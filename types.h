@@ -2,8 +2,8 @@
 //
 // handy typedefs
 //
-// Version 3.00.0 (23 March 2000)
-// (c) 1998-2000 dave @ spc       <no-brain@mindless.com>
+// Version 3.01.0 (10 Jan 2001)
+// (c) 1998-2001 dave @ spc       <no-brain@mindless.com>
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -13,8 +13,8 @@
 typedef union
 {
 	struct {
-		unsigned short left;
-		unsigned short right;
+		unsigned short Left;
+		unsigned short Right;
 	} sep;
 	unsigned long dword;
 } stereolevel;
@@ -23,7 +23,7 @@ typedef struct
 {
 	int nNumberOfPhases;
 	bool bLooping;
-	int nLevels[2][2][16]; // [Resolution][Phase][Withinphase]
+	unsigned short nLevels[2][2][16]; // [Resolution][Phase][Withinphase]
 } ENVDATA;
 
 #ifndef BYTE

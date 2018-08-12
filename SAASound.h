@@ -6,8 +6,8 @@
 //
 // SAASound.h: interface for the CSAASound class.
 //
-// Version 3.00.0 (23 March 2000)
-// (c) 1998-2000 dave @ spc       <no-brain@mindless.com>
+// Version 3.01.0 (10 Jan 2001)
+// (c) 1998-2001 dave @ spc       <no-brain@mindless.com>
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -23,7 +23,7 @@
 #ifndef SAASNDC_H_INCLUDED
 
 // Parameters for use with SetSoundParameters, for example,
-// SetSoundParameters(SAAP_NOFILTER | SAAP_44100 | SAA_16BIT | SAA_STEREO);
+// SetSoundParameters(SAAP_NOFILTER | SAAP_44100 | SAAP_16BIT | SAAP_STEREO);
 #define SAAP_FILTER 0x00000300
 #define SAAP_NOFILTER 0x00000100
 #define SAAP_44100 0x00000030
@@ -59,6 +59,7 @@ typedef unsigned long SAACMD;
 #define SAACMD_GetBitDepth		0x00000008
 #define SAACMD_SetFilterMode	0x00000009
 #define SAACMD_GetFilterMode	0x0000000a
+#define SAACMD_LoadSettingsFromFile	0x0000000b
 
 // 'Special' return values.
 #define	SAASENDCOMMAND_UNKNOWN_INVALID_COMMAND			0x80000000
@@ -76,21 +77,23 @@ typedef unsigned long SAACMD;
 #ifndef WINAPI
 #define WINAPI __stdcall
 #endif
-#define EXTDEF _declspec(dllexport) WINAPI
+#define EXTDEF __declspec(dllexport)
+#define EXTAPI __declspec(dllexport) WINAPI
 #else // Win32
 #ifndef WINAPI
 #define WINAPI /**/
 #endif
 #define EXTDEF /**/
+#define EXTAPI /**/
 #endif // Win32
 
 #endif // SAASNDC_H_INCLUDED
 
-extern "C" class CSAASound
+extern "C" class EXTDEF CSAASound
 {
 public:
-	EXTDEF CSAASound();
-	virtual EXTDEF ~CSAASound();
+	CSAASound();
+	virtual ~CSAASound();
 
 	virtual void SetSoundParameters(SAAPARAM uParam)=0;
 	virtual void WriteAddress(BYTE nReg)=0;
@@ -106,8 +109,10 @@ public:
 	static unsigned short GetBytesPerSample(SAAPARAM uParam);
 
 	virtual void GenerateMany(BYTE * pBuffer, unsigned long nSamples)=0;
+	// ClickClick function has been removed from library
+	// PLEASE DON'T USE IT AND THEN COMPLAIN IT DOESN'T WORK!!
 	virtual void ClickClick(int bValue)=0;
-	// 'Generate' function is obsolete
+	// 'Generate' function has been obsolete since a few versions ago
 	// PLEASE DON'T USE IT AND THEN COMPLAIN IT DOESN'T WORK!!
 	unsigned long Generate(void);
 
@@ -115,9 +120,15 @@ public:
 
 };
 
+
 typedef class CSAASound * LPCSAASOUND;
 
-LPCSAASOUND WINAPI CreateCSAASound(void);
-void WINAPI DestroyCSAASound(LPCSAASOUND object);
+LPCSAASOUND EXTAPI CreateCSAASound(void);
+void EXTAPI DestroyCSAASound(LPCSAASOUND object);
+
+
+
+
+
 
 #endif	// SAASOUND_H_INCLUDED

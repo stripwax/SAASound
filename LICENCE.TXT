@@ -1,0 +1,172 @@
+SAASound
+--------
+
+Licence.txt (issue 1)
+IMPORTANT
+---------
+
+Please read all sections before unzipping further.
+Please read all sections before viewing source or attempting to compile SAASound
+
+
+SAASound
+--------
+
+Current project at version 3.00.0 (23 March 2000)
+
+Comprises the following files
+SAAAmp.cpp					3.00.0
+SAAEnv.cpp					3.00.0
+SAAFreq.cpp					3.00.0
+SAANoise.cpp					3.00.0
+SAASndC.cpp					3.00.0
+SAASoundImplementation.cpp			3.00.0
+SAAAmp.h					3.00.0
+SAAEnv.h					3.00.0
+SAAFreq.h					3.00.0
+SAANoise.h					3.00.0
+SAASndC.h					3.00.0
+SAASound.h					3.00.0
+SAASoundImplementation.h			3.00.0
+types.h						3.00.0
+SAAFreqTable.dat				3.00.0
+SAASound.def					3.00.0
+SAASound.rc					3.00.0
+resource.h					3.00.0
+SAASound.dsp					29 March 2000 01:03
+LICENCE.TXT					Issue 1
+SAASound.lib					23 March 2000 01:03
+SAASound.dll					3.00.0
+README.TXT					29 March 2000 01:03
+
+
+
+
+Source Redistribution
+---------------------
+
+The following files are required to build SAASound support into WinCoupe, SAAEmu
+or any other code that makes use of SAASound. Note that for a given application,
+not all of the following files may be required.
+SAASndC.h					
+SAASound.h					
+SAASound.lib				
+
+
+If redistributing ANY of the files contained within this package, ALL files must be
+redistributed, and may only be redistributed as an entire package. The only packages
+that may be redistributed are those available at
+http://www.geocities.com/stripwax/saa/saasource.zip
+
+Any package which has been obtained from (and ONLY from) the above address may be
+distributed freely. The following versions have been released previously to this release
+and are therefore also freely redistributable:
+
+(no previous versions)
+
+If you believe you are in possession of an unofficial redistribution of the source code
+and the corresponding SAASound.lib and SAASound.dll files, please visit the above
+internet address or contact no-brain@mindless.com to obtain the latest official version.
+
+
+
+
+Object Redistribution
+---------------------
+
+The only exception to the previous redistribution rule is that the SAASound.dll may be
+redistributed PROVIDED it is also shipped with THIS licence statement, or the corresponding
+licence statement included in whichever saasource.zip distribution the SAASound.dll in question
+last appeared, (whichever is most recent), AND PROVIDED no other components of this SAASound
+package are distributed alongside the dll and the licence statement.
+This means that the following versions of SAASound.dll may be redistributed along with
+the corresponding licence statements:
+
+dll version			licence statement issue number
+3.00.0				Issue 1
+
+
+IT ALSO MEANS THAT VERSIONS OF SAASOUND.DLL PRIOR TO VERSION 3.00.0 MAY BE FREELY
+DISTRIBUTED.
+
+If you are currently redistributing SAASound.dll prior to version 3.00.0 it would
+be greatly appreciated if you could update your distribution to include THIS licence
+statement (issue 1). If this is not possible, a link to either  no-brain@mindless.com
+or  http://www.geocities.com/stripwax/saa  MUST be provided in documentation that you
+redistribute with the SAASound.dll
+
+
+The latest DLL-only distribution (i.e. containing just SAASound.dll and LICENCE.TXT)
+will always be available from
+http://www.geocities.com/stripwax/saa/saasound.zip
+
+
+
+Modification
+------------
+
+The source code can be modified for personal use only.
+MODIFIED SOURCE CODE AND/OR OBJECT CODE, MODIFIED DOCUMENTATION (INCLUDING THIS LICENCE)
+AND ANY OTHER FILES WHICH HAVE BEEN MODIFIED SUCH THAT THEY DIFFER FROM IDENTICALLY-NAMED
+FILES AVAILABLE IN OFFICIAL DISTRIBUTION PACKAGES MAY NOT BE DISTRIBUTED WITHOUT MY CONSENT.
+
+NO PORTIONS OF THE EXISTING SOURCE CODE OR OBJECT CODE THAT MAKES UP SAASOUND MAY BE
+DISTRIBUTED UNLESS THE ABOVE RULE AND THE RULES FOR OBJECT REDISTRIBUTION AND SOURCE
+REDISTRIBUTION (ABOVE) ARE STRICTLY ADHERED TO, OR UNLESS I GIVE EXPLICIT CONSENT.
+
+THE INTERFACES BETWEEN THE CODE MODULES THAT MAKE UP THE SAASOUND PACKAGE ARE ALSO COVERED
+BY THIS LICENCE STATEMENT. NO 'DROP IN' REPLACEMENTS FOR SOURCE CODE OR OBJECT CODE MAY
+BE DISTRIBUTED UNLESS ALL THE PREVIOUS RULES ARE STRICTLY ADHERED TO OR UNLESS I GIVE
+EXPLICIT CONSENT.
+
+
+
+Porting
+-------
+
+This licence statement does not allow distribution of 'ported' variants of the SAASound package.
+Future licence statements are likely to have a clause that relaxes this somewhat.
+However, personal modifications (as described above) ARE allowed by this licence statement.
+DISTRIBUTION of such modifications is ONLY allowable with my explicit consent.
+If you are interested in, or have succeeded in, porting any or all of the SAASound package to
+an operating system currently not supported then please keep me posted!
+
+
+
+Explicit Consent and Inheritence of this licence statement
+----------------------------------------------------------
+
+Any 'explicit consent' granted will be displayed on 
+http://www.geocities.com/stripwax/saa/consent.html
+The information displayed will included details of what has been allowed, along with a
+contact address (email, web or snail) for the party/parties involved.
+
+
+Any consent granted carries with it the obligation to
+1.	Implement and adhere to the statements set out in this licence statement (or a more recent
+	statement if available)
+2.	Supply and act in accordance with this licence statement (or a more recent statement
+	if available)
+
+
+
+Updates to this licence statement
+---------------------------------
+
+This is issue 1 of the licence statement for SAASound
+Any updates to this licence statement will be posted clearly at
+http://www.geocities.com/stripwax/saa
+If this is NOT the most recent licence statement available, all statements set out in THIS
+licence statement will ALWAYS be superceded by those in the most recent licence statement.
+
+
+
+Contact
+-------
+
+Main page:
+http://www.geocities.com/stripwax/saa
+
+Email:
+no-brain@mindless.com
+

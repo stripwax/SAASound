@@ -3,8 +3,8 @@
 // SAAFreq.cpp: implementation of the CSAAFreq class.
 // only 7-bit fractional accuracy on oscillator periods. I may consider fixing that.
 //
-// Version 3.00.0 (23 March 2000)
-// (c) 1998-2000 dave @ spc       <no-brain@mindless.com>
+// Version 3.01.0 (10 Jan 2001)
+// (c) 1998-2001 dave @ spc       <no-brain@mindless.com>
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -13,7 +13,9 @@
 #include "SAANoise.h"
 #include "SAAEnv.h"
 #include "SAAFreq.h"
-
+#ifdef _DEBUG
+#include <stdio.h>
+#endif
 // 'load in' the data for the static frequency lookup table:
 const unsigned long CSAAFreq::m_FreqTable[2048] =
 {
@@ -29,13 +31,13 @@ CSAAFreq::CSAAFreq(CSAANoise * const NoiseGenerator, CSAAEnv * const EnvGenerato
 m_nConnectedMode((NoiseGenerator == NULL) ? ((EnvGenerator == NULL) ? 0 : 1) : 2),
 m_pcConnectedNoiseGenerator(NoiseGenerator),
 m_pcConnectedEnvGenerator(EnvGenerator),
-m_nLevel(0), m_nCounter(0), m_nAdd(0),
+m_nLevel(2), m_nCounter(0), m_nAdd(0),
 m_nCurrentOffset(0), m_nCurrentOctave(0), m_nNextOffset(0), m_nNextOctave(0),
-m_bNewOffsetData(false), m_bNewOctaveData(false), m_bIgnoreOffsetData(false),
+m_bNewData(false), m_bIgnoreOffsetData(false),
 m_bSync(false),
-m_nSampleRateMode(2), m_nSampleRateTimes128(11025*128)
+m_nSampleRateMode(2), m_nSampleRateTimes4K(11025<<12)
 {
-	SetAdd(0,0);
+	SetAdd(); // current octave, current offset
 }
 
 CSAAFreq::~CSAAFreq()
@@ -45,19 +47,92 @@ CSAAFreq::~CSAAFreq()
 
 void CSAAFreq::SetFreqOffset(BYTE nOffset)
 {
-	m_nNextOffset = nOffset;
-	m_bNewOffsetData = true;
-	if (m_bNewOctaveData) m_bIgnoreOffsetData = true;
+	// nOffset between 0 and 255
+
+	if (!m_bSync)
+	{
+		m_nNextOffset = nOffset;
+		m_bNewData=true;
+		if (m_nNextOctave==m_nCurrentOctave)
+		{
+			// According to Philips, if you send the SAA-1099
+			// new Octave data and then new Offset data in that
+			// order, on the next half-cycle of the current frequency
+			// generator, ONLY the octave data is acted upon.
+			// The offset data will be acted upon next time.
+			m_bIgnoreOffsetData=true;
+		}
+	}
+	else
+	{
+		// updates straightaway if m_bSync
+		m_bNewData=false;
+		m_nCurrentOffset = nOffset;
+		m_nCurrentOctave = m_nNextOctave;
+		SetAdd();
+	}
+
 }
 
 void CSAAFreq::SetFreqOctave(BYTE nOctave)
 {
-	m_nNextOctave = nOctave;
-	m_bNewOctaveData = true;
-	if (m_bNewOffsetData) m_bIgnoreOffsetData = false;
+	// nOctave between 0 and 7
+
+	if (!m_bSync)
+	{
+		m_nNextOctave = nOctave;
+		m_bNewData=true;
+		m_bIgnoreOffsetData = false;
+	}
+	else
+	{
+		// updates straightaway if m_bSync
+		m_bNewData=false;
+		m_nCurrentOctave = nOctave;
+		m_nCurrentOffset = m_nNextOffset;
+		SetAdd();
+	}
 }
 
-void CSAAFreq::SetSampleRateMode(BYTE nSampleRateMode)
+void CSAAFreq::UpdateOctaveOffsetData(void)
+{
+	// loads the buffered new octave and new offset data into the current registers
+	// and sets up the new frequency for this frequency generator (i.e. sets up m_nAdd)
+	// - called during Sync, and called when waveform half-cycle completes
+
+	// How the SAA-1099 really treats new data:
+	// if only new octave data is present,
+	// then set new period based on just the octave data
+	// Otherwise, if only new offset data is present,
+	// then set new period based on just the offset data
+	// Otherwise, if new octave data is present, and new offset data is present,
+	// and the offset data was set BEFORE the octave data,
+	// then set new period based on both the octave and offset data
+	// Else, if the offset data came AFTER the new octave data
+	// then set new period based on JUST THE OCTAVE DATA, and continue
+	// signalling the offset data as 'new', so it will be acted upon
+	// next half-cycle
+	// 
+	// Weird, I know. But that's how it works. Philips even documented as much.
+
+	if (!m_bNewData)
+	{
+		// optimise for the most common case! No new data!
+		return;
+	}
+		
+	m_nCurrentOctave=m_nNextOctave;
+	if (!m_bIgnoreOffsetData)
+	{
+		m_nCurrentOffset=m_nNextOffset;
+		m_bNewData=false;
+	}
+	m_bIgnoreOffsetData=false;
+
+	SetAdd();
+}
+
+void CSAAFreq::SetSampleRateMode(int nSampleRateMode)
 {
 	// first, adjust the current value of the counter:
 	if (nSampleRateMode < m_nSampleRateMode)
@@ -73,30 +148,40 @@ void CSAAFreq::SetSampleRateMode(BYTE nSampleRateMode)
 	}
 
 	m_nSampleRateMode = nSampleRateMode;
-	m_nSampleRateTimes128 = (44100 << 7) >> nSampleRateMode;
+	m_nSampleRateTimes4K = 44100 << (12-nSampleRateMode);
 }
 
-BYTE CSAAFreq::Level(void) const
+unsigned short CSAAFreq::Level(void) const
 {
-	return m_nLevel;
+	return GetLevel(m_nLevel);
+}
+
+/*static*/ inline unsigned short CSAAFreq::GetLevel(unsigned short nLevel)
+{
+	return nLevel;
 }
 
 
-BYTE CSAAFreq::Tick(void)
+unsigned short CSAAFreq::Tick(void)
 {
+	// set to the absolute level (0 or 2)
 	if (!m_bSync)
 	{
+
 		m_nCounter+=m_nAdd;
-		if (m_nCounter >= m_nSampleRateTimes128)
+
+		if (m_nCounter >= m_nSampleRateTimes4K)
 		{
 			// period elapsed for one half-cycle of
 			// current frequency
 			// reset counter to zero (or thereabouts, taking into account
-			// the fractional part in the lower 8 bits)
-			while (m_nCounter >= m_nSampleRateTimes128)
+			// the fractional part in the lower 12 bits)
+			while (m_nCounter >= m_nSampleRateTimes4K)
 			{
-				m_nCounter-=m_nSampleRateTimes128;
-		
+				m_nCounter-=m_nSampleRateTimes4K;
+				// flip state - from 0 to -2 or vice versa
+				m_nLevel=2-m_nLevel;
+					
 				// trigger any connected devices
 				switch (m_nConnectedMode)
 				{
@@ -104,88 +189,49 @@ BYTE CSAAFreq::Tick(void)
 					// env trigger
 					m_pcConnectedEnvGenerator->InternalClock();
 					break;
-	
+			
 				case 2:
 					// noise trigger
 					m_pcConnectedNoiseGenerator->Trigger();
 					break;
-		
+				
 				default:
 					// do nothing
 					break;
 				}
-
+				
 			}
-			m_nLevel ^= 0x02;
-	
+
 			// get new frequency (set period length m_nAdd) if new data is waiting:
-			
-			// if new octave data is present, and new offset data is present,
-			// and the offset data came AFTER the new octave data
-			// then set new period based on just the octave data, and continue
-			// signalling the offset data as 'new', so it will be acted upon
-			// next half-cycle
-			// Otherwise, if both new octave and offset data are present,
-			// and the offset data was set BEFORE the octave data,
-			// then set new period based on both the octave and offset data
-			// Otherwise, if only new octave data is present,
-			// then set new period based on just the octave data
-			// Otherwise, if only new offset data is present,
-			// then set new period based on just the offset data
-			// Otherwise, if no new data is present, do nothing.
-			if (m_bNewOctaveData)
-			{
-				if (m_bNewOffsetData)
-				{
-					if (m_bIgnoreOffsetData)
-					{
-						m_bNewOctaveData=false;
-						m_bNewOffsetData=true;
-						m_nCurrentOctave=m_nNextOctave;
-						SetAdd(m_nCurrentOctave, m_nCurrentOffset);
-					}
-					else
-					{
-						m_bNewOctaveData=false;
-						m_bNewOffsetData=false;
-						m_nCurrentOctave=m_nNextOctave;
-						m_nCurrentOffset=m_nNextOffset;
-						SetAdd(m_nCurrentOctave, m_nCurrentOffset);
-					}
-				}
-				else
-				{
-					m_bNewOctaveData=false;
-					m_nCurrentOctave=m_nNextOctave;
-					SetAdd(m_nCurrentOctave, m_nCurrentOffset);
-				}
-			}
-			else if (m_bNewOffsetData)
-			{
-				m_bNewOffsetData=false;
-				m_nCurrentOffset=m_nNextOffset;
-				SetAdd(m_nCurrentOctave, m_nCurrentOffset);
-			}
+			UpdateOctaveOffsetData();
 		}
+	
 	}
-
-	return m_nLevel;
+	return GetLevel(m_nLevel);
 }
 
 
-void CSAAFreq::SetAdd(BYTE nOctave, BYTE nOffset)
+void CSAAFreq::SetAdd(void)
 {
+	// nOctave between 0 and 7; nOffset between 0 and 255
+
 	// Used to be:
-	// m_nAdd = (15625 << (nOctave + 8)) / (511 - nOffset);
-	// Now just lookup:
-	m_nAdd = m_FreqTable[nOctave<<8 | nOffset];
+	// m_nAdd = (15625 << nOctave) / (511 - nOffset);
+	// Now just table lookup:
+	m_nAdd = m_FreqTable[m_nCurrentOctave<<8 | m_nCurrentOffset];
 }
 
 void CSAAFreq::Sync(bool bSync)
 {
-	if (bSync)
+	m_bSync = bSync;
+
+	// update straightaway if m_bSync
+	if (m_bSync)
 	{
 		m_nCounter = 0;
+		m_nLevel=2;
+		m_nCurrentOctave=m_nNextOctave;
+		m_nCurrentOffset=m_nNextOffset;
+		SetAdd();
 	}
-	m_bSync = bSync;
 }

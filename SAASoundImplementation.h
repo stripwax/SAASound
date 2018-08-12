@@ -6,13 +6,19 @@
 // .. Meaning future releases don't require relinking everyone elses code against
 //    the updated saasound stuff
 //
-// Version 3.00.0 (23 March 2000)
-// (c) 1998-2000 dave @ spc       <no-brain@mindless.com>
+// Version 3.01.0 (10 Jan 2001)
+// (c) 1998-2001 dave @ spc       <no-brain@mindless.com>
 //
 //////////////////////////////////////////////////////////////////////
 
-#define CLICKCLICKLEVEL 60 /* relative volume of clickclicks ... */
-#define CLICKCLICKLEVELTIMES256 15360
+#ifndef SAASOUNDIMPLEMENTATION_H_INCLUDED
+#define SAASOUNDIMPLEMENTATION_H_INCLUDED
+
+#ifdef _MSC_VER
+#if _MSC_VER >= 1000
+#pragma once
+#endif // _MSC_VER >= 1000
+#endif
 
 class CSAASoundInternal : public CSAASound
 {
@@ -26,10 +32,6 @@ private:
 	CSAANoise * Noise[2];
 	CSAAAmp * Amp[6];
 	CSAAEnv * Env[2];
-
-	// NEW - for emulating bit 4 of OUT 254,xxx
-	unsigned int m_bClickClick;
-	unsigned int m_bClickClicktimes256;
 
 public:
 	CSAASoundInternal();
@@ -55,3 +57,6 @@ public:
 	int SendCommand(SAACMD nCommandID, long nData);
 
 };
+
+
+#endif // SAASOUNDIMPLEMENTATION_H_INCLUDED

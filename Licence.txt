@@ -137,7 +137,7 @@ an operating system currently not supported then please keep me posted!
 
 
 Explicit Consent and Inheritence of this licence statement
------------------------------------------------------------
+----------------------------------------------------------
 
 Any 'explicit consent' granted will be displayed on 
 http://www.geocities.com/stripwax/saa/consent.html

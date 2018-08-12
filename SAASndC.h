@@ -6,8 +6,8 @@
 //
 // SAASndC.h: "C-style" interface for the CSAASound class.
 //
-// Version 3.00.0 (23 March 2000)
-// (c) 1998-2000 dave @ spc       <no-brain@mindless.com>
+// Version 3.01.0 (10 Jan 2001)
+// (c) 1998-2001 dave @ spc       <no-brain@mindless.com>
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -22,9 +22,8 @@
 
 #ifndef SAASOUND_H_INCLUDED
 
-
 // Parameters for use with SetSoundParameters, for example,
-// SetSoundParameters(SAAP_NOFILTER | SAAP_44100 | SAA_16BIT | SAA_STEREO);
+// SetSoundParameters(SAAP_NOFILTER | SAAP_44100 | SAAP_16BIT | SAAP_STEREO);
 #define SAAP_FILTER 0x00000300
 #define SAAP_NOFILTER 0x00000100
 #define SAAP_44100 0x00000030
@@ -49,7 +48,12 @@ typedef unsigned long SAAPARAM;
 // int nCurrentSampleRate = SendCommand(SAACMD_GetSampleRate,0);
 // or
 // int nError = SendCommand(SAACMD_SetSampleRate,44100);
-typedef unsigned long SAACMD;
+//
+// SendCommand(SAACMD_Set4BitAmpRes,BOOL) sets the resolution of the amplitude registers when
+// using 'digital audio' and any other envelope effects.
+// Use 0 or FALSE to set the resolution to just 3 bits when using envelope control (DEFAULT AND AUTHENTIC!)
+// or use non-zero or TRUE to set the resolution to 4 bits (NOT AUTHENTIC - BUT BETTER THAN A REAL SAA!)
+//
 #define SAACMD_SetVolumeBoost	0x00000001
 #define SAACMD_GetVolumeBoost	0x00000002
 #define SAACMD_SetSampleRate	0x00000003
@@ -60,6 +64,9 @@ typedef unsigned long SAACMD;
 #define SAACMD_GetBitDepth		0x00000008
 #define SAACMD_SetFilterMode	0x00000009
 #define SAACMD_GetFilterMode	0x0000000a
+#define SAACMD_Set4BitAmpRes	0x0000000b
+#define SAACMD_LoadSettingsFromFile	0x10000000
+
 
 // 'Special' return values.
 #define	SAASENDCOMMAND_UNKNOWN_INVALID_COMMAND			0x80000000
@@ -76,12 +83,12 @@ typedef unsigned long SAACMD;
 #ifndef WINAPI
 #define WINAPI __stdcall
 #endif
-#define EXTDEF _declspec(dllexport) WINAPI
+#define EXTAPI __declspec(dllexport) WINAPI
 #else // Win32
 #ifndef WINAPI
 #define WINAPI /**/
 #endif
-#define EXTDEF /**/
+#define EXTAPI /**/
 #endif // Win32
 
 #endif // SAASOUND_H_INCLUDED
@@ -94,33 +101,35 @@ typedef void * SAASND;
 extern "C" {
 #endif
 
-SAASND newSAASND(void);
-void deleteSAASND(SAASND object);
+SAASND EXTAPI newSAASND(void);
+void EXTAPI deleteSAASND(SAASND object);
 
-void SAASNDSetSoundParameters(SAASND object, SAAPARAM uParam);
-void SAASNDWriteAddress(SAASND object, BYTE nReg);
-void SAASNDWriteData(SAASND object, BYTE nData);
-void SAASNDWriteAddressData(SAASND object, BYTE nReg, BYTE nData);
-void SAASNDClear(SAASND object);
-BYTE SAASNDReadAddress(SAASND object);
+void EXTAPI SAASNDSetSoundParameters(SAASND object, SAAPARAM uParam);
+void EXTAPI SAASNDWriteAddress(SAASND object, BYTE nReg);
+void EXTAPI SAASNDWriteData(SAASND object, BYTE nData);
+void EXTAPI SAASNDWriteAddressData(SAASND object, BYTE nReg, BYTE nData);
+void EXTAPI SAASNDClear(SAASND object);
+BYTE EXTAPI SAASNDReadAddress(SAASND object);
 
-SAAPARAM SAASNDGetCurrentSoundParameters(SAASND object);
-unsigned short SAASNDGetCurrentBytesPerSample(SAASND object);
-unsigned short SAASNDGetBytesPerSample(SAAPARAM uParam);
-unsigned long SAASNDGetCurrentSampleRate(SAASND object);
-unsigned long SAASNDGetSampleRate(SAAPARAM uParam);
+SAAPARAM EXTAPI SAASNDGetCurrentSoundParameters(SAASND object);
+unsigned short EXTAPI SAASNDGetCurrentBytesPerSample(SAASND object);
+unsigned short EXTAPI SAASNDGetBytesPerSample(SAAPARAM uParam);
+unsigned long EXTAPI SAASNDGetCurrentSampleRate(SAASND object);
+unsigned long EXTAPI SAASNDGetSampleRate(SAAPARAM uParam);
 
-void SAASNDGenerateMany(SAASND object, BYTE * pBuffer, unsigned long nSamples);
-void SAASNDClickClick(bool bValue);
-// 'Generate' function is obsolete
+void EXTAPI SAASNDGenerateMany(SAASND object, BYTE * pBuffer, unsigned long nSamples);
+// ClickClick function has been removed from library
 // PLEASE DON'T USE IT AND THEN COMPLAIN IT DOESN'T WORK!!
-unsigned long SAASNDGenerate(SAASND object);
+void EXTAPI SAASNDClickClick(bool bValue);
+// 'Generate' function has been obsolete since a few versions ago
+// PLEASE DON'T USE IT AND THEN COMPLAIN IT DOESN'T WORK!!
+unsigned long EXTAPI SAASNDGenerate(SAASND object);
 
-int SAASNDSendCommand(SAACMD nCommandID, long nData);
+int EXTAPI SAASNDSendCommand(SAACMD nCommandID, long nData);
 
 
 #ifdef __cplusplus
-};
+}; // extern "C"
 #endif
 
 #endif	// SAASNDC_H_INCLUDED

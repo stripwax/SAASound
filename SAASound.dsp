@@ -43,7 +43,8 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /G5 /Gr /Zp16 /MD /W3 /vd0 /Ox /Ot /Oa /Og /Oi /Ob2 /Gf /Gy /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "WIN32_LEAN_AND_MEAN" /D "VC_EXTRALEAN" /D "NEW_RAND" /YX /FD /c
+# ADD CPP /nologo /G6 /Gr /Zp1 /MD /W3 /vd0 /Ox /Ot /Oa /Og /Oi /Ob2 /Gf /Gy /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "WIN32_LEAN_AND_MEAN" /D "VC_EXTRALEAN" /D "NEW_RAND" /FAcs /FR /YX /FD /c
+# SUBTRACT CPP /Os
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
@@ -53,8 +54,12 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib /nologo /base:"0x178a0000" /version:2.6 /subsystem:windows /dll /machine:I386
-# SUBTRACT LINK32 /profile /map
+# ADD LINK32 /nologo /base:"0x178a0000" /version:3.1 /subsystem:windows /dll /machine:I386
+# SUBTRACT LINK32 /profile /map /debug
+# Begin Special Build Tool
+SOURCE=$(InputPath)
+PostBuild_Cmds=copy release\saasound.dll c:\windows\system
+# End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "SAASound - Win32 Debug"
 
@@ -70,8 +75,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /G5 /Gr /Zp16 /MDd /W3 /Gm /vd0 /Zi /Ox /Ot /Oa /Og /Oi /Ob0 /Gf /Gy /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "NEW_RAND" /YX /FD /c
-# SUBTRACT CPP /Os
+# ADD CPP /nologo /G5 /Gr /Zp16 /MDd /W3 /Gm /vd0 /Zi /Od /Gf /Gy /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "NEW_RAND" /D "DEBUGSAA" /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o NUL /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o NUL /win32
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
@@ -86,8 +90,7 @@ LINK32=link.exe
 # Begin Special Build Tool
 SOURCE=$(InputPath)
 PostBuild_Desc=copying dll
-PostBuild_Cmds=copy "Debug\saasound.dll" "Saa demo\Debug\saasound.dll"	copy\
-                    "Debug\saasound.dll" "Saa con demo\Debug\saasound.dll"
+PostBuild_Cmds=copy "Debug\saasound.dll" "c:\windows\system"
 # End Special Build Tool
 
 !ENDIF 

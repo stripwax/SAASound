@@ -6,19 +6,8 @@
 // the actual sound generation is carried out in the other classes;
 // this class provides the output stage and the external interface only
 //
-// As part of the output stage, a one-bit 'Click Click' sound can be generated
-// by using the ClickClick(bool) function. This is not part of the SAA-1099
-// specification (or indeed part of the SAA-1099 emulation algorithm) but is
-// handy if (for example) the SAA-1099 emulation were to be used in conjunction
-// with a 1-bit speaker emulator (an 8-bit micro such as the Sam Coupe, for 
-// instance, uses both an SAA-1099 soundchip and a 1-bit speaker driver)
-//
-// Combining one-bit clickclick output into this class means postmixing of
-// the sound buffer is not required to 'mix in' this very simple additional
-// sound output.
-//
-// Version 3.00.0 (23 March 2000)
-// (c) 1998-2000 dave @ spc       <no-brain@mindless.com>
+// Version 3.01.0 (10 Jan 2001)
+// (c) 1998-2001 dave @ spc       <no-brain@mindless.com>
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -37,8 +26,9 @@
 // Globals
 //////////////////////////////////////////////////////////////////////
 
-#ifdef _DEBUG
-FILE * dbgfile = fopen("debugsaa.txt","wt");
+#ifdef DEBUGSAA
+FILE * dbgfile = NULL;
+FILE * pcmfile = NULL;
 #endif
 
 //////////////////////////////////////////////////////////////////////
@@ -51,10 +41,13 @@ m_bOutputEnabled(false),
 m_bSync(false),
 m_nCurrentSaaReg(0),
 m_uParam(0),
-m_uParamRate(0),
-m_bClickClick(0),
-m_bClickClicktimes256(0)
+m_uParamRate(0)
 {
+	#ifdef DEBUGSAA
+	dbgfile = fopen("debugsaa.txt","wt");
+	pcmfile = fopen("debugsaa.pcm","wb");
+	#endif
+
 	// Create and link up the objects that make up the emulator
 	Noise[0] = new CSAANoise(0x14af5209); // Create and seed a noise generator
 	Noise[1] = new CSAANoise(0x76a9b11e); // Create and seed a noise generator
@@ -112,6 +105,10 @@ CSAASoundInternal::~CSAASoundInternal()
 		if (Osc[i]) delete Osc[i];
 		if (Amp[i]) delete Amp[i];
 	}
+	
+#ifdef DEBUGSAA
+	if (dbgfile) fclose(dbgfile);
+#endif
 }
 
 
@@ -122,7 +119,7 @@ CSAASoundInternal::~CSAASoundInternal()
 void CSAASoundInternal::Clear(void)
 {
 	// reinitialises virtual SAA:
-	// sets reg 28 to 0x02;
+	// sets reg 28 to 0x02; - sync and disabled
 	// sets regs 00-31 (except 28) to 0x00;
 	// sets reg 28 to 0x00;
 	// sets current reg to 0
@@ -140,7 +137,7 @@ void CSAASoundInternal::WriteData(BYTE nData)
 {
 	// originated from an OUT 255,d call
 
-#ifdef _DEBUG
+#ifdef DEBUGSAA
 	fprintf(dbgfile, "%02d:%02x\n",m_nCurrentSaaReg,nData);
 #endif
 
@@ -242,7 +239,7 @@ void CSAASoundInternal::WriteData(BYTE nData)
 		break;
 
 	case 28:
-		if (!m_bSync && (nData & 0x02))
+		if (nData & 0x02)
 		{
 			// Sync all devices
 			// This amounts to telling them all to reset to a
@@ -257,7 +254,7 @@ void CSAASoundInternal::WriteData(BYTE nData)
 			Noise[1]->Sync(true);
 			m_bSync = true;
 		}
-		else if (m_bSync && !(nData & 0x02))
+		else 
 		{
 			// Unsync all devices
 			Osc[0]->Sync(false);
@@ -271,7 +268,7 @@ void CSAASoundInternal::WriteData(BYTE nData)
 			m_bSync = false;
 		}
 
-		if (!m_bOutputEnabled && (nData & 0x01))
+		if (nData & 0x01)
 		{
 			// unmute all amps - sound 'enabled'
 			Amp[0]->Mute(false);
@@ -282,7 +279,7 @@ void CSAASoundInternal::WriteData(BYTE nData)
 			Amp[5]->Mute(false);
 			m_bOutputEnabled = true;
 		}
-		else if (m_bOutputEnabled && !(nData & 0x01))
+		else 
 		{
 			// mute all amps
 			Amp[0]->Mute(true);
@@ -310,25 +307,25 @@ void CSAASoundInternal::WriteData(BYTE nData)
 void CSAASoundInternal::WriteAddress(BYTE nReg)
 {
 	// originated from an OUT 511,r call
-#ifdef _DEBUG
+#ifdef DEBUGSAA
 	fprintf(dbgfile,"%02d:",nReg);
 #endif
 	m_nCurrentSaaReg = nReg & 31;
 	if (m_nCurrentSaaReg==24)
 	{
 		Env[0]->ExternalClock();
-#ifdef _DEBUG
+#ifdef DEBUGSAA
 		fprintf(dbgfile, "<!ENVO!>");
 #endif
 	}
 	else if (m_nCurrentSaaReg==25)
 	{
 		Env[1]->ExternalClock();
-#ifdef _DEBUG
+#ifdef DEBUGSAA
 		fprintf(dbgfile, "<!ENV1!>");
 #endif
 	}
-#ifdef _DEBUG
+#ifdef DEBUGSAA
 	fprintf(dbgfile,"\n");
 #endif
 }
@@ -350,15 +347,15 @@ BYTE CSAASoundInternal::ReadAddress(void)
 
 void CSAASoundInternal::SetSoundParameters(SAAPARAM uParam)
 {
+	int sampleratemode = 0;
+
 	switch (uParam & SAAP_MASK_FILTER)
 	{
 	case SAAP_NOFILTER: // disable filter
 		m_uParam = (m_uParam & ~SAAP_MASK_FILTER) | SAAP_NOFILTER;
 		break;
 	case SAAP_FILTER: // enable filter
-//		m_uParam = (m_uParam & ~SAAP_MASK_FILTER) | SAAP_FILTER;
-		//FILTERING IS CURRENTLY TOTALLY DISABLED
-		m_uParam = (m_uParam & ~SAAP_MASK_FILTER) | SAAP_NOFILTER;
+		m_uParam = (m_uParam & ~SAAP_MASK_FILTER) | SAAP_FILTER;
 		break;
 	case 0:// change nothing!
 	default:
@@ -368,36 +365,15 @@ void CSAASoundInternal::SetSoundParameters(SAAPARAM uParam)
 	switch (uParam & SAAP_MASK_SAMPLERATE)
 	{
 	case SAAP_44100:
-		Osc[0]->SetSampleRateMode(0);
-		Osc[1]->SetSampleRateMode(0);
-		Osc[2]->SetSampleRateMode(0);
-		Osc[3]->SetSampleRateMode(0);
-		Osc[4]->SetSampleRateMode(0);
-		Osc[5]->SetSampleRateMode(0);
-		Noise[0]->SetSampleRateMode(0);
-		Noise[1]->SetSampleRateMode(0);
+		sampleratemode = 0;
 		m_uParamRate = (m_uParamRate & ~SAAP_MASK_SAMPLERATE) | SAAP_44100;
 		break;
 	case SAAP_22050:
-		Osc[0]->SetSampleRateMode(1);
-		Osc[1]->SetSampleRateMode(1);
-		Osc[2]->SetSampleRateMode(1);
-		Osc[3]->SetSampleRateMode(1);
-		Osc[4]->SetSampleRateMode(1);
-		Osc[5]->SetSampleRateMode(1);
-		Noise[0]->SetSampleRateMode(1);
-		Noise[1]->SetSampleRateMode(1);
+		sampleratemode = 1;
 		m_uParamRate = (m_uParamRate & ~SAAP_MASK_SAMPLERATE) | SAAP_22050;
 		break;
 	case SAAP_11025:
-		Osc[0]->SetSampleRateMode(2);
-		Osc[1]->SetSampleRateMode(2);
-		Osc[2]->SetSampleRateMode(2);
-		Osc[3]->SetSampleRateMode(2);
-		Osc[4]->SetSampleRateMode(2);
-		Osc[5]->SetSampleRateMode(2);
-		Noise[0]->SetSampleRateMode(2);
-		Noise[1]->SetSampleRateMode(2);
+		sampleratemode = 2;
 		m_uParamRate = (m_uParamRate & ~SAAP_MASK_SAMPLERATE) | SAAP_11025;
 		break;
 	case 0:// change nothing!
@@ -405,6 +381,24 @@ void CSAASoundInternal::SetSoundParameters(SAAPARAM uParam)
 		break;
 	}
 
+	/* Enabling the filter automatically puts the oscillators and
+	 * noise generators into an ultra-high-resolution mode of 88.2kHz */
+	if ( (m_uParam & SAAP_MASK_FILTER) == SAAP_FILTER)
+	{
+		sampleratemode = -1;
+	}
+
+
+	Osc[0]->SetSampleRateMode(sampleratemode);
+	Osc[1]->SetSampleRateMode(sampleratemode);
+	Osc[2]->SetSampleRateMode(sampleratemode);
+	Osc[3]->SetSampleRateMode(sampleratemode);
+	Osc[4]->SetSampleRateMode(sampleratemode);
+	Osc[5]->SetSampleRateMode(sampleratemode);
+	Noise[0]->SetSampleRateMode(sampleratemode);
+	Noise[1]->SetSampleRateMode(sampleratemode);
+
+		
 	switch (uParam & SAAP_MASK_BITDEPTH)
 	{
 	case SAAP_8BIT: // set 8bit mode
@@ -481,7 +475,13 @@ unsigned long CSAASoundInternal::GetCurrentSampleRate(void)
 
 void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 {
-	unsigned short o1,o2;
+	unsigned short mono;
+	stereolevel stereoval;
+
+#ifdef DEBUGSAA
+	BYTE * pBufferStart = pBuffer;
+	unsigned long nTotalSamples = nSamples;
+#endif
 
 	switch(m_uParam)
 	{
@@ -490,22 +490,17 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 		{
 			Noise[0]->Tick();
 			Noise[1]->Tick();
-			Amp[0]->Tick();
-			Amp[1]->Tick();
-			Amp[2]->Tick();
-			Amp[3]->Tick();
-			Amp[4]->Tick();
-			Amp[5]->Tick();
+
+			mono = (Amp[0]->TickAndOutputMono() +
+				  Amp[1]->TickAndOutputMono() +
+				  Amp[2]->TickAndOutputMono() +
+				  Amp[3]->TickAndOutputMono() +
+				  Amp[4]->TickAndOutputMono() +
+				  Amp[5]->TickAndOutputMono() );
 
 			// force output into the range 0<=x<=255
-			// (strictly, the following gives us 0<=x<=247)
-			o1 = 	Amp[0]->MonoOutput() +
-					Amp[1]->MonoOutput() +
-					Amp[2]->MonoOutput() +
-					Amp[3]->MonoOutput() +
-					Amp[4]->MonoOutput() +
-					Amp[5]->MonoOutput() ;
-			*pBuffer++ = 0x80+((o1 + (o1>>2) + (o1>>3))>>6)-(m_bClickClick);
+			mono *= 5;
+			*pBuffer++ = 0x80+(mono>>8);
 		}
 		break;
 	
@@ -514,24 +509,19 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 		{
 			Noise[0]->Tick();
 			Noise[1]->Tick();
-			Amp[0]->Tick();
-			Amp[1]->Tick();
-			Amp[2]->Tick();
-			Amp[3]->Tick();
-			Amp[4]->Tick();
-			Amp[5]->Tick();
+			
+			mono = (Amp[0]->TickAndOutputMono() +
+				  Amp[1]->TickAndOutputMono() +
+				  Amp[2]->TickAndOutputMono() +
+				  Amp[3]->TickAndOutputMono() +
+				  Amp[4]->TickAndOutputMono() +
+				  Amp[5]->TickAndOutputMono() );
 
-			o1 = 	Amp[0]->MonoOutput() +
-					Amp[1]->MonoOutput() +
-					Amp[2]->MonoOutput() +
-					Amp[3]->MonoOutput() +
-					Amp[4]->MonoOutput() +
-					Amp[5]->MonoOutput() ;
 			// force output into the range 0<=x<=65535
 			// (strictly, the following gives us 0<=x<=63360)
-			o1 = ((o1>>1)+(o1)+(o1<<2))-(m_bClickClicktimes256);
-			*pBuffer++ = (o1 & 0x00ff);
-			*pBuffer++ = (o1 >> 8);
+			mono *= 5;
+			*pBuffer++ = mono & 0x00ff;
+			*pBuffer++ = mono >> 8;
 		}
 		break;
 	
@@ -540,29 +530,20 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 		{
 			Noise[0]->Tick();
 			Noise[1]->Tick();
-			Amp[0]->Tick();
-			Amp[1]->Tick();
-			Amp[2]->Tick();
-			Amp[3]->Tick();
-			Amp[4]->Tick();
-			Amp[5]->Tick();
 
-			o1 =	Amp[0]->LeftOutput() +
-					Amp[1]->LeftOutput() +
-					Amp[2]->LeftOutput() +
-					Amp[3]->LeftOutput() +
-					Amp[4]->LeftOutput() +
-					Amp[5]->LeftOutput() ;
-			o2 = 	Amp[0]->RightOutput() +
-					Amp[1]->RightOutput() +
-					Amp[2]->RightOutput() +
-					Amp[3]->RightOutput() +
-					Amp[4]->RightOutput() +
-					Amp[5]->RightOutput() ;
+			
+			stereoval.dword=(Amp[0]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[1]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[2]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[3]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[4]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[5]->TickAndOutputStereo()).dword;
+
 			// force output into the range 0<=x<=255
-			// (strictly, the following gives us 0<=x<=247)
-			*pBuffer++ = 0x80+((o1 + (o1>>2) + (o1>>3)) >> 5)-(m_bClickClick);
-			*pBuffer++ = 0x80+((o2 + (o2>>2) + (o2>>3)) >> 5)-(m_bClickClick);
+			stereoval.sep.Left *= 10;
+			stereoval.sep.Right *= 10;
+			*pBuffer++ = 0x80+((stereoval.sep.Left)>>8);
+			*pBuffer++ = 0x80+((stereoval.sep.Right)>>8);
 		}
 		break;
 			
@@ -572,53 +553,129 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 		{
 			Noise[0]->Tick();
 			Noise[1]->Tick();
-			Amp[0]->Tick();
-			Amp[1]->Tick();
-			Amp[2]->Tick();
-			Amp[3]->Tick();
-			Amp[4]->Tick();
-			Amp[5]->Tick();
 
-			o1 =	Amp[0]->LeftOutput() +
-					Amp[1]->LeftOutput() +
-					Amp[2]->LeftOutput() +
-					Amp[3]->LeftOutput() +
-					Amp[4]->LeftOutput() +
-					Amp[5]->LeftOutput() ;
-			o2 = 	Amp[0]->RightOutput() +
-					Amp[1]->RightOutput() +
-					Amp[2]->RightOutput() +
-					Amp[3]->RightOutput() +
-					Amp[4]->RightOutput() +
-					Amp[5]->RightOutput() ;
+			stereoval.dword=(Amp[0]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[1]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[2]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[3]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[4]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[5]->TickAndOutputStereo()).dword;
+
 			// force output into the range 0<=x<=65535
 			// (strictly, the following gives us 0<=x<=63360)
-			o1 = ((o1)+(o1<<1)+(o1<<3))-(m_bClickClicktimes256);
-			o2 = ((o2)+(o2<<1)+(o2<<3))-(m_bClickClicktimes256);
-			*pBuffer++ = (o1 & 0x00ff);
-			*pBuffer++ = (o1 >> 8);
-			*pBuffer++ = (o2 & 0x00ff);
-			*pBuffer++ = (o2 >> 8);
+			stereoval.sep.Left *= 10;
+			stereoval.sep.Right *= 10;
+			*pBuffer++ = stereoval.sep.Left & 0x00ff;
+			*pBuffer++ = stereoval.sep.Left >> 8;
+			*pBuffer++ = stereoval.sep.Right & 0x00ff;
+			*pBuffer++ = stereoval.sep.Right >> 8;
 		}
 		break;
 	
+
+	// FILTER : (high-quality mode + bandpass filter)
+	case SAAP_FILTER | SAAP_MONO | SAAP_8BIT:
+		while (nSamples--)
+		{
+			Noise[0]->Tick();
+			Noise[1]->Tick();
+
+			mono = (Amp[0]->TickAndOutputMono() +
+				  Amp[1]->TickAndOutputMono() +
+				  Amp[2]->TickAndOutputMono() +
+				  Amp[3]->TickAndOutputMono() +
+				  Amp[4]->TickAndOutputMono() +
+				  Amp[5]->TickAndOutputMono() );
+
+			// force output into the range 0<=x<=255
+			mono *= 5;
+			*pBuffer++ = 0x80+(mono>>8);
+		}
+		break;
+	
+	case SAAP_FILTER | SAAP_MONO | SAAP_16BIT:
+		while (nSamples--)
+		{
+			Noise[0]->Tick();
+			Noise[1]->Tick();
+			
+			mono = (Amp[0]->TickAndOutputMono() +
+				  Amp[1]->TickAndOutputMono() +
+				  Amp[2]->TickAndOutputMono() +
+				  Amp[3]->TickAndOutputMono() +
+				  Amp[4]->TickAndOutputMono() +
+				  Amp[5]->TickAndOutputMono() );
+
+
+			// force output into the range 0<=x<=65535
+			// (strictly, the following gives us 0<=x<=63360)
+			mono *= 5;
+			*pBuffer++ = mono & 0x00ff;
+			*pBuffer++ = mono >> 8;
+		}
+		break;
+	
+	case SAAP_FILTER | SAAP_STEREO | SAAP_8BIT:
+		while (nSamples--)
+		{
+			Noise[0]->Tick();
+			Noise[1]->Tick();
+
+			
+			stereoval.dword=(Amp[0]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[1]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[2]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[3]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[4]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[5]->TickAndOutputStereo()).dword;
+
+			// force output into the range 0<=x<=255
+			stereoval.sep.Left *= 10;
+			stereoval.sep.Right *= 10;
+			*pBuffer++ = 0x80+(stereoval.sep.Left>>8);
+			*pBuffer++ = 0x80+(stereoval.sep.Right>>8);
+		}
+		break;
+			
+	
+	case SAAP_FILTER | SAAP_STEREO | SAAP_16BIT:
+		while (nSamples--)
+		{
+			Noise[0]->Tick();
+			Noise[1]->Tick();
+
+			stereoval.dword=(Amp[0]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[1]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[2]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[3]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[4]->TickAndOutputStereo()).dword;
+			stereoval.dword+=(Amp[5]->TickAndOutputStereo()).dword;
+
+			// force output into the range 0<=x<=65535
+			// (strictly, the following gives us 0<=x<=63360)
+			stereoval.sep.Left *= 10;
+			stereoval.sep.Right *= 10;
+			*pBuffer++ = stereoval.sep.Left & 0x00ff;
+			*pBuffer++ = stereoval.sep.Left >> 8;
+			*pBuffer++ = stereoval.sep.Right & 0x00ff;
+			*pBuffer++ = stereoval.sep.Right >> 8;
+		}
+		break;
 	
 
-	// FILTER (lowpass):
-	
-	case SAAP_FILTER | SAAP_MONO | SAAP_8BIT:
-	case SAAP_FILTER | SAAP_MONO | SAAP_16BIT:
-	case SAAP_FILTER | SAAP_STEREO | SAAP_8BIT:
-	case SAAP_FILTER | SAAP_STEREO | SAAP_16BIT:
 	default: // ie - the m_uParam contains modes not implemented yet
 		{
-#ifdef _DEBUG
+#ifdef DEBUGSAA
 		char error[256];
 		sprintf(error,"not implemented: uParam=%#L.8x\n",m_uParam);
 		OutputDebugString(error);
 #endif
 		}
 	}
+
+#ifdef DEBUGSAA
+	fwrite(pBufferStart, GetCurrentBytesPerSample(), nTotalSamples, pcmfile);
+#endif
 }
 
 
@@ -649,16 +706,7 @@ int CSAASoundInternal::SendCommand(SAACMD nCommandID, long nData)
 
 void CSAASoundInternal::ClickClick(int bValue)
 {
-	if (bValue)
-	{
-		m_bClickClick = CLICKCLICKLEVEL;
-		m_bClickClicktimes256 = CLICKCLICKLEVELTIMES256;
-	}
-	else
-	{
-		m_bClickClick = 0;
-		m_bClickClicktimes256 = 0;
-	}
+	// removed from library - does nothing
 }
 
 
@@ -671,12 +719,12 @@ unsigned long CSAASound::Generate(void)
 
 ///////////////////////////////////////////////////////
 
-LPCSAASOUND __stdcall CreateCSAASound(void)
+LPCSAASOUND EXTAPI CreateCSAASound(void)
 {
 	return (new CSAASoundInternal);
 }
 
-void __stdcall DestroyCSAASound(LPCSAASOUND object)
+void EXTAPI DestroyCSAASound(LPCSAASOUND object)
 {
 	delete (object);
 }

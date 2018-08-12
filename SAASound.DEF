@@ -1,10 +1,10 @@
 ; Part of SAASound copyright 1998-2000 dave hooper <no-brain@mindless.com>
 ; This is the current .DEF file for the SAASound.dll
 ; These export ordinals WILL NOT change in future releases
-; Version 3.00.0 (23 March 2000)
-; (c) 1998-2000 dave @ spc       <no-brain@mindless.com>
+; Version 3.01.0 (10 Jan 2001)
+; (c) 1998-2001 dave @ spc       <no-brain@mindless.com>
 
-VERSION 3.0
+VERSION 3.1
 
 EXPORTS
 	newSAASND								@1

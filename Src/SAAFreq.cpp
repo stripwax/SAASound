@@ -8,14 +8,12 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "windows.h"
+#include "SAASound.h"
 #include "types.h"
 #include "SAANoise.h"
 #include "SAAEnv.h"
 #include "SAAFreq.h"
-#ifdef _DEBUG
-#include <stdio.h>
-#endif
+
 // 'load in' the data for the static frequency lookup table:
 const unsigned long CSAAFreq::m_FreqTable[2048] =
 {
@@ -28,14 +26,14 @@ const unsigned long CSAAFreq::m_FreqTable[2048] =
 
 CSAAFreq::CSAAFreq(CSAANoise * const NoiseGenerator, CSAAEnv * const EnvGenerator)
 :
-m_nConnectedMode((NoiseGenerator == NULL) ? ((EnvGenerator == NULL) ? 0 : 1) : 2),
+m_nCounter(0), m_nAdd(0), m_nLevel(2),
+m_nCurrentOffset(0), m_nCurrentOctave(0), m_nNextOffset(0), m_nNextOctave(0),
+m_bIgnoreOffsetData(false), m_bNewData(false), 
+m_bSync(false),
+m_nSampleRateMode(2), m_nSampleRateTimes4K(11025<<12),
 m_pcConnectedNoiseGenerator(NoiseGenerator),
 m_pcConnectedEnvGenerator(EnvGenerator),
-m_nLevel(2), m_nCounter(0), m_nAdd(0),
-m_nCurrentOffset(0), m_nCurrentOctave(0), m_nNextOffset(0), m_nNextOctave(0),
-m_bNewData(false), m_bIgnoreOffsetData(false),
-m_bSync(false),
-m_nSampleRateMode(2), m_nSampleRateTimes4K(11025<<12)
+m_nConnectedMode((NoiseGenerator == NULL) ? ((EnvGenerator == NULL) ? 0 : 1) : 2)
 {
 	SetAdd(); // current octave, current offset
 }

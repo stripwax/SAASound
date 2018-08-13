@@ -11,8 +11,11 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "assert.h"
-#include "windows.h"
+#include <stdio.h>	// for sprintf
+#include <assert.h>
+
+#include "SAASound.h"
+
 #include "types.h"
 #include "SAAEnv.h"
 #include "SAANoise.h"
@@ -20,7 +23,6 @@
 #include "SAAAmp.h"
 #include "SAASound.h"
 #include "SAASoundImplementation.h"
-#include "stdio.h" // for sprintf
 
 //////////////////////////////////////////////////////////////////////
 // Globals
@@ -37,9 +39,9 @@ FILE * pcmfile = NULL;
 
 CSAASoundInternal::CSAASoundInternal()
 :
+m_nCurrentSaaReg(0),
 m_bOutputEnabled(false),
 m_bSync(false),
-m_nCurrentSaaReg(0),
 m_uParam(0),
 m_uParamRate(0)
 {
@@ -81,9 +83,9 @@ m_uParamRate(0)
 	Amp[3] = new CSAAAmp(Osc[3], Noise[1], NULL),
 	Amp[4] = new CSAAAmp(Osc[4], Noise[1], NULL),
 	Amp[5] = new CSAAAmp(Osc[5], Noise[1], Env[1]);
-	for (i=5; i>=0; i--)
+	for (int j=5; j>=0; j--)
 	{
-		assert (Amp[i] != NULL);
+		assert (Amp[j] != NULL);
 	}
 
 
@@ -668,7 +670,11 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 #ifdef DEBUGSAA
 		char error[256];
 		sprintf(error,"not implemented: uParam=%#L.8x\n",m_uParam);
-		OutputDebugString(error);
+#ifdef WIN32
+		OutputDebugStringA(error);
+#else
+		fprintf(stderr, error);
+#endif
 #endif
 		}
 	}
@@ -704,43 +710,16 @@ int CSAASoundInternal::SendCommand(SAACMD nCommandID, long nData)
 }
 
 
-void CSAASoundInternal::ClickClick(int bValue)
-{
-	// removed from library - does nothing
-}
-
-
-
-unsigned long CSAASound::Generate(void)
-{
-	// obsolete - DON'T BOTHER USING THIS NOW THAT I'VE OBSOLETED IT!
-	return 0;
-}
-
 ///////////////////////////////////////////////////////
 
-LPCSAASOUND EXTAPI CreateCSAASound(void)
+LPCSAASOUND SAAAPI CreateCSAASound(void)
 {
 	return (new CSAASoundInternal);
 }
 
-void EXTAPI DestroyCSAASound(LPCSAASOUND object)
+void SAAAPI DestroyCSAASound(LPCSAASOUND object)
 {
 	delete (object);
 }
 
 ///////////////////////////////////////////////////////
-
-
-
-CSAASound::CSAASound()
-{
-	// Nothing. I know for a fact the only CSAASound objects that can be created
-	// are CSAASoundInternal objects and therefore handled by the constructor for
-	// CSAASoundInternal objects. There is no base-level object initialisation.
-}
-
-CSAASound::~CSAASound()
-{
-	// Nothing
-}

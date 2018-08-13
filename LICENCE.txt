@@ -15,29 +15,29 @@ SAASound
 Current project at version 3.01.0 (10 Jan 2001)
 
 Comprises the following files
-SAAAmp.cpp					3.01.0
-SAAEnv.cpp					3.01.0
-SAAFreq.cpp					3.01.0
-SAANoise.cpp					3.01.0
-SAASndC.cpp					3.01.0
-SAASoundImplementation.cpp			3.01.0
-SAAAmp.h					3.01.0
-SAAEnv.h					3.01.0
-SAAFreq.h					3.01.0
-SAANoise.h					3.01.0
-SAASndC.h					3.01.0
-SAASound.h					3.01.0
-SAASoundImplementation.h			3.01.0
-types.h						3.01.0
-SAAFreqTable.dat				3.01.0
-SAASound.def					3.01.0
-SAASound.rc					3.01.0
-resource.h					3.01.0
-SAASound.dsp					7 Jan 2001 09:23
-LICENCE.TXT					Issue 1 (3.01.0)
-SAASound.lib					10 Jan 2001 00:49
-SAASound.dll					3.01.0
-README.TXT					29 March 2000 01:03
+SAAAmp.cpp                  3.01.0
+SAAEnv.cpp                  3.01.0
+SAAFreq.cpp                 3.01.0
+SAANoise.cpp                3.01.0
+SAASndC.cpp                 3.01.0
+SAASoundImplementation.cpp  3.01.0
+SAAAmp.h                    3.01.0
+SAAEnv.h                    3.01.0
+SAAFreq.h                   3.01.0
+SAANoise.h                  3.01.0
+SAASndC.h                   3.01.0
+SAASound.h                  3.01.0
+SAASoundImplementation.h    3.01.0
+types.h                     3.01.0
+SAAFreqTable.dat            3.01.0
+SAASound.def                3.01.0
+SAASound.rc                 3.01.0
+resource.h                  3.01.0
+SAASound.dsp                7 Jan 2001 09:23
+LICENCE.TXT                 Issue 1 (3.01.0)
+SAASound.lib                10 Jan 2001 00:49
+SAASound.dll                3.01.0
+README.TXT                  29 March 2000 01:03
 
 
 
@@ -48,9 +48,9 @@ Source Redistribution
 The following files are required to build SAASound support into WinCoupe, SAAEmu
 or any other code that makes use of SAASound. Note that for a given application,
 not all of the following files may be required.
-SAASndC.h					
-SAASound.h					
-SAASound.lib				
+SAASndC.h                   
+SAASound.h                  
+SAASound.lib                
 
 
 If redistributing ANY of the files contained within this package, ALL files must be
@@ -63,7 +63,7 @@ distributed freely. The following versions have been released previously to this
 and are therefore also freely redistributable:
 
 SAASound package version 3.00.0:
-		http://www.geocities.com/stripwax/saa/saasource_3_00_0.zip
+    http://www.geocities.com/stripwax/saa/saasource_3_00_0.zip
 
 
 If you believe you are in possession of an unofficial redistribution of the source code
@@ -84,9 +84,9 @@ package are distributed alongside the dll and the licence statement.
 This means that the following versions of SAASound.dll may be redistributed along with
 the corresponding licence statements:
 
-dll version			licence statement issue number
-3.00.0				Issue 1
-3.01.0				Issue 1 (3.01.0)
+dll version     licence statement issue number
+3.00.0          Issue 1
+3.01.0          Issue 1 (3.01.0)
 
 
 IT ALSO MEANS THAT VERSIONS OF SAASOUND.DLL PRIOR TO VERSION 3.00.0 MAY BE FREELY
@@ -137,7 +137,7 @@ an operating system currently not supported then please keep me posted!
 
 
 Explicit Consent and Inheritence of this licence statement
------------------------------------------------------------
+----------------------------------------------------------
 
 Any 'explicit consent' granted will be displayed on 
 http://www.geocities.com/stripwax/saa/consent.html
@@ -146,10 +146,10 @@ contact address (email, web or snail) for the party/parties involved.
 
 
 Any consent granted carries with it the obligation to
-1.	Implement and adhere to the statements set out in this licence statement (or a more recent
-	statement if available)
-2.	Supply and act in accordance with this licence statement (or a more recent statement
-	if available)
+1.  Implement and adhere to the statements set out in this licence statement (or a more recent
+    statement if available)
+2.  Supply and act in accordance with this licence statement (or a more recent statement
+    if available)
 
 
 
@@ -172,4 +172,3 @@ http://www.geocities.com/stripwax/saa
 
 Email:
 no-brain@mindless.com
-

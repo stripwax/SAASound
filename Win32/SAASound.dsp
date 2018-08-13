@@ -1,5 +1,5 @@
 # Microsoft Developer Studio Project File - Name="SAASound" - Package Owner=<4>
-# Microsoft Developer Studio Generated Build File, Format Version 5.00
+# Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
@@ -17,12 +17,12 @@ CFG=SAASound - Win32 Debug
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "SAASound - Win32 Release" (based on\
- "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "SAASound - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "SAASound - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
+# PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
@@ -43,10 +43,10 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /G6 /Gr /Zp1 /MD /W3 /vd0 /Ox /Ot /Oa /Og /Oi /Ob2 /Gf /Gy /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "WIN32_LEAN_AND_MEAN" /D "VC_EXTRALEAN" /D "NEW_RAND" /FAcs /FR /YX /FD /c
+# ADD CPP /nologo /G6 /Gr /Zp1 /MD /W3 /vd0 /Ox /Ot /Oa /Og /Oi /Ob2 /Gf /Gy /I "." /I "..\Src" /I "..\Include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "WIN32_LEAN_AND_MEAN" /D "VC_EXTRALEAN" /D "NEW_RAND" /FAcs /FR /YX /FD /c
 # SUBTRACT CPP /Os
-# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
-# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
+# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
+# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -56,10 +56,6 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386
 # ADD LINK32 /nologo /base:"0x178a0000" /version:3.1 /subsystem:windows /dll /machine:I386
 # SUBTRACT LINK32 /profile /map /debug
-# Begin Special Build Tool
-SOURCE=$(InputPath)
-PostBuild_Cmds=copy release\saasound.dll c:\windows\system
-# End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "SAASound - Win32 Debug"
 
@@ -75,9 +71,9 @@ PostBuild_Cmds=copy release\saasound.dll c:\windows\system
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /G5 /Gr /Zp16 /MDd /W3 /Gm /vd0 /Zi /Od /Gf /Gy /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "NEW_RAND" /D "DEBUGSAA" /YX /FD /c
-# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o NUL /win32
-# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o NUL /win32
+# ADD CPP /nologo /G5 /Gr /Zp16 /MDd /W3 /Gm /vd0 /ZI /Od /I "." /I "..\Src" /I "..\Include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "NEW_RAND" /D "DEBUGSAA" /YX /FD /c
+# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
+# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
 # ADD RSC /l 0x809 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -87,11 +83,6 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
 # SUBTRACT LINK32 /map
-# Begin Special Build Tool
-SOURCE=$(InputPath)
-PostBuild_Desc=copying dll
-PostBuild_Cmds=copy "Debug\saasound.dll" "c:\windows\system"
-# End Special Build Tool
 
 !ENDIF 
 
@@ -104,27 +95,31 @@ PostBuild_Cmds=copy "Debug\saasound.dll" "c:\windows\system"
 # PROP Default_Filter "cpp"
 # Begin Source File
 
-SOURCE=.\SAAAmp.cpp
+SOURCE=..\Src\SAAAmp.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\SAAEnv.cpp
+SOURCE=..\Src\SAAEnv.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\SAAFreq.cpp
+SOURCE=..\Src\SAAFreq.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\SAANoise.cpp
+SOURCE=..\Src\SAANoise.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\SaaSndC.cpp
+SOURCE=..\Src\SAASndC.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\SAASoundImplementation.cpp
+SOURCE=..\Src\SAASound.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\Src\SAASoundImplementation.cpp
 # End Source File
 # End Group
 # Begin Group "C++ Header Files"
@@ -132,35 +127,31 @@ SOURCE=.\SAASoundImplementation.cpp
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\SAAAmp.h
+SOURCE=..\Src\SAAAmp.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\SAAEnv.h
+SOURCE=..\Src\SAAEnv.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\SAAFreq.h
+SOURCE=..\Src\SAAFreq.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\SAANoise.h
+SOURCE=..\Src\SAANoise.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\SAASndC.h
+SOURCE=..\Include\SAASound.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\SAASound.h
+SOURCE=..\Src\SAASoundImplementation.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\SAASoundImplementation.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\types.h
+SOURCE=..\Src\types.h
 # End Source File
 # End Group
 # Begin Group "Nasty Inline Stuff"
@@ -168,16 +159,24 @@ SOURCE=.\types.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\SAAFreqTable.dat
+SOURCE=..\Src\SAAFreqTable.dat
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=..\LICENCE.txt
+# End Source File
 # Begin Source File
 
 SOURCE=.\Licence.txt
 # End Source File
 # Begin Source File
 
-SOURCE=.\SAASound.DEF
+SOURCE=.\resource.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\SAASound.def
 # End Source File
 # Begin Source File
 

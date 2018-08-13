@@ -14,12 +14,6 @@
 #ifndef SAASOUNDIMPLEMENTATION_H_INCLUDED
 #define SAASOUNDIMPLEMENTATION_H_INCLUDED
 
-#ifdef _MSC_VER
-#if _MSC_VER >= 1000
-#pragma once
-#endif // _MSC_VER >= 1000
-#endif
-
 class CSAASoundInternal : public CSAASound
 {
 private:
@@ -51,12 +45,9 @@ public:
 	static unsigned short GetBytesPerSample(SAAPARAM uParam);
 
 	void GenerateMany(BYTE * pBuffer, unsigned long nSamples);
-	void ClickClick(int bValue);
-	// 'Generate' function is obsolete
 
 	int SendCommand(SAACMD nCommandID, long nData);
 
 };
-
 
 #endif // SAASOUNDIMPLEMENTATION_H_INCLUDED

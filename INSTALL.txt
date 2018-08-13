@@ -1,0 +1,17 @@
+SAASound build and install notes
+--------------------------------
+
+Win32:
+    - unzip Win32.zip into the current directory
+    - Open the Win32/SAASound.dsw in Visual Studio (VC6)
+    - Select and build the Release target
+    - Copy the DLL to Windows\System (WinNT\System32 on NT/W2K)
+
+Unix:
+    - To build it run:   ./configure ; make
+    - To install, log in as root and run:  make install
+
+BeOS:
+    - unzip BeOS.zip into the current directory
+    - Open BeOS/SAASound.proj in BeIDE and build it
+    - Copy libSAASound.so into /boot/home/config/lib

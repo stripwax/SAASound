@@ -10,14 +10,6 @@
 #ifndef SAANOISE_H_INCLUDED
 #define SAANOISE_H_INCLUDED
 
-#ifdef _MSC_VER
-#if _MSC_VER >= 1000
-#pragma once
-#endif // _MSC_VER >= 1000
-#endif
-
-
-
 class CSAANoise  
 {
 private:
@@ -56,7 +48,5 @@ public:
 	void Sync(bool bSync);
 
 };
-
-
 
 #endif	// SAANOISE_H_INCLUDED

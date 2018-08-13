@@ -7,7 +7,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "windows.h"
+#include "SAASound.h"
 #include "types.h"
 #include "SAAEnv.h"
 
@@ -43,9 +43,9 @@ const ENVDATA CSAAEnv::cs_EnvData[8] =
 CSAAEnv::CSAAEnv()
 :
 m_bEnabled(false),
-m_bOkForNewData(false),
 m_bNewData(false),
-m_nNextData(0)
+m_nNextData(0),
+m_bOkForNewData(false)
 {
 	// initialise itself with the value 'zero'
 	SetNewEnvData(0);

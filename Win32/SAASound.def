@@ -21,10 +21,10 @@ EXPORTS
 	SAASNDGetBytesPerSample					@13
 	SAASNDGetCurrentSampleRate				@14
 	SAASNDGetSampleRate						@15
-	SAASNDGenerate							@16
+;	SAASNDGenerate							@16
 	SAASNDGenerateMany						@17
 	SAASNDSendCommand						@18
-	SAASNDClickClick						@19
+;	SAASNDClickClick						@19
 
 	CreateCSAASound							@25
 	DestroyCSAASound						@26
@@ -40,7 +40,7 @@ EXPORTS
 	GetSampleRate							@38	
 	GetCurrentBytesPerSample				@39
 	GetBytesPerSample						@40
-	Generate								@41
+;	Generate								@41
 	GenerateMany							@42
 	SendCommand								@43
-	ClickClick								@44
+;	ClickClick								@44

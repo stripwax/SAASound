@@ -1,4 +1,8 @@
-AUTOMAKE_OPTIONS = foreign
+## Process this file with automake to produce Makefile.in
 
-SUBDIRS = Src Include
-DIST_SUBDIRS = $(SUBDIRS)
+AUTOMAKE_OPTIONS= foreign
+
+SUBDIRS= . include src
+
+EXTRA_DIST= $(srcdir)/config/* $(srcdir)/doc/*
+

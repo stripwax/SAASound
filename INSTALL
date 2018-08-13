@@ -2,19 +2,32 @@ SAASound build and install notes
 --------------------------------
 
 Win32:
-    - unzip Win32.zip into the current directory
-    - Open the Win32/SAASound.dsw in Visual Studio (VC6)
+    - Open the VS6/SAASound.dsw in Visual Studio 6
     - Select and build the Release target
     - Copy the DLL to Windows\System (or WinNT\System32 on NT/W2K/XP)
 
 Unix:
-    - To build it run:   ./configure ; make
+    - To build it run:  ./configure ; make
     - To install, log in as root and run:  make install
+
+OS X:
+   - Open OSX/SAASound.xcodeproject in XCode 2.2 or later
+   - On the Project menu, Set Active Build Configuration to Release
+   - Click the Build button on the toolbar
+   - Copy SAASound.framework into /Library/Frameworks
+   - Or for a Unix-style library, follow the Unix instructions
 
 BeOS:
     - unzip BeOS.zip into the current directory
     - Open BeOS/SAASound.proj in BeIDE and build it
     - Copy libSAASound.so into /boot/home/config/lib
 
-Ported to Unix and BeOS by Simon Owen (simon.owen@simcoupe.org)
+Pocket PC:
+    - Open SAASound.dsw from eVC3/eVC4, depending on your compiler version
+    - Select and build the appropriate Release target (ARM for devices)
+    - Copy the DLL to Windows\ on your device
 
+-- 
+
+Last updated 30th March 2006
+by Simon Owen <simon@simonowen.com>

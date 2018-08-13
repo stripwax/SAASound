@@ -1,0 +1,149 @@
+<QPG:Generation>
+   <QPG:Options>
+      <QPG:User unattended="yes" verbosity="0" listfiles="yes"/>
+      <QPG:Defaults type="qnx_package"/>
+      <QPG:Source></QPG:Source>
+      <QPG:Release number="+"/>
+      <QPG:Build></QPG:Build>
+      <QPG:FileSorting strip="yes"/>
+      <QPG:Package targets="combine"/>
+      <QPG:Repository generate="yes"/>
+      <QPG:FinalDir></QPG:FinalDir>
+      <QPG:Cleanup></QPG:Cleanup>
+   </QPG:Options>
+
+   <QPG:Responsible>
+      <QPG:Company></QPG:Company>
+      <QPG:Department></QPG:Department>
+      <QPG:Group></QPG:Group>
+      <QPG:Team></QPG:Team>
+      <QPG:Employee></QPG:Employee>
+      <QPG:EmailAddress></QPG:EmailAddress>
+   </QPG:Responsible>
+
+   <QPG:Values>
+      <QPG:Files>
+         <QPG:Add file="/opt/lib/libSAASound-3.2.so.1" install="/opt/lib/"/>
+         <QPG:Add file="/opt/lib/libSAASound-3.2.so.1" install="/opt/lib/" component="slib"/>
+         <QPG:Add file="/opt/lib/libSAASound.a" install="/x86/opt/lib/"/>
+         <QPG:Add file="/opt/usr/include/SAASound.h" install="/opt/usr/include/"/>
+         <QPG:Add file="LICENCE" install="LicenseUrl/" handling="repdata"/>
+      </QPG:Files>
+
+      <QPG:PackageFilter>
+         <QPM:PackageManifest>
+            <QPM:PackageDescription>
+               <QPM:PackageType>Library</QPM:PackageType>
+               <QPM:PackageRepository></QPM:PackageRepository>
+               <QPM:FileVersion>2.0</QPM:FileVersion>
+            </QPM:PackageDescription>
+
+            <QPM:ProductDescription>
+               <QPM:ProductName>SAASound</QPM:ProductName>
+               <QPM:ProductIdentifier>saasound</QPM:ProductIdentifier>
+               <QPM:ProductEmail>dave@rebuzz.org</QPM:ProductEmail>
+               <QPM:VendorName>Public</QPM:VendorName>
+               <QPM:VendorInstallName>public</QPM:VendorInstallName>
+               <QPM:VendorURL>http://homepage.ntlworld.com/simon.owen/sam/saasound/</QPM:VendorURL>
+               <QPM:VendorEmbedURL></QPM:VendorEmbedURL>
+               <QPM:VendorEmail>simon.owen@simcoupe.org</QPM:VendorEmail>
+               <QPM:AuthorName>Dave Hooper</QPM:AuthorName>
+               <QPM:AuthorURL>http://sourceforge.net/projects/saasound/</QPM:AuthorURL>
+               <QPM:AuthorEmbedURL></QPM:AuthorEmbedURL>
+               <QPM:AuthorEmail>dave@rebuzz.org</QPM:AuthorEmail>
+               <QPM:ProductIconSmall></QPM:ProductIconSmall>
+               <QPM:ProductIconLarge></QPM:ProductIconLarge>
+               <QPM:ProductDescriptionShort>SAASound is a Phillips SAA 1099 emulation library.</QPM:ProductDescriptionShort>
+               <QPM:ProductDescriptionLong>SAASound is a high quality Phillips SAA 1099 emulation library.  Its intended use is in software signal generators, soft-synths and video game emulators.</QPM:ProductDescriptionLong>
+               <QPM:ProductDescriptionURL>http://sourceforge.net/projects/saasound/</QPM:ProductDescriptionURL>
+               <QPM:ProductDescriptionEmbedURL></QPM:ProductDescriptionEmbedURL>
+            </QPM:ProductDescription>
+
+            <QPM:ReleaseDescription>
+               <QPM:ReleaseVersion>3.2</QPM:ReleaseVersion>
+               <QPM:ReleaseUrgency>High</QPM:ReleaseUrgency>
+               <QPM:ReleaseStability>Stable</QPM:ReleaseStability>
+               <QPM:ReleaseNoteMinor></QPM:ReleaseNoteMinor>
+               <QPM:ReleaseNoteMajor></QPM:ReleaseNoteMajor>
+               <QPM:ExcludeCountries>
+                  <QPM:Country></QPM:Country>
+               </QPM:ExcludeCountries>
+
+               <QPM:ReleaseCopyright>BSD License</QPM:ReleaseCopyright>
+            </QPM:ReleaseDescription>
+
+            <QPM:ContentDescription>
+               <QPM:ContentTopic xmlmultiple="true">Software Development/Libraries and Extensions/C++ Libraries</QPM:ContentTopic>
+               <QPM:ContentKeyword>saa,saasound,phillips,sound,emulator</QPM:ContentKeyword>
+               <QPM:TargetOS>qnx6</QPM:TargetOS>
+               <QPM:HostOS>none</QPM:HostOS>
+               <QPM:DisplayEnvironment xmlmultiple="true">None</QPM:DisplayEnvironment>
+               <QPM:TargetAudience xmlmultiple="true">Developer</QPM:TargetAudience>
+            </QPM:ContentDescription>
+
+            <QPM:LicenseUrl>repdata://LicenseUrl/LICENCE</QPM:LicenseUrl>
+         </QPM:PackageManifest>
+      </QPG:PackageFilter>
+
+      <QPG:PackageFilter proc="none" target="none">
+         <QPM:PackageManifest>
+            <QPM:ProductInstallationDependencies>
+               <QPM:ProductRequirements></QPM:ProductRequirements>
+            </QPM:ProductInstallationDependencies>
+         </QPM:PackageManifest>
+      </QPG:PackageFilter>
+
+      <QPG:PackageFilter proc="x86" target="none">
+         <QPM:PackageManifest>
+            <QPM:ProductInstallationDependencies>
+               <QPM:ProductRequirements></QPM:ProductRequirements>
+            </QPM:ProductInstallationDependencies>
+         </QPM:PackageManifest>
+      </QPG:PackageFilter>
+
+      <QPG:PackageFilter proc="none" target="none">
+         <QPM:PackageManifest>
+            <QPM:ProductInstallationDependencies>
+               <QPM:ProductRequirements></QPM:ProductRequirements>
+            </QPM:ProductInstallationDependencies>
+         </QPM:PackageManifest>
+      </QPG:PackageFilter>
+
+      <QPG:PackageFilter proc="x86" target="none">
+         <QPM:PackageManifest>
+            <QPM:ProductInstallationDependencies>
+               <QPM:ProductRequirements></QPM:ProductRequirements>
+            </QPM:ProductInstallationDependencies>
+         </QPM:PackageManifest>
+      </QPG:PackageFilter>
+
+      <QPG:PackageFilter proc="none" target="x86">
+         <QPM:PackageManifest>
+            <QPM:ProductInstallationDependencies>
+               <QPM:ProductRequirements></QPM:ProductRequirements>
+               <QPM:Dependency xmlmultiple="true">
+                  <QPM:DependencyType>Install</QPM:DependencyType>
+                  <QPM:Notes>Requires the core development package (Packager-generated dependency).</QPM:Notes>
+                  <QPM:Product>saasound-dev</QPM:Product>
+               </QPM:Dependency>
+            </QPM:ProductInstallationDependencies>
+         </QPM:PackageManifest>
+      </QPG:PackageFilter>
+
+      <QPG:PackageFilter proc="none" target="none">
+         <QPM:PackageManifest>
+            <QPM:ProductInstallationDependencies>
+               <QPM:ProductRequirements></QPM:ProductRequirements>
+               <QPM:Dependency xmlmultiple="true">
+                  <QPM:DependencyType>Install</QPM:DependencyType>
+                  <QPM:Notes>Must include at least one development package targeting a specific processor (Packager-generated dependency).</QPM:Notes>
+                  <QPM:Filter xmlmultiple="true">
+                     <QPM:FilterType>StringExpression</QPM:FilterType>
+                     <ProductIdentifier>saasound-dev-target*</ProductIdentifier>
+                  </QPM:Filter>
+               </QPM:Dependency>
+            </QPM:ProductInstallationDependencies>
+         </QPM:PackageManifest>
+      </QPG:PackageFilter>
+   </QPG:Values>
+</QPG:Generation>

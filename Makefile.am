@@ -1,0 +1,4 @@
+AUTOMAKE_OPTIONS = foreign
+
+SUBDIRS = Src Include
+DIST_SUBDIRS = $(SUBDIRS)

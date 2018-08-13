@@ -9,7 +9,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "windows.h"
+#include "SAASound.h"
 #include "types.h"
 #include "SAANoise.h"
 #include "SAAEnv.h"
@@ -22,10 +22,10 @@
 
 CSAAAmp::CSAAAmp(CSAAFreq * const ToneGenerator, const CSAANoise * const NoiseGenerator, const CSAAEnv * const EnvGenerator)
 :
-m_bUseEnvelope(EnvGenerator != NULL),
 m_pcConnectedToneGenerator(ToneGenerator),
 m_pcConnectedNoiseGenerator(NoiseGenerator),
-m_pcConnectedEnvGenerator(EnvGenerator)
+m_pcConnectedEnvGenerator(EnvGenerator),
+m_bUseEnvelope(EnvGenerator != NULL)
 {
 	leftleveltimes32=leftleveltimes16=leftlevela0x0e=leftlevela0x0etimes2=0;
 	rightleveltimes32=rightleveltimes16=rightlevela0x0e=rightlevela0x0etimes2=0;
@@ -320,7 +320,7 @@ unsigned short CSAAAmp::TickAndOutputMono(void)
 stereolevel CSAAAmp::TickAndOutputStereo(void)
 {
 	static stereolevel retval;
-	static const stereolevel zeroval = {0,0};
+	static const stereolevel zeroval = { {0,0} };
 	
 	// first, do the Tick:
 	Tick();

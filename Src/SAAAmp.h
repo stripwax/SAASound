@@ -12,12 +12,6 @@
 #ifndef SAAAMP_H_INCLUDED
 #define SAAAMP_H_INCLUDED
 
-#ifdef _MSC_VER
-#if _MSC_VER >= 1000
-#pragma once
-#endif // _MSC_VER >= 1000
-#endif
-
 class CSAAAmp  
 {
 private:

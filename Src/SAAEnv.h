@@ -13,12 +13,6 @@
 #ifndef SAAENV_H_INCLUDED
 #define SAAENV_H_INCLUDED
 
-#ifdef _MSC_VER
-#if _MSC_VER >= 1000
-#pragma once
-#endif // _MSC_VER >= 1000
-#endif
-
 class CSAAEnv  
 {
 private:
@@ -58,6 +52,5 @@ public:
 	bool IsActive(void) const;
 
 };
-
 
 #endif	// SAAENV_H_INCLUDED

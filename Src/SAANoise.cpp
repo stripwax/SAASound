@@ -13,7 +13,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "windows.h"
+#include "SAASound.h"
+
 #include "types.h"
 #include "SAANoise.h"
 
@@ -31,16 +32,16 @@ const unsigned long CSAANoise::cs_nAddBase = 31250 << 12;
 
 CSAANoise::CSAANoise()
 :
+m_nCounter(0),
+m_nAdd(cs_nAddBase),
+m_bSync(false),
+m_nSampleRateMode(2),
+m_nSampleRateTimes4K(11025<<12),
 #ifndef NEW_RAND
 /* old code: */
 m_nLevel(0),
 m_nLevelTimesTwo(0),
 #endif
-m_bSync(false),
-m_nCounter(0),
-m_nAdd(cs_nAddBase),
-m_nSampleRateMode(2),
-m_nSampleRateTimes4K(11025<<12),
 m_nSourceMode(0),
 m_nRand(0x11111111) /* well hey, it's as good a seed as any */
 {
@@ -49,15 +50,15 @@ m_nRand(0x11111111) /* well hey, it's as good a seed as any */
 
 CSAANoise::CSAANoise(unsigned long seed)
 :
+m_nCounter(0),
+m_nAdd(cs_nAddBase),
+m_bSync(false),
+m_nSampleRateMode(2),
+m_nSampleRateTimes4K(11025<<12),
 #ifndef NEW_RAND
 /* old code: */
 m_nLevel(0),
 #endif
-m_bSync(false),
-m_nCounter(0),
-m_nAdd(cs_nAddBase),
-m_nSampleRateMode(2),
-m_nSampleRateTimes4K(11025<<12),
 m_nSourceMode(0),
 m_nRand(seed)
 {
@@ -81,7 +82,7 @@ unsigned short CSAANoise::Level(void) const
 	return m_nLevel;
 #else
 	/* new code: */
-	return m_nRand & 0x00000001;
+	return (unsigned short)(m_nRand & 0x00000001);
 #endif
 }
 
@@ -92,7 +93,7 @@ unsigned short CSAANoise::LevelTimesTwo(void) const
 	return m_nLevelTimesTwo;
 #else
 	/* new code: */
-	return (m_nRand & 0x00000001) << 1;
+	return (unsigned short)((m_nRand & 0x00000001) << 1);
 #endif
 }
 
@@ -149,7 +150,7 @@ unsigned short CSAANoise::Tick(void)
 	return m_nLevel;
 #else
 	/* new code: */
-	return m_nRand & 0x00000001;
+	return (unsigned short)(m_nRand & 0x00000001);
 #endif
 }
 

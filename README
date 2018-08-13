@@ -1,6 +1,7 @@
-SAASound readme 
----------------
-ENSURE THAT YOU HAVE READ AND AGREE TO LICENCE STATEMENT BEFORE PROCEEDING!
+S A A S O U N D
+===============
 
-Thanks,
-Dave (no-brain@mindless.com)
+SAASound is a portable Phillips SAA 1099 sound chip emulator, written in C++.
+
+Email: Dave Hooper <dave@rebuzz.org>
+Homepage: http://sourceforge.net/projects/saasound/

@@ -4,5 +4,5 @@ AUTOMAKE_OPTIONS= foreign
 
 SUBDIRS= . include src
 
-EXTRA_DIST= $(srcdir)/config/* $(srcdir)/doc/*
+EXTRA_DIST= $(srcdir)/config/*
 

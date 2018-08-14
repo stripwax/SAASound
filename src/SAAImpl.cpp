@@ -1,13 +1,10 @@
-// Part of SAASound copyright 1998-2004 Dave Hooper <dave@rebuzz.org>
+// Part of SAASound copyright 1998-2018 Dave Hooper <dave@beermex.com>
 //
 // SAAImpl.cpp: implementation of the CSAASound class.
 // the bones of the 'virtual SAA-1099' emulation
 //
 // the actual sound generation is carried out in the other classes;
 // this class provides the output stage and the external interface only
-//
-// Version 3.1.3 (8th March 2004)
-// (c) 1998-2004 dave @ spc       <dave@rebuzz.org>
 //
 //////////////////////////////////////////////////////////////////////
 

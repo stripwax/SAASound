@@ -2,9 +2,14 @@ SAASound build and install notes
 --------------------------------
 
 Win32:
-    - Open the VS6/SAASound.dsw in Visual Studio 6
+    - Open the VS6/SAASound.dsw in Visual Studio 6 ,
+	  or open the VS17/SAASound.sln in Visual Studio 2017
     - Select and build the Release target
-    - Copy the DLL to Windows\System (or WinNT\System32 on NT/W2K/XP)
+    - Copy the resulting SAASound.dll from the Release folder
+	  to Windows\System (or WinNT\System32 on NT/W2K/XP)
+	  or alternatively simply copy it directly to the application folder
+	  that requires it (e.g. for SimCoupe and SAAPlay, copy the
+	  SAASound.dll to the same folder as the executable application)
 
 Unix:
     - To build it run:  ./configure ; make
@@ -29,5 +34,6 @@ Pocket PC:
 
 -- 
 
-Last updated 30th March 2006
-by Simon Owen <simon@simonowen.com>
+Last updated 15th August 2018
+by Dave Hooper <dave@beermex.com>
+and Simon Owen <simon@simonowen.com>

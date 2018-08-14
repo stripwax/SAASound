@@ -1,13 +1,10 @@
-// Part of SAASound copyright 1998-2000 dave hooper <no-brain@mindless.com>
+// Part of SAASound copyright 1998-2018 Dave Hooper <dave@beermex.com>
 //
 // **********
 // * PUBLIC *
 // **********
 //
 // SAASndC.h: "C-style" interface for the CSAASound class.
-//
-// Version 3.01.0 (10 Jan 2001)
-// (c) 1998-2001 dave @ spc       <no-brain@mindless.com>
 //
 //////////////////////////////////////////////////////////////////////
 

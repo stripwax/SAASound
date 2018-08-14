@@ -1,9 +1,16 @@
-// Part of SAASound copyright 1998-2004 Dave Hooper <dave@rebuzz.org>
+// Part of SAASound copyright 1998-2018 Dave Hooper <dave@beermex.com>
 //
 // SAASound.h: interface for the CSAASound class.
 //
+// This corresponds to the public (exported) DLL interface, so all
+// APIs and client factory methods belong here.
+//
+// Compatibility notes : the intention is for this to be fully backwards
+// compatible across minor and patch versions.  Any backwards breaking changes
+// should be reflected as a major version increment.  New functionality can be added
+// in minor versions so long as backwards compatiblity is maintained
+// 
 // Version 3.1.3 (8th March 2004)
-// (c) 1998-2004 dave @ spc       <dave@rebuzz.org>
 //
 //////////////////////////////////////////////////////////////////////
 

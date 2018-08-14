@@ -1,4 +1,4 @@
-// Part of SAASound copyright 1998-2004 Dave Hooper <dave@rebuzz.org>
+// Part of SAASound copyright 1998-2018 Dave Hooper <dave@beermex.com>
 //
 // SAANoise.cpp: implementation of the CSAANoise class.
 // One noise generator
@@ -7,9 +7,6 @@
 // trying to use the generator.
 // (Just because the CSAANoise object has a default samplerate
 //  doesn't mean you should rely on it)
-//
-// Version 3.1.3 (8th March 2004)
-// (c) 1998-2004 dave @ spc       <dave@rebuzz.org>
 //
 //////////////////////////////////////////////////////////////////////
 

@@ -1,9 +1,6 @@
-// Part of SAASound copyright 1998-2004 Dave Hooper <dave@rebuzz.org>
+// Part of SAASound copyright 1998-2018 Dave Hooper <dave@beermex.com>
 //
 // SAASound.cpp - dummy function
-//
-// Version 3.1.3 (8th March 2004)
-// (c) 1998-2004 dave @ spc       <dave@rebuzz.org>
 //
 //////////////////////////////////////////////////////////////////////
 

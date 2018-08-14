@@ -1,10 +1,7 @@
-// Part of SAASound copyright 1998-2004 Dave Hooper <dave@rebuzz.org>
+// Part of SAASound copyright 1998-2018 Dave Hooper <dave@beermex.com>
 //
 // SAAFreq.h: interface for the CSAAFreq class.
 // Note about Samplerates: 0=44100, 1=22050; 2=11025
-//
-// Version 3.1.3 (8th March 2004)
-// (c) 1998-2004 dave @ spc       <dave@rebuzz.org>
 //
 //////////////////////////////////////////////////////////////////////
 

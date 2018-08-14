@@ -1,13 +1,10 @@
-// Part of SAASound copyright 1998-2004 Dave Hooper <dave@rebuzz.org>
+// Part of SAASound copyright 1998-2018 Dave Hooper <dave@beermex.com>
 //
 // This is the internal implementation (header file) of the SAASound object.
 // This is done so that the external interface to the object always stays the same
 // (SAASound.h) even though the internal object can change
 // .. Meaning future releases don't require relinking everyone elses code against
 //    the updated saasound stuff
-//
-// Version 3.1.3 (8th March 2004)
-// (c) 1998-2004 dave @ spc       <dave@rebuzz.org>
 //
 //////////////////////////////////////////////////////////////////////
 

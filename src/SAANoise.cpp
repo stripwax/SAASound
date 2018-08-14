@@ -1,4 +1,4 @@
-// Part of SAASound copyright 1998-2004 Dave Hooper <dave@rebuzz.org>
+// Part of SAASound copyright 1998-2018 Dave Hooper <dave@beermex.com>
 //
 // SAANoise.cpp: implementation of the CSAANoise class.
 // One noise generator
@@ -7,9 +7,6 @@
 // trying to use the generator.
 // (Just because the CSAANoise object has a default samplerate
 //  doesn't mean you should rely on it)
-//
-// Version 3.1.3 (8th March 2004)
-// (c) 1998-2004 dave @ spc       <dave@rebuzz.org>
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -38,7 +35,7 @@ m_bSync(false),
 m_nSampleRateMode(2),
 m_nSampleRateTimes4K(11025<<12),
 m_nSourceMode(0),
-m_nRand(0x11111111) /* well hey, it's as good a seed as any */
+m_nRand(1)
 {
 	// That's all
 }
@@ -158,13 +155,21 @@ void CSAANoise::SetSampleRateMode(int nSampleRateMode)
 
 inline void CSAANoise::ChangeLevel(void)
 {
-	/* new routine (thanks to MASS) */
-	if ( (m_nRand & 0x40000004) && ((m_nRand & 0x40000004) != 0x40000004) )
+	/*
+	https://www.vogons.org/viewtopic.php?f=9&t=51695
+	SAA1099P noise generator as documented by Jepael
+	18-bit Galois LFSR
+	Feedback polynomial = x^18 + x^11 + x^1
+	Period = 2^18-1 = 262143 bits
+	Verified to match recorded noise from my SAA1099P
+	*/
+
+	if (m_nRand & 1)
 	{
-		m_nRand = (m_nRand<<1)+1;
+		m_nRand = (m_nRand >> 1) ^ 0x20400;
 	}
 	else
 	{
-		m_nRand<<=1;
+		m_nRand >>= 1;
 	}
 }

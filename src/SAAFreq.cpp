@@ -156,7 +156,6 @@ unsigned short CSAAFreq::Level(void) const
 	return nLevel;
 }
 
-
 unsigned short CSAAFreq::Tick(void)
 {
 	// set to the absolute level (0 or 2)
@@ -180,21 +179,20 @@ unsigned short CSAAFreq::Tick(void)
 				// trigger any connected devices
 				switch (m_nConnectedMode)
 				{
-				case 1:
-					// env trigger
-					m_pcConnectedEnvGenerator->InternalClock();
-					break;
+					case 1:
+						// env trigger
+						m_pcConnectedEnvGenerator->InternalClock();
+						break;
 			
-				case 2:
-					// noise trigger
-					m_pcConnectedNoiseGenerator->Trigger();
-					break;
+					case 2:
+						// noise trigger
+						m_pcConnectedNoiseGenerator->Trigger();
+						break;
 				
-				default:
-					// do nothing
-					break;
+					default:
+						// do nothing
+						break;
 				}
-				
 			}
 
 			// get new frequency (set period length m_nAdd) if new data is waiting:
@@ -204,7 +202,6 @@ unsigned short CSAAFreq::Tick(void)
 	}
 	return GetLevel(m_nLevel);
 }
-
 
 void CSAAFreq::SetAdd(void)
 {

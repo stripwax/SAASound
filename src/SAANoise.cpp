@@ -79,7 +79,6 @@ void CSAANoise::SetSource(int nSource)
 	m_nAdd = cs_nAddBase >> m_nSourceMode;
 }
 
-
 void CSAANoise::Trigger(void)
 {
 	// Trigger only does anything useful when we're
@@ -151,7 +150,6 @@ void CSAANoise::SetSampleRateMode(int nSampleRateMode)
 	m_nSampleRateMode = nSampleRateMode;
 	m_nSampleRateTimes4K = 44100 << (12-m_nSampleRateMode);
 }
-
 
 inline void CSAANoise::ChangeLevel(void)
 {

@@ -255,25 +255,25 @@ inline void CSAAEnv::SetLevels(void)
 
 	switch (m_nResolution)
 	{
-	case 1: // 4 bit res waveforms
-	default:
-		{
-			m_nLeftLevel = m_pEnvData->nLevels[0][m_nPhase][m_nPhasePosition];
-			if (m_bInvertRightChannel)
-				m_nRightLevel = 15-m_nLeftLevel;
-			else
-				m_nRightLevel = m_nLeftLevel;
-			break;
-		}
-	case 2: // 3 bit res waveforms
-		{
-			m_nLeftLevel = m_pEnvData->nLevels[1][m_nPhase][m_nPhasePosition];
-			if (m_bInvertRightChannel)
-				m_nRightLevel = 14-m_nLeftLevel;
-			else
-				m_nRightLevel = m_nLeftLevel;
-			break;
-		}
+		case 1: // 4 bit res waveforms
+		default:
+			{
+				m_nLeftLevel = m_pEnvData->nLevels[0][m_nPhase][m_nPhasePosition];
+				if (m_bInvertRightChannel)
+					m_nRightLevel = 15-m_nLeftLevel;
+				else
+					m_nRightLevel = m_nLeftLevel;
+				break;
+			}
+		case 2: // 3 bit res waveforms
+			{
+				m_nLeftLevel = m_pEnvData->nLevels[1][m_nPhase][m_nPhasePosition];
+				if (m_bInvertRightChannel)
+					m_nRightLevel = 14-m_nLeftLevel;
+				else
+					m_nRightLevel = m_nLeftLevel;
+				break;
+			}
 	}
 }
 

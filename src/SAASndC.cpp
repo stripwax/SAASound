@@ -79,12 +79,10 @@ unsigned long SAAAPI SAASNDGetSampleRate(SAAPARAM uParam)
 	return CSAASound::GetSampleRate(uParam);
 }
 
-
 void SAAAPI SAASNDGenerateMany(SAASND object, BYTE * pBuffer, unsigned long nSamples)
 {
 	((LPCSAASOUND)(object))->GenerateMany(pBuffer, nSamples);
 }
-
 
 int SAAAPI SAASNDSendCommand(SAASND object, SAACMD nCommandID, long nData)
 {

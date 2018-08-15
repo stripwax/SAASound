@@ -86,13 +86,13 @@ unsigned short CSAAAmp::LeftOutput(void) const
 //		as a simple switch statement:
 		switch (m_nOutputIntermediate)
 		{
-		case 0:
-			return m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0etimes2;
-		case 1:
-			return m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0e;
-		case 2:
-		default:
-			return 0;
+			case 0:
+				return m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0etimes2;
+			case 1:
+				return m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0e;
+			case 2:
+			default:
+				return 0;
 		}
 	}
 	else
@@ -102,17 +102,16 @@ unsigned short CSAAAmp::LeftOutput(void) const
 //		as a simple switch statement:
 		switch (m_nOutputIntermediate)
 		{
-		case 0:
-		default:
-			return 0;
-		case 1:
-			return leftleveltimes16;
-		case 2:
-			return leftleveltimes32;
+			case 0:
+			default:
+				return 0;
+			case 1:
+				return leftleveltimes16;
+			case 2:
+				return leftleveltimes32;
 		}
 	}
 }
-	 
 
 unsigned short CSAAAmp::RightOutput(void) const
 {
@@ -128,13 +127,13 @@ unsigned short CSAAAmp::RightOutput(void) const
 //		as a simple switch statement:
 		switch (m_nOutputIntermediate)
 		{
-		case 0:
-			return m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0etimes2;
-		case 1:
-			return m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0e;
-		case 2:
-		default:
-			return 0;
+			case 0:
+				return m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0etimes2;
+			case 1:
+				return m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0e;
+			case 2:
+			default:
+				return 0;
 		}
 	}
 	else
@@ -144,13 +143,13 @@ unsigned short CSAAAmp::RightOutput(void) const
 //		as a simple switch statement:
 		switch (m_nOutputIntermediate)
 		{
-		case 0:
-		default:
-			return 0;
-		case 1:
-			return rightleveltimes16;
-		case 2:
-			return rightleveltimes32;
+			case 0:
+			default:
+				return 0;
+			case 1:
+				return rightleveltimes16;
+			case 2:
+				return rightleveltimes32;
 		}
 	}
 }
@@ -169,13 +168,13 @@ unsigned short CSAAAmp::MonoOutput(void) const
 //		as a simple switch statement:
 		switch (m_nOutputIntermediate)
 		{
-		case 0:
-			return (m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0etimes2) + (m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0etimes2);
-		case 1:
-			return (m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0e) + (m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0e);
-		case 2:
-		default:
-			return 0;
+			case 0:
+				return (m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0etimes2) + (m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0etimes2);
+			case 1:
+				return (m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0e) + (m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0e);
+			case 2:
+			default:
+				return 0;
 		}
 	}
 	else
@@ -185,13 +184,13 @@ unsigned short CSAAAmp::MonoOutput(void) const
 //		as a simple switch statement:
 		switch (m_nOutputIntermediate)
 		{
-		case 0:
-		default:
-			return 0;
-		case 1:
-			return monoleveltimes16;
-		case 2:
-			return monoleveltimes32;
+			case 0:
+			default:
+				return 0;
+			case 1:
+				return monoleveltimes16;
+			case 2:
+				return monoleveltimes32;
 		}
 	}
 }
@@ -222,7 +221,6 @@ void CSAAAmp::SetNoiseMixer(BYTE bEnabled)
 	}
 }
 
-
 void CSAAAmp::Mute(bool bMute)
 {
 	// m_bMute refers to the GLOBAL mute setting (sound 28,0)
@@ -230,36 +228,35 @@ void CSAAAmp::Mute(bool bMute)
 	m_bMute = bMute;
 }
 
-
 void CSAAAmp::Tick(void)
 {
 	switch (m_nMixMode)
 	{
-	case 0:
-		// no tone or noise for this channel
-		m_pcConnectedToneGenerator->Tick();
-		m_nOutputIntermediate=0;
-		break;
-	case 1:
-		// tone only for this channel
-		m_nOutputIntermediate=(m_pcConnectedToneGenerator->Tick());
-		// NOTE: ConnectedToneGenerator returns either 0 or 2
-		break;
-	case 2:
-		// noise only for this channel
-		m_pcConnectedToneGenerator->Tick();
-		m_nOutputIntermediate= m_pcConnectedNoiseGenerator->LevelTimesTwo();
-		// NOTE: ConnectedNoiseFunction returns either 0 or 1 using ->Level()
-		// and either 0 or 2 when using ->LevelTimesTwo();
-		break;
-	case 3:
-		// tone+noise for this channel ... mixing algorithm :
-		m_nOutputIntermediate = m_pcConnectedToneGenerator->Tick();
-		if ( m_nOutputIntermediate==2 && (m_pcConnectedNoiseGenerator->Level())==1 )
-		{
-			m_nOutputIntermediate=1;
-		}
-		break;
+		case 0:
+			// no tone or noise for this channel
+			m_pcConnectedToneGenerator->Tick();
+			m_nOutputIntermediate=0;
+			break;
+		case 1:
+			// tone only for this channel
+			m_nOutputIntermediate=(m_pcConnectedToneGenerator->Tick());
+			// NOTE: ConnectedToneGenerator returns either 0 or 2
+			break;
+		case 2:
+			// noise only for this channel
+			m_pcConnectedToneGenerator->Tick();
+			m_nOutputIntermediate= m_pcConnectedNoiseGenerator->LevelTimesTwo();
+			// NOTE: ConnectedNoiseFunction returns either 0 or 1 using ->Level()
+			// and either 0 or 2 when using ->LevelTimesTwo();
+			break;
+		case 3:
+			// tone+noise for this channel ... mixing algorithm :
+			m_nOutputIntermediate = m_pcConnectedToneGenerator->Tick();
+			if ( m_nOutputIntermediate==2 && (m_pcConnectedNoiseGenerator->Level())==1 )
+			{
+				m_nOutputIntermediate=1;
+			}
+			break;
 	}
 	// intermediate is between 0 and 2
 }
@@ -284,13 +281,13 @@ unsigned short CSAAAmp::TickAndOutputMono(void)
 //		as a simple switch statement:
 		switch (m_nOutputIntermediate)
 		{
-		case 0:
-			return (m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0etimes2) + (m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0etimes2);
-		case 1:
-			return (m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0e) + (m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0e);
-		case 2:
-		default:
-			return 0;
+			case 0:
+				return (m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0etimes2) + (m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0etimes2);
+			case 1:
+				return (m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0e) + (m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0e);
+			case 2:
+			default:
+				return 0;
 		}
 	}
 	else
@@ -300,19 +297,17 @@ unsigned short CSAAAmp::TickAndOutputMono(void)
 //		as a simple switch statement:
 		switch (m_nOutputIntermediate)
 		{
-		case 0:
-		default:
-			return 0;
-		case 1:
-			return monoleveltimes16;
-		case 2:
-			return monoleveltimes32;
+			case 0:
+			default:
+				return 0;
+			case 1:
+				return monoleveltimes16;
+			case 2:
+				return monoleveltimes32;
 		}
 	}
 
 }
-
-
 
 stereolevel CSAAAmp::TickAndOutputStereo(void)
 {
@@ -337,17 +332,17 @@ stereolevel CSAAAmp::TickAndOutputStereo(void)
 //		as a simple switch statement:
 		switch (m_nOutputIntermediate)
 		{
-		case 0:
-			retval.sep.Left=m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0etimes2;
-			retval.sep.Right=m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0etimes2;
-			return retval;
-		case 1:
-			retval.sep.Left=m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0e;
-			retval.sep.Right=m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0e;
-			return retval;
-		case 2:
-		default:
-			return zeroval;
+			case 0:
+				retval.sep.Left=m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0etimes2;
+				retval.sep.Right=m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0etimes2;
+				return retval;
+			case 1:
+				retval.sep.Left=m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0e;
+				retval.sep.Right=m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0e;
+				return retval;
+			case 2:
+			default:
+				return zeroval;
 		}
 	}
 	else
@@ -357,17 +352,17 @@ stereolevel CSAAAmp::TickAndOutputStereo(void)
 //		as a simple switch statement:
 		switch (m_nOutputIntermediate)
 		{
-		case 0:
-		default:
-			return zeroval;
-		case 1:
-			retval.sep.Left=leftleveltimes16;
-			retval.sep.Right=rightleveltimes16;
-			return retval;
-		case 2:
-			retval.sep.Left=leftleveltimes32;
-			retval.sep.Right=rightleveltimes32;
-			return retval;
+			case 0:
+			default:
+				return zeroval;
+			case 1:
+				retval.sep.Left=leftleveltimes16;
+				retval.sep.Right=rightleveltimes16;
+				return retval;
+			case 2:
+				retval.sep.Left=leftleveltimes32;
+				retval.sep.Right=rightleveltimes32;
+				return retval;
 		}
 	}
 

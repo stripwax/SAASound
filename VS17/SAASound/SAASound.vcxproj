@@ -50,15 +50,12 @@
     <None Include="..\..\README" />
     <None Include="..\..\src\SAAFreq.dat" />
   </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="..\SAASound.rc" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{EDEC064F-E383-4824-8892-EF4B47C9841E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>SAASound</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

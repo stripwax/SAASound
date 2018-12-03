@@ -67,7 +67,4 @@
     <None Include="..\..\LICENCE" />
     <None Include="..\..\README" />
   </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="..\SAASound.rc" />
-  </ItemGroup>
 </Project>

@@ -1,109 +1,90 @@
-// Part of SAASound copyright 1998-2000 dave hooper <no-brain@mindless.com>
+// Part of SAASound copyright 1998-2018 Dave Hooper <dave@beermex.com>
 //
 // Thanks to this file (and associated header file) you can now
 // use CSAASound from within a standard 'C' program
 //
-// Version 3.01.0 (10 Jan 2000)
-// (c) 1998-2001 dave @ spc       <no-brain@mindless.com>
-//
 //////////////////////////////////////////////////////////////////////
 
+#include "SAASound.h"
 #include "types.h"
 #include "SAAEnv.h"
 #include "SAANoise.h"
 #include "SAAFreq.h"
 #include "SAAAmp.h"
 #include "SAASound.h"
-#include "SAASoundImplementation.h"
-#include "SAASndC.h"
+#include "SAAImpl.h"
 
-SAASND EXTAPI newSAASND(void)
+SAASND SAAAPI newSAASND(void)
 {
 	return (SAASND)(new CSAASoundInternal());
 }
 
-void EXTAPI deleteSAASND(SAASND object)
+void SAAAPI deleteSAASND(SAASND object)
 {
 	delete (LPCSAASOUND)(object);
 }
 
-void EXTAPI SAASNDSetSoundParameters(SAASND object, SAAPARAM uParam)
+void SAAAPI SAASNDSetSoundParameters(SAASND object, SAAPARAM uParam)
 {
 	((LPCSAASOUND)(object))->SetSoundParameters(uParam);
 }
 
-void EXTAPI SAASNDWriteAddress(SAASND object, BYTE nReg)
+void SAAAPI SAASNDWriteAddress(SAASND object, BYTE nReg)
 {
 	((LPCSAASOUND)(object))->WriteAddress(nReg);
 }
 
-void EXTAPI SAASNDWriteData(SAASND object, BYTE nData)
+void SAAAPI SAASNDWriteData(SAASND object, BYTE nData)
 {
 	((LPCSAASOUND)(object))->WriteData(nData);
 }
 
-void EXTAPI SAASNDWriteAddressData(SAASND object, BYTE nReg, BYTE nData)
+void SAAAPI SAASNDWriteAddressData(SAASND object, BYTE nReg, BYTE nData)
 {
 	((LPCSAASOUND)(object))->WriteAddressData(nReg, nData);
 }
 
-void EXTAPI SAASNDClear(SAASND object)
+void SAAAPI SAASNDClear(SAASND object)
 {
 	((LPCSAASOUND)(object))->Clear();
 }
 
-BYTE EXTAPI SAASNDReadAddress(SAASND object)
+BYTE SAAAPI SAASNDReadAddress(SAASND object)
 {
 	return ((LPCSAASOUND)(object))->ReadAddress();
 }
 
-SAAPARAM EXTAPI SAASNDGetCurrentSoundParameters(SAASND object)
+SAAPARAM SAAAPI SAASNDGetCurrentSoundParameters(SAASND object)
 {
 	return ((LPCSAASOUND)(object))->GetCurrentSoundParameters();
 }
 
-unsigned short EXTAPI SAASNDGetCurrentBytesPerSample(SAASND object)
+unsigned short SAAAPI SAASNDGetCurrentBytesPerSample(SAASND object)
 {
 	return ((LPCSAASOUND)(object))->GetCurrentBytesPerSample();
 }
 
-unsigned short EXTAPI SAASNDGetBytesPerSample(SAAPARAM uParam)
+unsigned short SAAAPI SAASNDGetBytesPerSample(SAAPARAM uParam)
 {
-	
 	return CSAASound::GetBytesPerSample(uParam);
 }
 
-unsigned long EXTAPI SAASNDGetCurrentSampleRate(SAASND object)
+unsigned long SAAAPI SAASNDGetCurrentSampleRate(SAASND object)
 {
 	return ((LPCSAASOUND)(object))->GetCurrentSampleRate();
 }
 
-unsigned long EXTAPI SAASNDGetSampleRate(SAAPARAM uParam)
+unsigned long SAAAPI SAASNDGetSampleRate(SAAPARAM uParam)
 {
 	return CSAASound::GetSampleRate(uParam);
 }
 
-
-void EXTAPI SAASNDGenerateMany(SAASND object, BYTE * pBuffer, unsigned long nSamples)
+void SAAAPI SAASNDGenerateMany(SAASND object, BYTE * pBuffer, unsigned long nSamples)
 {
 	((LPCSAASOUND)(object))->GenerateMany(pBuffer, nSamples);
 }
 
-
-int EXTAPI SAASNDSendCommand(SAASND object, SAACMD nCommandID, long nData)
+int SAAAPI SAASNDSendCommand(SAASND object, SAACMD nCommandID, long nData)
 {
 	return ((LPCSAASOUND)(object))->SendCommand(nCommandID, nData);
-}
-
-void EXTAPI SAASNDClickClick(SAASND object, bool bValue)
-{
-	// removed from library - does nothing
-}
-
-
-
-unsigned long EXTAPI SAASNDGenerate(void)
-{
-	// obsolete - DON'T BOTHER USING THIS NOW THAT I'VE OBSOLETED IT!
-	return 0;
 }

@@ -3,4 +3,6 @@ Release/*
 unused/*
 Backup*/*
 .vs/*
-SAASound/*
+SAASound/Debug/*
+SAASound/Release/*
+SAASound/Release-SSE/*

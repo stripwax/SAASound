@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="C++ Source Code">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="C++ Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Nasty Inline Stuff">
+      <UniqueIdentifier>{c9818b28-21fd-4eb8-8f90-cdfdd72c6582}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\SAASound.h">
+      <Filter>C++ Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SAAAmp.h">
+      <Filter>C++ Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SAAEnv.h">
+      <Filter>C++ Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SAAFreq.h">
+      <Filter>C++ Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SAAImpl.h">
+      <Filter>C++ Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SAANoise.h">
+      <Filter>C++ Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SAASndC.h">
+      <Filter>C++ Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\types.h">
+      <Filter>C++ Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\SAAAmp.cpp">
+      <Filter>C++ Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SAAEnv.cpp">
+      <Filter>C++ Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SAAFreq.cpp">
+      <Filter>C++ Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SAAImpl.cpp">
+      <Filter>C++ Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SAANoise.cpp">
+      <Filter>C++ Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SAASndC.cpp">
+      <Filter>C++ Source Code</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\SAAFreq.dat">
+      <Filter>Nasty Inline Stuff</Filter>
+    </None>
+    <None Include="..\..\INSTALL" />
+    <None Include="..\..\LICENCE" />
+    <None Include="..\..\README" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\SAASound.rc" />
+  </ItemGroup>
+</Project>

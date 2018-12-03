@@ -12,6 +12,9 @@
     <Filter Include="Nasty Inline Stuff">
       <UniqueIdentifier>{c9818b28-21fd-4eb8-8f90-cdfdd72c6582}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{b1405cde-b230-4c13-915e-159136ba7d5a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\SAASound.h">
@@ -36,6 +39,9 @@
       <Filter>C++ Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\types.h">
+      <Filter>C++ Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
       <Filter>C++ Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -66,5 +72,8 @@
     <None Include="..\..\INSTALL" />
     <None Include="..\..\LICENCE" />
     <None Include="..\..\README" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="SAASound.rc" />
   </ItemGroup>
 </Project>

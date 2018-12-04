@@ -94,6 +94,8 @@ m_uParamRate(0)
 	SetSoundParameters(SAAP_NOFILTER | SAAP_11025 | SAAP_8BIT | SAAP_MONO);
 	// reset the virtual SAA
 	Clear();
+
+	SetClockRate(8000000);
 }
 
 CSAASoundInternal::~CSAASoundInternal()

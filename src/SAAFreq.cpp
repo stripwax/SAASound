@@ -11,11 +11,7 @@
 #include "SAAEnv.h"
 #include "SAAFreq.h"
 
-// 'load in' the data for the static frequency lookup table:
-const unsigned long CSAAFreq::m_FreqTable[2048] =
-{
-#include "SAAFreq.dat"
-};
+unsigned long CSAAFreq::m_FreqTable[2048];
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -32,6 +28,7 @@ m_pcConnectedNoiseGenerator(NoiseGenerator),
 m_pcConnectedEnvGenerator(EnvGenerator),
 m_nConnectedMode((NoiseGenerator == NULL) ? ((EnvGenerator == NULL) ? 0 : 1) : 2)
 {
+	SetClockRate(8000000);
 	SetAdd(); // current octave, current offset
 }
 
@@ -144,6 +141,14 @@ void CSAAFreq::SetSampleRateMode(int nSampleRateMode)
 
 	m_nSampleRateMode = nSampleRateMode;
 	m_nSampleRateTimes4K = 44100 << (12-nSampleRateMode);
+}
+
+void CSAAFreq::SetClockRate(int nClockRate)
+{
+	int ix = 0;
+	for (int nOctave = 0; nOctave < 8; nOctave++)
+		for (int nOffset = 0; nOffset < 256; nOffset++)
+			m_FreqTable[ix++] = (15625ull << (nOctave+13)) / (511 - nOffset);
 }
 
 unsigned short CSAAFreq::Level(void) const

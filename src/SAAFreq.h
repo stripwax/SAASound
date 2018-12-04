@@ -11,7 +11,7 @@
 class CSAAFreq  
 {
 private:
-	static const unsigned long m_FreqTable[2048];
+	static unsigned long m_FreqTable[2048];
 	static inline unsigned short GetLevel(unsigned short nLevel);
 
 	unsigned long m_nCounter;
@@ -41,6 +41,7 @@ public:
 	void SetFreqOffset(BYTE nOffset);
 	void SetFreqOctave(BYTE nOctave);
 	void SetSampleRateMode(int nSampleRateMode);
+	void SetClockRate(int nClockRate);
 	void Sync(bool bSync);
 	unsigned short Tick(void);
 	unsigned short Level(void) const;

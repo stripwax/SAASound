@@ -28,6 +28,7 @@ public:
 	CSAASoundInternal();
 	~CSAASoundInternal();
 
+	void SetClockRate(unsigned int nClockRate);
 	void SetSoundParameters(SAAPARAM uParam);
 	void WriteAddress(BYTE nReg);
 	void WriteData(BYTE nData);

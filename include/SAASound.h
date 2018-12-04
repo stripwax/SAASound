@@ -10,7 +10,7 @@
 // should be reflected as a major version increment.  New functionality can be added
 // in minor versions so long as backwards compatiblity is maintained
 // 
-// Version 3.1.3 (8th March 2004)
+// Version 3.3.0 (4th Dec 2018)
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -96,6 +96,7 @@ public:
 	virtual void GenerateMany (BYTE * pBuffer, unsigned long nSamples) = 0;
 
 	virtual int SendCommand (SAACMD nCommandID, long nData) = 0;
+	virtual void SetClockRate(unsigned int nClockRate) = 0;
 
 };
 

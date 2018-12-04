@@ -117,6 +117,16 @@ CSAASoundInternal::~CSAASoundInternal()
 // CSAASound members
 //////////////////////////////////////////////////////////////////////
 
+void CSAASoundInternal::SetClockRate(unsigned int nClockRate)
+{
+	for (int i = 0; i < 6; i++)
+	{
+		Osc[i]->SetClockRate(nClockRate);
+	}
+	Noise[0]->SetClockRate(nClockRate);
+	Noise[1]->SetClockRate(nClockRate);
+}
+
 void CSAASoundInternal::Clear(void)
 {
 	// reinitialises virtual SAA:

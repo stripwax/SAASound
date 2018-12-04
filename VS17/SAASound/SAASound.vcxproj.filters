@@ -68,6 +68,8 @@
     <None Include="..\..\README" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="SAASound.rc" />
+    <ResourceCompile Include="SAASound.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

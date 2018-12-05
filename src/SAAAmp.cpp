@@ -334,6 +334,7 @@ stereolevel CSAAAmp::TickAndOutputStereo(void)
 			case 0:
 			default:
 				retval = zeroval;
+				break;
 			case 1:
 				retval.sep.Left=leftleveltimes16;
 				retval.sep.Right=rightleveltimes16;

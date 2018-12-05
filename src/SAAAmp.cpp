@@ -31,13 +31,6 @@ m_bUseEnvelope(EnvGenerator != NULL)
 	m_bMute=true;
 	m_nOutputIntermediate=0;
 	last_level_byte=0;
-	level_unchanged=false;
-	last_leftlevel=0;
-	last_rightlevel=0;
-	leftlevel_unchanged=false;
-	rightlevel_unchanged=false;
-	cached_last_leftoutput=0;
-	cached_last_rightoutput=0;
 	SetAmpLevel(0x00);
 
 }
@@ -309,10 +302,9 @@ stereolevel CSAAAmp::TickAndOutputStereo(void)
 
 	if (m_bMute)
 	{
-		return zeroval;
+		retval = zeroval;
 	}
-
-	if (m_bUseEnvelope && m_pcConnectedEnvGenerator->IsActive())
+	else if (m_bUseEnvelope && m_pcConnectedEnvGenerator->IsActive())
 	{
 //		Implement 
 //		return ( (m_pcConnectedEnvGenerator->RightLevel()*rightlevela0x0e) + (m_pcConnectedEnvGenerator->LeftLevel()*leftlevela0x0e) ) * (2.0f-m_nOutputIntermediate);
@@ -322,14 +314,14 @@ stereolevel CSAAAmp::TickAndOutputStereo(void)
 			case 0:
 				retval.sep.Left = EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e) * 2;
 				retval.sep.Right = EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e) * 2;
-				return retval;
+				break;
 			case 1:
 				retval.sep.Left = EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e);
 				retval.sep.Right = EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e);
-				return retval;
+				break;
 			case 2:
 			default:
-				return zeroval;
+				retval = zeroval;
 		}
 	}
 	else
@@ -341,17 +333,18 @@ stereolevel CSAAAmp::TickAndOutputStereo(void)
 		{
 			case 0:
 			default:
-				return zeroval;
+				retval = zeroval;
 			case 1:
 				retval.sep.Left=leftleveltimes16;
 				retval.sep.Right=rightleveltimes16;
-				return retval;
+				break;
 			case 2:
 				retval.sep.Left=leftleveltimes32;
 				retval.sep.Right=rightleveltimes32;
-				return retval;
+				break;
 		}
 	}
 
+	return retval;
 }
 

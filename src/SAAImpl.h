@@ -24,6 +24,9 @@ private:
 	CSAAAmp * Amp[6];
 	CSAAEnv * Env[2];
 
+	unsigned short prev_output_mono;
+	stereolevel prev_output_stereo;
+
 public:
 	CSAASoundInternal();
 	~CSAASoundInternal();

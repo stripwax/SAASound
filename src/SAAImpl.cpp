@@ -47,6 +47,9 @@ m_bSync(false),
 m_uParam(0),
 m_uParamRate(0)
 {
+	prev_output_mono = 0;
+	prev_output_stereo.sep.Left = prev_output_stereo.sep.Right = 0;
+
 	#ifdef DEBUGSAA
 	dbgfile = fopen("debugsaa.txt","wt");
 	pcmfile = fopen("debugsaa.pcm","wb");
@@ -491,6 +494,10 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 	unsigned short mono1,mono2,mono;
 	stereolevel stereoval, stereoval1, stereoval2;
 
+	unsigned short prev_mono = prev_output_mono;
+	stereolevel prev_stereo;
+	prev_stereo.dword = prev_output_stereo.dword;
+
 #ifdef DEBUGSAA
 	BYTE * pBufferStart = pBuffer;
 	unsigned long nTotalSamples = nSamples;
@@ -520,7 +527,13 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 
 				// force output into the range 0<=x<=255
 				mono = ((mono1 + mono2)*5) >> 1;
-				*pBuffer++ = 0x80+(mono>>8);
+				mono = 0x80 + (mono >> 8);
+				
+				// lowpass filter
+				mono = (prev_mono + mono) >> 1;
+				prev_mono = mono;
+
+				*pBuffer++ = (unsigned char)mono;
 			}
 			break;
 	
@@ -547,7 +560,12 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 				// (strictly, the following gives us 0<=x<=63360)
 				mono1 *= 5;
 				mono2 *= 5;
+
+				// lowpass filter
 				mono = (mono1 + mono2) >> 1;
+				mono = (prev_mono + mono) >> 1;
+				prev_mono = mono;
+
 				*pBuffer++ = mono & 0x00ff;
 				*pBuffer++ = mono >> 8;
 			}
@@ -576,6 +594,12 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 				// force output into the range 0<=x<=255
 				stereoval.sep.Left = ((stereoval1.sep.Left + stereoval2.sep.Left) * 10) >> 1;
 				stereoval.sep.Right = ((stereoval1.sep.Right + stereoval2.sep.Right) * 10) >> 1;
+
+				// lowpass filter
+				stereoval.sep.Left = (stereoval.sep.Left + prev_stereo.sep.Left) >> 1;
+				stereoval.sep.Right = (stereoval.sep.Right + prev_stereo.sep.Right) >> 1;
+				prev_stereo.dword = stereoval.dword;
+
 				*pBuffer++ = 0x80+((stereoval.sep.Left)>>8);
 				*pBuffer++ = 0x80+((stereoval.sep.Right)>>8);
 			}
@@ -605,6 +629,12 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 				// (strictly, the following gives us 0<=x<=63360)
 				stereoval.sep.Left = ((stereoval1.sep.Left + stereoval2.sep.Left) * 10) >> 1;
 				stereoval.sep.Right = ((stereoval1.sep.Right + stereoval2.sep.Right) * 10) >> 1;
+
+				// lowpass filter
+				stereoval.sep.Left = (stereoval.sep.Left + prev_stereo.sep.Left) >> 1;
+				stereoval.sep.Right = (stereoval.sep.Right + prev_stereo.sep.Right) >> 1;
+				prev_stereo.dword = stereoval.dword;
+
 				*pBuffer++ = stereoval.sep.Left & 0x00ff;
 				*pBuffer++ = stereoval.sep.Left >> 8;
 				*pBuffer++ = stereoval.sep.Right & 0x00ff;
@@ -629,6 +659,9 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 #ifdef DEBUGSAA
 	fwrite(pBufferStart, GetCurrentBytesPerSample(), nTotalSamples, pcmfile);
 #endif
+
+	prev_output_mono = prev_mono;
+	prev_output_stereo.dword = prev_stereo.dword;
 }
 
 int CSAASoundInternal::SendCommand(SAACMD nCommandID, long nData)

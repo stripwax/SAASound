@@ -23,11 +23,6 @@ private:
 	const bool m_bUseEnvelope;
 	mutable bool m_bMute;
 	mutable BYTE last_level_byte;
-	mutable bool level_unchanged;
-	mutable unsigned short last_leftlevel, last_rightlevel;
-	mutable bool leftlevel_unchanged, rightlevel_unchanged;
-	mutable unsigned short cached_last_leftoutput, cached_last_rightoutput;
-
 	unsigned short EffectiveAmplitude(unsigned short amp, unsigned short env) const;
 
 public:

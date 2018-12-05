@@ -87,9 +87,9 @@ unsigned short CSAAAmp::LeftOutput(void) const
 		switch (m_nOutputIntermediate)
 		{
 			case 0:
-				return m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0etimes2;
+				return EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e) * 2;
 			case 1:
-				return m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0e;
+				return EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e);
 			case 2:
 			default:
 				return 0;
@@ -128,9 +128,9 @@ unsigned short CSAAAmp::RightOutput(void) const
 		switch (m_nOutputIntermediate)
 		{
 			case 0:
-				return m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0etimes2;
+				return EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e) * 2;
 			case 1:
-				return m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0e;
+				return EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e);
 			case 2:
 			default:
 				return 0;
@@ -163,15 +163,15 @@ unsigned short CSAAAmp::MonoOutput(void) const
 
 	if (m_bUseEnvelope && m_pcConnectedEnvGenerator->IsActive())
 	{
-//		Implement 
+//		Implement something roughly equivalent to
 //		return ( (m_pcConnectedEnvGenerator->RightLevel()*rightlevela0x0e) + (m_pcConnectedEnvGenerator->LeftLevel()*leftlevela0x0e) ) * (2.0f-m_nOutputIntermediate);
-//		as a simple switch statement:
+//		as a simple switch statement.  The nuance is in how the amplitude and envelope controls are combined (see EffectiveAmplitude)
 		switch (m_nOutputIntermediate)
 		{
 			case 0:
-				return (m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0etimes2) + (m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0etimes2);
+				return (EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e) + EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e)) * 2;
 			case 1:
-				return (m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0e) + (m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0e);
+				return EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e) + EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e);
 			case 2:
 			default:
 				return 0;
@@ -261,52 +261,39 @@ void CSAAAmp::Tick(void)
 	// intermediate is between 0 and 2
 }
 
+unsigned short CSAAAmp::EffectiveAmplitude(unsigned short amp, unsigned short env) const
+{
+	// Return the effective amplitude of the low-pass-filtered result of the logical
+	// AND of the amplitude PDM and envelope PDM patterns.  This is a more accurate
+	// evaluation of the SAA than simply returning amp * env , based on how the SAA
+	// implements pulse-density modulation.
+
+	static const unsigned short pdm[16][16] = {
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,2,2,2,2,2,2,2,2,4,4,4,4},
+		{0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8},
+		{0,1,1,2,4,5,5,6,6,7,7,8,10,11,11,12},
+		{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15},
+		{0,1,2,3,6,7,8,9,10,11,12,13,16,17,18,19},
+		{0,2,3,5,6,8,9,11,12,14,15,17,18,20,21,23},
+		{0,2,3,5,8,10,11,13,14,16,17,19,22,24,25,27},
+		{0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30},
+		{0,2,4,6,10,12,14,16,18,20,22,24,28,30,32,34},
+		{0,3,5,8,10,13,15,18,20,23,25,28,30,33,35,38},
+		{0,3,5,8,12,15,17,20,22,25,27,30,34,37,39,42},
+		{0,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45},
+		{0,3,6,9,14,17,20,23,26,29,32,35,40,43,46,49},
+		{0,4,7,11,14,18,21,25,28,32,35,39,42,46,49,53},
+		{0,4,7,11,16,20,23,27,30,34,37,41,46,50,53,57}
+	};
+	return(pdm[amp][env] * 4);
+}
+
 unsigned short CSAAAmp::TickAndOutputMono(void)
 {
 	// first, do the Tick:
 	Tick();
-	
-	// now calculate the returned amplitude for this sample:
-	////////////////////////////////////////////////////////
-
-	if (m_bMute)
-	{
-		return 0;
-	}
-
-	if (m_bUseEnvelope && m_pcConnectedEnvGenerator->IsActive())
-	{
-//		Implement 
-//		return ( (m_pcConnectedEnvGenerator->RightLevel()*rightlevela0x0e) + (m_pcConnectedEnvGenerator->LeftLevel()*leftlevela0x0e) ) * (2.0f-m_nOutputIntermediate);
-//		as a simple switch statement:
-		switch (m_nOutputIntermediate)
-		{
-			case 0:
-				return (m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0etimes2) + (m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0etimes2);
-			case 1:
-				return (m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0e) + (m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0e);
-			case 2:
-			default:
-				return 0;
-		}
-	}
-	else
-	{
-//		Implement 
-//		return monoleveltimes16 * m_nOutputIntermediate;
-//		as a simple switch statement:
-		switch (m_nOutputIntermediate)
-		{
-			case 0:
-			default:
-				return 0;
-			case 1:
-				return monoleveltimes16;
-			case 2:
-				return monoleveltimes32;
-		}
-	}
-
+	return MonoOutput();
 }
 
 stereolevel CSAAAmp::TickAndOutputStereo(void)
@@ -333,12 +320,12 @@ stereolevel CSAAAmp::TickAndOutputStereo(void)
 		switch (m_nOutputIntermediate)
 		{
 			case 0:
-				retval.sep.Left=m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0etimes2;
-				retval.sep.Right=m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0etimes2;
+				retval.sep.Left = EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e) * 2;
+				retval.sep.Right = EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e) * 2;
 				return retval;
 			case 1:
-				retval.sep.Left=m_pcConnectedEnvGenerator->LeftLevel() * leftlevela0x0e;
-				retval.sep.Right=m_pcConnectedEnvGenerator->RightLevel() * rightlevela0x0e;
+				retval.sep.Left = EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e);
+				retval.sep.Right = EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e);
 				return retval;
 			case 2:
 			default:

@@ -28,6 +28,8 @@ private:
 	mutable bool leftlevel_unchanged, rightlevel_unchanged;
 	mutable unsigned short cached_last_leftoutput, cached_last_rightoutput;
 
+	unsigned short EffectiveAmplitude(unsigned short amp, unsigned short env) const;
+
 public:
 	CSAAAmp(CSAAFreq * const ToneGenerator, const CSAANoise * const NoiseGenerator, const CSAAEnv * const EnvGenerator);
 	~CSAAAmp();

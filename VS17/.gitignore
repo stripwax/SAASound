@@ -6,3 +6,4 @@ Backup*/*
 SAASound/Debug/*
 SAASound/Release/*
 SAASound/Release-SSE/*
+SAASound/*.aps

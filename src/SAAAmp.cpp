@@ -29,6 +29,7 @@ m_bUseEnvelope(EnvGenerator != NULL)
 	monoleveltimes32=monoleveltimes16=0;
 	m_nMixMode = 0;
 	m_bMute=true;
+	m_bSync = false;
 	m_nOutputIntermediate=0;
 	last_level_byte=0;
 	SetAmpLevel(0x00);
@@ -67,7 +68,7 @@ void CSAAAmp::SetAmpLevel(BYTE level_byte)
 
 unsigned short CSAAAmp::LeftOutput(void) const
 {
-	if (m_bMute)
+	if (m_bMute || m_bSync)
 	{
 		return 0;
 	}
@@ -97,18 +98,18 @@ unsigned short CSAAAmp::LeftOutput(void) const
 		{
 			case 0:
 			default:
-				return 0;
+				return leftleveltimes32;
 			case 1:
 				return leftleveltimes16;
 			case 2:
-				return leftleveltimes32;
+				return 0;
 		}
 	}
 }
 
 unsigned short CSAAAmp::RightOutput(void) const
 {
-	if (m_bMute)
+	if (m_bMute || m_bSync)
 	{
 		return 0;
 	}
@@ -138,18 +139,18 @@ unsigned short CSAAAmp::RightOutput(void) const
 		{
 			case 0:
 			default:
-				return 0;
+				return rightleveltimes32;
 			case 1:
 				return rightleveltimes16;
 			case 2:
-				return rightleveltimes32;
+				return 0;
 		}
 	}
 }
 
 unsigned short CSAAAmp::MonoOutput(void) const
 {
-	if (m_bMute)
+	if (m_bMute || m_bSync)
 	{
 		return 0;
 	}
@@ -179,11 +180,11 @@ unsigned short CSAAAmp::MonoOutput(void) const
 		{
 			case 0:
 			default:
-				return 0;
+				return monoleveltimes32;
 			case 1:
 				return monoleveltimes16;
 			case 2:
-				return monoleveltimes32;
+				return 0;
 		}
 	}
 }
@@ -219,6 +220,12 @@ void CSAAAmp::Mute(bool bMute)
 	// m_bMute refers to the GLOBAL mute setting (sound 28,0)
 	// NOT the per-channel mixer settings !!
 	m_bMute = bMute;
+}
+
+void CSAAAmp::Sync(bool bSync)
+{
+	// m_bSync refers to the GLOBAL sync setting (sound 28,2)
+	m_bSync = bSync;
 }
 
 void CSAAAmp::Tick(void)
@@ -284,6 +291,9 @@ unsigned short CSAAAmp::EffectiveAmplitude(unsigned short amp, unsigned short en
 
 unsigned short CSAAAmp::TickAndOutputMono(void)
 {
+	if (m_bSync)
+		return 0;
+
 	// first, do the Tick:
 	Tick();
 	return MonoOutput();
@@ -294,6 +304,9 @@ stereolevel CSAAAmp::TickAndOutputStereo(void)
 	static stereolevel retval;
 	static const stereolevel zeroval = { {0,0} };
 	
+	if (m_bSync)
+		return zeroval;
+
 	// first, do the Tick:
 	Tick();
 	
@@ -333,15 +346,15 @@ stereolevel CSAAAmp::TickAndOutputStereo(void)
 		{
 			case 0:
 			default:
-				retval = zeroval;
+				retval.sep.Left = leftleveltimes32;
+				retval.sep.Right = rightleveltimes32;
 				break;
 			case 1:
 				retval.sep.Left=leftleveltimes16;
 				retval.sep.Right=rightleveltimes16;
 				break;
 			case 2:
-				retval.sep.Left=leftleveltimes32;
-				retval.sep.Right=rightleveltimes32;
+				retval = zeroval;
 				break;
 		}
 	}

@@ -19,7 +19,7 @@ unsigned long CSAAFreq::m_FreqTable[2048];
 
 CSAAFreq::CSAAFreq(CSAANoise * const NoiseGenerator, CSAAEnv * const EnvGenerator)
 :
-m_nCounter(0), m_nAdd(0), m_nLevel(2),
+m_nCounter(0), m_nAdd(0), m_nLevel(0),
 m_nCurrentOffset(0), m_nCurrentOctave(0), m_nNextOffset(0), m_nNextOctave(0),
 m_bIgnoreOffsetData(false), m_bNewData(false), 
 m_bSync(false),
@@ -173,6 +173,9 @@ void CSAAFreq::SetClockRate(int nClockRate)
 
 unsigned short CSAAFreq::Level(void) const
 {
+	if (m_bSync)
+		return 0;
+
 	return GetLevel(m_nLevel);
 }
 
@@ -184,6 +187,9 @@ unsigned short CSAAFreq::Level(void) const
 unsigned short CSAAFreq::Tick(void)
 {
 	// set to the absolute level (0 or 2)
+	if (m_bSync)
+		return 0;
+
 	if (!m_bSync)
 	{
 
@@ -246,7 +252,8 @@ void CSAAFreq::Sync(bool bSync)
 	if (m_bSync)
 	{
 		m_nCounter = 0;
-		m_nLevel=2;
+		//m_nLevel=2;
+		m_nLevel = 0; // so..  what's actually correct here?
 		m_nCurrentOctave=m_nNextOctave;
 		m_nCurrentOffset=m_nNextOffset;
 		SetAdd();

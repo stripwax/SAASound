@@ -269,6 +269,12 @@ void CSAASoundInternal::WriteData(BYTE nData)
 				Osc[5]->Sync(true);
 				Noise[0]->Sync(true);
 				Noise[1]->Sync(true);
+				Amp[0]->Sync(true);
+				Amp[1]->Sync(true);
+				Amp[2]->Sync(true);
+				Amp[3]->Sync(true);
+				Amp[4]->Sync(true);
+				Amp[5]->Sync(true);
 				m_bSync = true;
 			}
 			else
@@ -282,6 +288,12 @@ void CSAASoundInternal::WriteData(BYTE nData)
 				Osc[5]->Sync(false);
 				Noise[0]->Sync(false);
 				Noise[1]->Sync(false);
+				Amp[0]->Sync(false);
+				Amp[1]->Sync(false);
+				Amp[2]->Sync(false);
+				Amp[3]->Sync(false);
+				Amp[4]->Sync(false);
+				Amp[5]->Sync(false);
 				m_bSync = false;
 			}
 

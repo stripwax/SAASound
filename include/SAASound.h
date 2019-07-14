@@ -17,6 +17,9 @@
 #ifndef SAASOUND_H_INCLUDED
 #define SAASOUND_H_INCLUDED
 
+// define this if you want to output diagnostic text and PCM files
+//#define DEBUGSAA
+
 // Parameters for use with SetSoundParameters, for example,
 // SetSoundParameters(SAAP_NOFILTER | SAAP_44100 | SAA_16BIT | SAA_STEREO);
 #define SAAP_FILTER 0x00000300

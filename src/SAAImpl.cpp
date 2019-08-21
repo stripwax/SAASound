@@ -8,8 +8,6 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>	// for sprintf
-
 #ifdef WIN32
 #include <assert.h>
 #else
@@ -31,6 +29,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #ifdef DEBUGSAA
+#include <stdio.h>	// for sprintf
 FILE * dbgfile = NULL;
 FILE * pcmfile = NULL;
 #endif
@@ -153,7 +152,7 @@ void CSAASoundInternal::WriteData(BYTE nData)
 	// originated from an OUT 255,d call
 
 #ifdef DEBUGSAA
-	fprintf(dbgfile, "%02d:%02x\n",m_nCurrentSaaReg,nData);
+	fprintf(dbgfile, "%lu %02d:%02x\n", m_nDebugSample, m_nCurrentSaaReg, nData);
 #endif
 
 	// route nData to the appropriate place
@@ -335,7 +334,7 @@ void CSAASoundInternal::WriteAddress(BYTE nReg)
 {
 	// originated from an OUT 511,r call
 #ifdef DEBUGSAA
-	fprintf(dbgfile,"%02d:",nReg);
+	fprintf(dbgfile, "%lu %02d:", m_nDebugSample, nReg);
 #endif
 	m_nCurrentSaaReg = nReg & 31;
 	if (m_nCurrentSaaReg==24)
@@ -670,10 +669,13 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 
 #ifdef DEBUGSAA
 	fwrite(pBufferStart, GetCurrentBytesPerSample(), nTotalSamples, pcmfile);
+	m_nDebugSample += nTotalSamples;
 #endif
 
 	prev_output_mono = prev_mono;
 	prev_output_stereo.dword = prev_stereo.dword;
+
+
 }
 
 int CSAASoundInternal::SendCommand(SAACMD nCommandID, long nData)

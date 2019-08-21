@@ -59,7 +59,9 @@ void CSAAFreq::SetFreqOffset(BYTE nOffset)
 	{
 		// updates straightaway if m_bSync
 		m_bNewData=false;
+		m_bIgnoreOffsetData = false;
 		m_nCurrentOffset = nOffset;
+		m_nNextOffset = nOffset;
 		m_nCurrentOctave = m_nNextOctave;
 		SetAdd();
 	}
@@ -80,7 +82,9 @@ void CSAAFreq::SetFreqOctave(BYTE nOctave)
 	{
 		// updates straightaway if m_bSync
 		m_bNewData=false;
+		m_bIgnoreOffsetData = false;
 		m_nCurrentOctave = nOctave;
+		m_nNextOctave = nOctave;
 		m_nCurrentOffset = m_nNextOffset;
 		SetAdd();
 	}

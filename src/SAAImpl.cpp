@@ -56,8 +56,8 @@ m_uParamRate(0)
 	#endif
 
 	// Create and link up the objects that make up the emulator
-	Noise[0] = new CSAANoise(0x14af5209); // Create and seed a noise generator
-	Noise[1] = new CSAANoise(0x76a9b11e); // Create and seed a noise generator
+	Noise[0] = new CSAANoise(0xffffffff); // Create and seed a noise generator
+	Noise[1] = new CSAANoise(0xffffffff); // Create and seed a noise generator
 	Env[0] = new CSAAEnv;
 	Env[1] = new CSAAEnv;
 

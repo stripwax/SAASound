@@ -8,8 +8,6 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>	// for sprintf
-
 #ifdef WIN32
 #include <assert.h>
 #else
@@ -31,6 +29,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #ifdef DEBUGSAA
+#include <stdio.h>	// for sprintf
 FILE * dbgfile = NULL;
 FILE * pcmfile = NULL;
 #endif
@@ -47,14 +46,17 @@ m_bSync(false),
 m_uParam(0),
 m_uParamRate(0)
 {
+	prev_output_mono = 0;
+	prev_output_stereo.sep.Left = prev_output_stereo.sep.Right = 0;
+
 	#ifdef DEBUGSAA
 	dbgfile = fopen("debugsaa.txt","wt");
 	pcmfile = fopen("debugsaa.pcm","wb");
 	#endif
 
 	// Create and link up the objects that make up the emulator
-	Noise[0] = new CSAANoise(0x14af5209); // Create and seed a noise generator
-	Noise[1] = new CSAANoise(0x76a9b11e); // Create and seed a noise generator
+	Noise[0] = new CSAANoise(0xffffffff); // Create and seed a noise generator
+	Noise[1] = new CSAANoise(0xffffffff); // Create and seed a noise generator
 	Env[0] = new CSAAEnv;
 	Env[1] = new CSAAEnv;
 
@@ -91,9 +93,11 @@ m_uParamRate(0)
 	}
 
 	// set parameters
-	SetSoundParameters(SAAP_NOFILTER | SAAP_11025 | SAAP_8BIT | SAAP_MONO);
+	SetSoundParameters(SAAP_FILTER | SAAP_11025 | SAAP_8BIT | SAAP_MONO);
 	// reset the virtual SAA
 	Clear();
+
+	SetClockRate(8000000);
 }
 
 CSAASoundInternal::~CSAASoundInternal()
@@ -117,6 +121,16 @@ CSAASoundInternal::~CSAASoundInternal()
 // CSAASound members
 //////////////////////////////////////////////////////////////////////
 
+void CSAASoundInternal::SetClockRate(unsigned int nClockRate)
+{
+	for (int i = 0; i < 6; i++)
+	{
+		Osc[i]->SetClockRate(nClockRate);
+	}
+	Noise[0]->SetClockRate(nClockRate);
+	Noise[1]->SetClockRate(nClockRate);
+}
+
 void CSAASoundInternal::Clear(void)
 {
 	// reinitialises virtual SAA:
@@ -138,7 +152,7 @@ void CSAASoundInternal::WriteData(BYTE nData)
 	// originated from an OUT 255,d call
 
 #ifdef DEBUGSAA
-	fprintf(dbgfile, "%02d:%02x\n",m_nCurrentSaaReg,nData);
+	fprintf(dbgfile, "%lu %02d:%02x\n", m_nDebugSample, m_nCurrentSaaReg, nData);
 #endif
 
 	// route nData to the appropriate place
@@ -254,6 +268,12 @@ void CSAASoundInternal::WriteData(BYTE nData)
 				Osc[5]->Sync(true);
 				Noise[0]->Sync(true);
 				Noise[1]->Sync(true);
+				Amp[0]->Sync(true);
+				Amp[1]->Sync(true);
+				Amp[2]->Sync(true);
+				Amp[3]->Sync(true);
+				Amp[4]->Sync(true);
+				Amp[5]->Sync(true);
 				m_bSync = true;
 			}
 			else
@@ -267,6 +287,12 @@ void CSAASoundInternal::WriteData(BYTE nData)
 				Osc[5]->Sync(false);
 				Noise[0]->Sync(false);
 				Noise[1]->Sync(false);
+				Amp[0]->Sync(false);
+				Amp[1]->Sync(false);
+				Amp[2]->Sync(false);
+				Amp[3]->Sync(false);
+				Amp[4]->Sync(false);
+				Amp[5]->Sync(false);
 				m_bSync = false;
 			}
 
@@ -308,7 +334,7 @@ void CSAASoundInternal::WriteAddress(BYTE nReg)
 {
 	// originated from an OUT 511,r call
 #ifdef DEBUGSAA
-	fprintf(dbgfile,"%02d:",nReg);
+	fprintf(dbgfile, "%lu %02d:", m_nDebugSample, nReg);
 #endif
 	m_nCurrentSaaReg = nReg & 31;
 	if (m_nCurrentSaaReg==24)
@@ -348,6 +374,10 @@ void CSAASoundInternal::SetSoundParameters(SAAPARAM uParam)
 {
 	int sampleratemode = 0;
 
+	// always enable FILTER mode
+	m_uParam = (m_uParam & ~SAAP_MASK_FILTER) | SAAP_FILTER;
+
+/*
 	switch (uParam & SAAP_MASK_FILTER)
 	{
 		case SAAP_NOFILTER: // disable filter
@@ -360,6 +390,7 @@ void CSAASoundInternal::SetSoundParameters(SAAPARAM uParam)
 		default:
 			break;
 	}
+*/
 
 	switch (uParam & SAAP_MASK_SAMPLERATE)
 	{
@@ -471,8 +502,12 @@ unsigned long CSAASoundInternal::GetCurrentSampleRate(void)
 
 void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 {
-	unsigned short mono;
-	stereolevel stereoval;
+	unsigned short mono1,mono2,mono;
+	stereolevel stereoval, stereoval1, stereoval2;
+
+	unsigned short prev_mono = prev_output_mono;
+	stereolevel prev_stereo;
+	prev_stereo.dword = prev_output_stereo.dword;
 
 #ifdef DEBUGSAA
 	BYTE * pBufferStart = pBuffer;
@@ -481,92 +516,6 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 
 	switch (m_uParam)
 	{
-		case SAAP_NOFILTER | SAAP_MONO | SAAP_8BIT:
-			while (nSamples--)
-			{
-				Noise[0]->Tick();
-				Noise[1]->Tick();
-
-				mono = (Amp[0]->TickAndOutputMono() +
-					  Amp[1]->TickAndOutputMono() +
-					  Amp[2]->TickAndOutputMono() +
-					  Amp[3]->TickAndOutputMono() +
-					  Amp[4]->TickAndOutputMono() +
-					  Amp[5]->TickAndOutputMono() );
-
-				// force output into the range 0<=x<=255
-				mono *= 5;
-				*pBuffer++ = 0x80+(mono>>8);
-			}
-			break;
-	
-		case SAAP_NOFILTER | SAAP_MONO | SAAP_16BIT:
-			while (nSamples--)
-			{
-				Noise[0]->Tick();
-				Noise[1]->Tick();
-			
-				mono = (Amp[0]->TickAndOutputMono() +
-					  Amp[1]->TickAndOutputMono() +
-					  Amp[2]->TickAndOutputMono() +
-					  Amp[3]->TickAndOutputMono() +
-					  Amp[4]->TickAndOutputMono() +
-					  Amp[5]->TickAndOutputMono() );
-
-				// force output into the range 0<=x<=65535
-				// (strictly, the following gives us 0<=x<=63360)
-				mono *= 5;
-				*pBuffer++ = mono & 0x00ff;
-				*pBuffer++ = mono >> 8;
-			}
-			break;
-	
-		case SAAP_NOFILTER | SAAP_STEREO | SAAP_8BIT:
-			while (nSamples--)
-			{
-				Noise[0]->Tick();
-				Noise[1]->Tick();
-
-			
-				stereoval.dword=(Amp[0]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[1]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[2]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[3]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[4]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[5]->TickAndOutputStereo()).dword;
-
-				// force output into the range 0<=x<=255
-				stereoval.sep.Left *= 10;
-				stereoval.sep.Right *= 10;
-				*pBuffer++ = 0x80+((stereoval.sep.Left)>>8);
-				*pBuffer++ = 0x80+((stereoval.sep.Right)>>8);
-			}
-			break;
-	
-		case SAAP_NOFILTER | SAAP_STEREO | SAAP_16BIT:
-			while (nSamples--)
-			{
-				Noise[0]->Tick();
-				Noise[1]->Tick();
-
-				stereoval.dword=(Amp[0]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[1]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[2]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[3]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[4]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[5]->TickAndOutputStereo()).dword;
-
-				// force output into the range 0<=x<=65535
-				// (strictly, the following gives us 0<=x<=63360)
-				stereoval.sep.Left *= 10;
-				stereoval.sep.Right *= 10;
-				*pBuffer++ = stereoval.sep.Left & 0x00ff;
-				*pBuffer++ = stereoval.sep.Left >> 8;
-				*pBuffer++ = stereoval.sep.Right & 0x00ff;
-				*pBuffer++ = stereoval.sep.Right >> 8;
-			}
-			break;
-	
 		// FILTER : (high-quality mode + bandpass filter)
 		case SAAP_FILTER | SAAP_MONO | SAAP_8BIT:
 			while (nSamples--)
@@ -574,16 +523,28 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 				Noise[0]->Tick();
 				Noise[1]->Tick();
 
-				mono = (Amp[0]->TickAndOutputMono() +
-					  Amp[1]->TickAndOutputMono() +
-					  Amp[2]->TickAndOutputMono() +
-					  Amp[3]->TickAndOutputMono() +
-					  Amp[4]->TickAndOutputMono() +
-					  Amp[5]->TickAndOutputMono() );
+				mono1 = (Amp[0]->TickAndOutputMono() +
+					Amp[1]->TickAndOutputMono() +
+					Amp[2]->TickAndOutputMono() +
+					Amp[3]->TickAndOutputMono() +
+					Amp[4]->TickAndOutputMono() +
+					Amp[5]->TickAndOutputMono());
+				mono2 = (Amp[0]->TickAndOutputMono() +
+					Amp[1]->TickAndOutputMono() +
+					Amp[2]->TickAndOutputMono() +
+					Amp[3]->TickAndOutputMono() +
+					Amp[4]->TickAndOutputMono() +
+					Amp[5]->TickAndOutputMono());
 
 				// force output into the range 0<=x<=255
-				mono *= 5;
-				*pBuffer++ = 0x80+(mono>>8);
+				mono = ((mono1 + mono2)*5) >> 1;
+				mono = 0x80 + (mono >> 8);
+				
+				// lowpass filter
+				mono = (prev_mono + mono) >> 1;
+				prev_mono = mono;
+
+				*pBuffer++ = (unsigned char)mono;
 			}
 			break;
 	
@@ -593,16 +554,29 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 				Noise[0]->Tick();
 				Noise[1]->Tick();
 			
-				mono = (Amp[0]->TickAndOutputMono() +
-					  Amp[1]->TickAndOutputMono() +
-					  Amp[2]->TickAndOutputMono() +
-					  Amp[3]->TickAndOutputMono() +
-					  Amp[4]->TickAndOutputMono() +
-					  Amp[5]->TickAndOutputMono() );
+				mono1 = (Amp[0]->TickAndOutputMono() +
+					Amp[1]->TickAndOutputMono() +
+					Amp[2]->TickAndOutputMono() +
+					Amp[3]->TickAndOutputMono() +
+					Amp[4]->TickAndOutputMono() +
+					Amp[5]->TickAndOutputMono());
+				mono2 = (Amp[0]->TickAndOutputMono() +
+					Amp[1]->TickAndOutputMono() +
+					Amp[2]->TickAndOutputMono() +
+					Amp[3]->TickAndOutputMono() +
+					Amp[4]->TickAndOutputMono() +
+					Amp[5]->TickAndOutputMono());
 
 				// force output into the range 0<=x<=65535
 				// (strictly, the following gives us 0<=x<=63360)
-				mono *= 5;
+				mono1 *= 5;
+				mono2 *= 5;
+
+				// lowpass filter
+				mono = (mono1 + mono2) >> 1;
+				mono = (prev_mono + mono) >> 1;
+				prev_mono = mono;
+
 				*pBuffer++ = mono & 0x00ff;
 				*pBuffer++ = mono >> 8;
 			}
@@ -613,23 +587,34 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 			{
 				Noise[0]->Tick();
 				Noise[1]->Tick();
-
 			
-				stereoval.dword=(Amp[0]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[1]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[2]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[3]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[4]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[5]->TickAndOutputStereo()).dword;
+				stereoval1.dword=(Amp[0]->TickAndOutputStereo()).dword;
+				stereoval1.dword+=(Amp[1]->TickAndOutputStereo()).dword;
+				stereoval1.dword+=(Amp[2]->TickAndOutputStereo()).dword;
+				stereoval1.dword+=(Amp[3]->TickAndOutputStereo()).dword;
+				stereoval1.dword+=(Amp[4]->TickAndOutputStereo()).dword;
+				stereoval1.dword+=(Amp[5]->TickAndOutputStereo()).dword;
+
+				stereoval2.dword = (Amp[0]->TickAndOutputStereo()).dword;
+				stereoval2.dword += (Amp[1]->TickAndOutputStereo()).dword;
+				stereoval2.dword += (Amp[2]->TickAndOutputStereo()).dword;
+				stereoval2.dword += (Amp[3]->TickAndOutputStereo()).dword;
+				stereoval2.dword += (Amp[4]->TickAndOutputStereo()).dword;
+				stereoval2.dword += (Amp[5]->TickAndOutputStereo()).dword;
 
 				// force output into the range 0<=x<=255
-				stereoval.sep.Left *= 10;
-				stereoval.sep.Right *= 10;
-				*pBuffer++ = 0x80+(stereoval.sep.Left>>8);
-				*pBuffer++ = 0x80+(stereoval.sep.Right>>8);
+				stereoval.sep.Left = ((stereoval1.sep.Left + stereoval2.sep.Left) * 10) >> 1;
+				stereoval.sep.Right = ((stereoval1.sep.Right + stereoval2.sep.Right) * 10) >> 1;
+
+				// lowpass filter
+				stereoval.sep.Left = (stereoval.sep.Left + prev_stereo.sep.Left) >> 1;
+				stereoval.sep.Right = (stereoval.sep.Right + prev_stereo.sep.Right) >> 1;
+				prev_stereo.dword = stereoval.dword;
+
+				*pBuffer++ = 0x80+((stereoval.sep.Left)>>8);
+				*pBuffer++ = 0x80+((stereoval.sep.Right)>>8);
 			}
 			break;
-			
 	
 		case SAAP_FILTER | SAAP_STEREO | SAAP_16BIT:
 			while (nSamples--)
@@ -637,17 +622,30 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 				Noise[0]->Tick();
 				Noise[1]->Tick();
 
-				stereoval.dword=(Amp[0]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[1]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[2]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[3]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[4]->TickAndOutputStereo()).dword;
-				stereoval.dword+=(Amp[5]->TickAndOutputStereo()).dword;
+				stereoval1.dword = (Amp[0]->TickAndOutputStereo()).dword;
+				stereoval1.dword += (Amp[1]->TickAndOutputStereo()).dword;
+				stereoval1.dword += (Amp[2]->TickAndOutputStereo()).dword;
+				stereoval1.dword += (Amp[3]->TickAndOutputStereo()).dword;
+				stereoval1.dword += (Amp[4]->TickAndOutputStereo()).dword;
+				stereoval1.dword += (Amp[5]->TickAndOutputStereo()).dword;
+
+				stereoval2.dword = (Amp[0]->TickAndOutputStereo()).dword;
+				stereoval2.dword += (Amp[1]->TickAndOutputStereo()).dword;
+				stereoval2.dword += (Amp[2]->TickAndOutputStereo()).dword;
+				stereoval2.dword += (Amp[3]->TickAndOutputStereo()).dword;
+				stereoval2.dword += (Amp[4]->TickAndOutputStereo()).dword;
+				stereoval2.dword += (Amp[5]->TickAndOutputStereo()).dword;
 
 				// force output into the range 0<=x<=65535
 				// (strictly, the following gives us 0<=x<=63360)
-				stereoval.sep.Left *= 10;
-				stereoval.sep.Right *= 10;
+				stereoval.sep.Left = ((stereoval1.sep.Left + stereoval2.sep.Left) * 10) >> 1;
+				stereoval.sep.Right = ((stereoval1.sep.Right + stereoval2.sep.Right) * 10) >> 1;
+
+				// lowpass filter
+				stereoval.sep.Left = (stereoval.sep.Left + prev_stereo.sep.Left) >> 1;
+				stereoval.sep.Right = (stereoval.sep.Right + prev_stereo.sep.Right) >> 1;
+				prev_stereo.dword = stereoval.dword;
+
 				*pBuffer++ = stereoval.sep.Left & 0x00ff;
 				*pBuffer++ = stereoval.sep.Left >> 8;
 				*pBuffer++ = stereoval.sep.Right & 0x00ff;
@@ -671,7 +669,13 @@ void CSAASoundInternal::GenerateMany(BYTE * pBuffer, unsigned long nSamples)
 
 #ifdef DEBUGSAA
 	fwrite(pBufferStart, GetCurrentBytesPerSample(), nTotalSamples, pcmfile);
+	m_nDebugSample += nTotalSamples;
 #endif
+
+	prev_output_mono = prev_mono;
+	prev_output_stereo.dword = prev_stereo.dword;
+
+
 }
 
 int CSAASoundInternal::SendCommand(SAACMD nCommandID, long nData)

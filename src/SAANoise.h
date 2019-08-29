@@ -16,7 +16,7 @@ private:
 	BYTE m_nSampleRateMode; // 0=44100, 1=22050; 2=11025
 	unsigned long m_nSampleRateTimes4K; // = (44100*4096) when RateMode=0, for example
 	int m_nSourceMode;
-	static const unsigned long cs_nAddBase; // nAdd for 31.25 kHz noise at 44.1 kHz samplerate
+	unsigned long m_nAddBase; // nAdd for 31.25 kHz noise at 44.1 kHz samplerate
 
 	// pseudo-random number generator
 	unsigned long m_nRand;
@@ -32,6 +32,7 @@ public:
 	void SetSource(int nSource);
 	void Trigger(void);
 	void SetSampleRateMode(int nSampleRateMode);
+	void SetClockRate(int nClockRate);
 	void Seed(unsigned long seed);
 
 	unsigned short Tick(void);

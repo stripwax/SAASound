@@ -24,6 +24,11 @@ void SAAAPI deleteSAASND(SAASND object)
 	delete (LPCSAASOUND)(object);
 }
 
+void SAAAPI SAASNDSetClockRate(SAASND object, unsigned int nClockRate)
+{
+	((LPCSAASOUND)(object))->SetClockRate(nClockRate);
+}
+
 void SAAAPI SAASNDSetSoundParameters(SAASND object, SAAPARAM uParam)
 {
 	((LPCSAASOUND)(object))->SetSoundParameters(uParam);

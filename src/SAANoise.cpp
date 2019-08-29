@@ -17,45 +17,47 @@
 
 
 //////////////////////////////////////////////////////////////////////
-// static member initialisation
-//////////////////////////////////////////////////////////////////////
-
-const unsigned long CSAANoise::cs_nAddBase = 31250 << 12;
-
-
-//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
 CSAANoise::CSAANoise()
 :
 m_nCounter(0),
-m_nAdd(cs_nAddBase),
 m_bSync(false),
 m_nSampleRateMode(2),
 m_nSampleRateTimes4K(11025<<12),
 m_nSourceMode(0),
 m_nRand(1)
 {
-	// That's all
+	SetClockRate(8000000);
+	m_nAdd = m_nAddBase;
 }
 
 CSAANoise::CSAANoise(unsigned long seed)
 :
 m_nCounter(0),
-m_nAdd(cs_nAddBase),
 m_bSync(false),
 m_nSampleRateMode(2),
 m_nSampleRateTimes4K(11025<<12),
 m_nSourceMode(0),
 m_nRand(seed)
 {
-	// That's all
+	SetClockRate(8000000);
+	m_nAdd = m_nAddBase;
 }
 
 CSAANoise::~CSAANoise()
 {
 	// Nothing to do
+}
+
+void CSAANoise::SetClockRate(int nClockRate)
+{
+	// at 8MHz the clock rate is 31250kHZ
+	// This is simply the clock rate divided by 256 i.e. 2^8
+	// We then shift this by 2^12 (like the Freq) for better
+	// period accuracy.  So that's the same as shifting by (12-8)
+	m_nAddBase = nClockRate << (12-8);
 }
 
 void CSAANoise::Seed(unsigned long seed)
@@ -76,7 +78,7 @@ unsigned short CSAANoise::LevelTimesTwo(void) const
 void CSAANoise::SetSource(int nSource)
 {
 	m_nSourceMode = nSource;
-	m_nAdd = cs_nAddBase >> m_nSourceMode;
+	m_nAdd = m_nAddBase >> m_nSourceMode;
 }
 
 void CSAANoise::Trigger(void)

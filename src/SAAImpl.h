@@ -11,6 +11,8 @@
 #ifndef SAAIMPL_H_INCLUDED
 #define SAAIMPL_H_INCLUDED
 
+#include "SAASound.h"
+
 class CSAASoundInternal : public CSAASound
 {
 private:
@@ -24,10 +26,18 @@ private:
 	CSAAAmp * Amp[6];
 	CSAAEnv * Env[2];
 
+	unsigned short prev_output_mono;
+	stereolevel prev_output_stereo;
+
+#ifdef DEBUGSAA
+	unsigned long m_nDebugSample;
+#endif
+
 public:
 	CSAASoundInternal();
 	~CSAASoundInternal();
 
+	void SetClockRate(unsigned int nClockRate);
 	void SetSoundParameters(SAAPARAM uParam);
 	void WriteAddress(BYTE nReg);
 	void WriteData(BYTE nData);

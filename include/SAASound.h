@@ -10,12 +10,15 @@
 // should be reflected as a major version increment.  New functionality can be added
 // in minor versions so long as backwards compatiblity is maintained
 // 
-// Version 3.1.3 (8th March 2004)
+// Version 3.3.0 (4th Dec 2018)
 //
 //////////////////////////////////////////////////////////////////////
 
 #ifndef SAASOUND_H_INCLUDED
 #define SAASOUND_H_INCLUDED
+
+// define this if you want to output diagnostic text and PCM files
+//#define DEBUGSAA
 
 // Parameters for use with SetSoundParameters, for example,
 // SetSoundParameters(SAAP_NOFILTER | SAAP_44100 | SAA_16BIT | SAA_STEREO);
@@ -96,6 +99,7 @@ public:
 	virtual void GenerateMany (BYTE * pBuffer, unsigned long nSamples) = 0;
 
 	virtual int SendCommand (SAACMD nCommandID, long nData) = 0;
+	virtual void SetClockRate(unsigned int nClockRate) = 0;
 
 };
 

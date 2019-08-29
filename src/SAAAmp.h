@@ -22,11 +22,9 @@ private:
 	const CSAAEnv * const m_pcConnectedEnvGenerator;
 	const bool m_bUseEnvelope;
 	mutable bool m_bMute;
+	mutable bool m_bSync;
 	mutable BYTE last_level_byte;
-	mutable bool level_unchanged;
-	mutable unsigned short last_leftlevel, last_rightlevel;
-	mutable bool leftlevel_unchanged, rightlevel_unchanged;
-	mutable unsigned short cached_last_leftoutput, cached_last_rightoutput;
+	unsigned short EffectiveAmplitude(unsigned short amp, unsigned short env) const;
 
 public:
 	CSAAAmp(CSAAFreq * const ToneGenerator, const CSAANoise * const NoiseGenerator, const CSAAEnv * const EnvGenerator);
@@ -39,6 +37,7 @@ public:
 	unsigned short RightOutput(void) const;
 	unsigned short MonoOutput(void) const;
 	void Mute(bool bMute);
+	void Sync(bool bSync);
 	void Tick(void);
 	unsigned short TickAndOutputMono(void);
 	stereolevel TickAndOutputStereo(void);

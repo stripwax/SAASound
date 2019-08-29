@@ -11,11 +11,7 @@
 #include "SAAEnv.h"
 #include "SAAFreq.h"
 
-// 'load in' the data for the static frequency lookup table:
-const unsigned long CSAAFreq::m_FreqTable[2048] =
-{
-#include "SAAFreq.dat"
-};
+unsigned long CSAAFreq::m_FreqTable[2048];
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -23,7 +19,7 @@ const unsigned long CSAAFreq::m_FreqTable[2048] =
 
 CSAAFreq::CSAAFreq(CSAANoise * const NoiseGenerator, CSAAEnv * const EnvGenerator)
 :
-m_nCounter(0), m_nAdd(0), m_nLevel(2),
+m_nCounter(0), m_nAdd(0), m_nLevel(0),
 m_nCurrentOffset(0), m_nCurrentOctave(0), m_nNextOffset(0), m_nNextOctave(0),
 m_bIgnoreOffsetData(false), m_bNewData(false), 
 m_bSync(false),
@@ -32,6 +28,7 @@ m_pcConnectedNoiseGenerator(NoiseGenerator),
 m_pcConnectedEnvGenerator(EnvGenerator),
 m_nConnectedMode((NoiseGenerator == NULL) ? ((EnvGenerator == NULL) ? 0 : 1) : 2)
 {
+	SetClockRate(8000000);
 	SetAdd(); // current octave, current offset
 }
 
@@ -62,7 +59,9 @@ void CSAAFreq::SetFreqOffset(BYTE nOffset)
 	{
 		// updates straightaway if m_bSync
 		m_bNewData=false;
+		m_bIgnoreOffsetData = false;
 		m_nCurrentOffset = nOffset;
+		m_nNextOffset = nOffset;
 		m_nCurrentOctave = m_nNextOctave;
 		SetAdd();
 	}
@@ -83,7 +82,9 @@ void CSAAFreq::SetFreqOctave(BYTE nOctave)
 	{
 		// updates straightaway if m_bSync
 		m_bNewData=false;
+		m_bIgnoreOffsetData = false;
 		m_nCurrentOctave = nOctave;
+		m_nNextOctave = nOctave;
 		m_nCurrentOffset = m_nNextOffset;
 		SetAdd();
 	}
@@ -146,8 +147,39 @@ void CSAAFreq::SetSampleRateMode(int nSampleRateMode)
 	m_nSampleRateTimes4K = 44100 << (12-nSampleRateMode);
 }
 
+#ifdef SAAFREQ_FIXED_CLOCKRATE
+void CSAAFreq::SetClockRate(int nClockRate)
+{
+	// if SAAFREQ 8MHZ is hardcoded, then we don't support dynamically
+	// adjusting the SAA clock rate, so this is a no-op
+}
+#else
+void CSAAFreq::SetClockRate(int nClockRate)
+{
+	// initialise the frequency table based on the SAA clockrate
+	// Each item in m_FreqTable corresponds to the frequency calculated by
+	// the standard formula   (15625 << octave) / (511 - offset)
+	// then multiplied by 8192 (and represented as a long integer value).
+	// We are therefore using 12 bits (i.e. 2^12 = 4096) as fractional part.
+	// The reason we multiply by 8192, not 4096, is that we use this as a counter
+	// to toggle the oscillator state, so we need to count half-waves (i.e. twice
+	// the frequency)
+	//
+	// Finally, note that the standard formula corresponds to a 8MHz base clock
+	// so we rescale the final result by the ratio nClockRate/8000000
+
+	int ix = 0;
+	for (int nOctave = 0; nOctave < 8; nOctave++)
+		for (int nOffset = 0; nOffset < 256; nOffset++)
+			m_FreqTable[ix++] = (unsigned long)((8192.0 * 15625.0 * double(1<<nOctave) * (double(nClockRate)/8000000.0)) / (511.0 - double(nOffset)));
+}
+#endif
+
 unsigned short CSAAFreq::Level(void) const
 {
+	if (m_bSync)
+		return 0;
+
 	return GetLevel(m_nLevel);
 }
 
@@ -159,6 +191,9 @@ unsigned short CSAAFreq::Level(void) const
 unsigned short CSAAFreq::Tick(void)
 {
 	// set to the absolute level (0 or 2)
+	if (m_bSync)
+		return 0;
+
 	if (!m_bSync)
 	{
 
@@ -221,7 +256,8 @@ void CSAAFreq::Sync(bool bSync)
 	if (m_bSync)
 	{
 		m_nCounter = 0;
-		m_nLevel=2;
+		//m_nLevel=2;
+		m_nLevel = 0; // so..  what's actually correct here?
 		m_nCurrentOctave=m_nNextOctave;
 		m_nCurrentOffset=m_nNextOffset;
 		SetAdd();

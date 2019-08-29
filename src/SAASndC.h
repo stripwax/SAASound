@@ -123,6 +123,7 @@ void EXTAPI SAASNDClickClick(bool bValue);
 unsigned long EXTAPI SAASNDGenerate(SAASND object);
 
 int EXTAPI SAASNDSendCommand(SAACMD nCommandID, long nData);
+void EXTAPI SAASNDSetClockRate(SAASND object, unsigned int nClockRate);
 
 
 #ifdef __cplusplus

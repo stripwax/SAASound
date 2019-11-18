@@ -1,9 +1,0 @@
-Debug/*
-Release/*
-unused/*
-Backup*/*
-.vs/*
-SAASound/Debug/*
-SAASound/Release/*
-SAASound/Release-SSE/*
-SAASound/*.aps

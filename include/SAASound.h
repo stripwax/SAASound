@@ -135,7 +135,7 @@ unsigned long SAAAPI SAASNDGetCurrentSampleRate(SAASND object);
 unsigned long SAAAPI SAASNDGetSampleRate(SAAPARAM uParam);
 
 void SAAAPI SAASNDGenerateMany(SAASND object, BYTE * pBuffer, unsigned long nSamples);
-int SAAAPI SAASNDSendCommand(SAACMD nCommandID, long nData);
+int SAAAPI SAASNDSendCommand(SAASND object, SAACMD nCommandID, long nData);
 
 
 #ifdef __cplusplus

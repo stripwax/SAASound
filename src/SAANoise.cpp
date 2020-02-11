@@ -53,11 +53,11 @@ CSAANoise::~CSAANoise()
 
 void CSAANoise::SetClockRate(int nClockRate)
 {
-	// at 8MHz the clock rate is 31250kHZ
+	// at 8MHz the clock rate is 31.250kHZ
 	// This is simply the clock rate divided by 256 i.e. 2^8
 	// We then shift this by 2^12 (like the Freq) for better
 	// period accuracy.  So that's the same as shifting by (12-8)
-	m_nAddBase = nClockRate << (12-8);
+	m_nAddBase = nClockRate << (12 - 8);
 }
 
 void CSAANoise::Seed(unsigned long seed)

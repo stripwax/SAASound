@@ -98,11 +98,11 @@ unsigned short CSAAAmp::LeftOutput(void) const
 		{
 			case 0:
 			default:
-				return leftleveltimes32;
+				return 0;
 			case 1:
 				return leftleveltimes16;
 			case 2:
-				return 0;
+				return leftleveltimes32;
 		}
 	}
 }
@@ -139,11 +139,11 @@ unsigned short CSAAAmp::RightOutput(void) const
 		{
 			case 0:
 			default:
-				return rightleveltimes32;
+				return 0;
 			case 1:
 				return rightleveltimes16;
 			case 2:
-				return 0;
+				return rightleveltimes32;
 		}
 	}
 }
@@ -180,11 +180,11 @@ unsigned short CSAAAmp::MonoOutput(void) const
 		{
 			case 0:
 			default:
-				return monoleveltimes32;
+				return 0;
 			case 1:
 				return monoleveltimes16;
 			case 2:
-				return 0;
+				return monoleveltimes32;
 		}
 	}
 }
@@ -346,19 +346,18 @@ stereolevel CSAAAmp::TickAndOutputStereo(void)
 		{
 			case 0:
 			default:
-				retval.sep.Left = leftleveltimes32;
-				retval.sep.Right = rightleveltimes32;
+				retval = zeroval;
 				break;
 			case 1:
 				retval.sep.Left=leftleveltimes16;
 				retval.sep.Right=rightleveltimes16;
 				break;
 			case 2:
-				retval = zeroval;
+				retval.sep.Left = leftleveltimes32;
+				retval.sep.Right = rightleveltimes32;
 				break;
 		}
 	}
 
 	return retval;
 }
-

@@ -9,6 +9,6 @@ It has been incorporated into standalone chiptune players, computer hardware emu
 Moved permanently to: 
  https://github.com/stripwax/SAASound/
 
-To use with SimCoupe:
-*  If using version 1.0 of SimCoupe, simply copy the SAASound.dll from this repository, over the top of the SAASound.dll in your installed version of SimCoupe
-*  If using a newer alpha build of SimCoupe, this has an embedded version of SAASound built-in.  This means you cannot replace the version with a newer one (please contact the author of SimCoupe for a newer release)
+To use with SimCoupe (https://github.com/simonowen/simcoupe) :
+*  If using version 1.0 of SimCoupe, or any version from 20200117 and newer, simply copy the SAASound.dll from this repository, over the top of the SAASound.dll in your installed version of SimCoupe
+*  If using version 1.1 Alpha of SimCoupe, this has an embedded version of SAASound built-in.  This means you cannot replace the SAA Sound version.  You should probably upgrade to a more recent build of SimCoupe

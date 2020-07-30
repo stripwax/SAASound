@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
+project(SAASound)
 
 if (APPLE)
   option(BUILD_FRAMEWORK "Build a Mac OS X framework instead of a shared library" OFF)
@@ -11,7 +12,12 @@ endif ()
 file(GLOB SOURCES src/*.cpp)
 file(GLOB HEADERS src/*.h)
 file(GLOB API_HEADERS include/*.h)
-add_library(SAASound SHARED ${SOURCES} ${HEADERS} ${API_HEADERS})
+
+if (MSVC)
+  set(RESOURCES VS17/SAASound.def)
+endif ()
+
+add_library(SAASound SHARED ${SOURCES} ${HEADERS} ${API_HEADERS} ${RESOURCES})
 
 set_target_properties(SAASound PROPERTIES
   VERSION 3.2

@@ -1,9 +1,12 @@
 Debug/*
 Release/*
+Release-SSE/*
+x64/*
 unused/*
 Backup*/*
 .vs/*
 SAASound/Debug/*
 SAASound/Release/*
 SAASound/Release-SSE/*
+SAASound/x64/*
 SAASound/*.aps

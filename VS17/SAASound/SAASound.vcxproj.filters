@@ -72,6 +72,9 @@
     <None Include="..\..\src\SAAFreq.dat">
       <Filter>Data</Filter>
     </None>
+    <None Include="..\SAASound.def">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SAASound.rc">

@@ -17,7 +17,7 @@ EXPORTS
 	SAASNDWriteData							@7
 	SAASNDWriteAddressData					@8
 	SAASNDClear								@9
-	SAASNDReadAddress						@10
+;	SAASNDReadAddress						@10
 	SAASNDGetCurrentSoundParameters			@11
 	SAASNDGetCurrentBytesPerSample			@12
 	SAASNDGetBytesPerSample					@13
@@ -36,7 +36,7 @@ EXPORTS
 	WriteData								@32
 	WriteAddressData						@33
 	Clear									@34
-	ReadAddress								@35
+;	ReadAddress								@35
 	GetCurrentSoundParameters				@36
 	GetCurrentSampleRate					@37
 	GetSampleRate							@38	

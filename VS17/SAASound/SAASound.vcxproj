@@ -167,7 +167,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>$(SolutionDir)SAASound.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)..\resources\SAASound.def</ModuleDefinitionFile>
       <AdditionalDependencies />
     </Link>
   </ItemDefinitionGroup>
@@ -184,7 +184,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies />
-      <ModuleDefinitionFile>$(SolutionDir)SAASound.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)..\resources\SAASound.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -217,7 +217,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <MapExports>false</MapExports>
-      <ModuleDefinitionFile>$(SolutionDir)SAASound.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)..\resources\SAASound.def</ModuleDefinitionFile>
       <AdditionalDependencies />
     </Link>
   </ItemDefinitionGroup>
@@ -251,7 +251,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <MapExports>false</MapExports>
-      <ModuleDefinitionFile>$(SolutionDir)SAASound.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)..\resources\SAASound.def</ModuleDefinitionFile>
       <AdditionalDependencies>
       </AdditionalDependencies>
     </Link>
@@ -285,7 +285,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ModuleDefinitionFile>$(SolutionDir)SAASound.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)..\resources\SAASound.def</ModuleDefinitionFile>
       <AdditionalDependencies />
       <LinkTimeCodeGeneration>
       </LinkTimeCodeGeneration>
@@ -321,7 +321,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies />
-      <ModuleDefinitionFile>$(SolutionDir)SAASound.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)..\resources\SAASound.def</ModuleDefinitionFile>
       <LinkTimeCodeGeneration>
       </LinkTimeCodeGeneration>
     </Link>

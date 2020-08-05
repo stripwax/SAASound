@@ -54,11 +54,6 @@ void SAAAPI SAASNDClear(SAASND object)
 	((LPCSAASOUND)(object))->Clear();
 }
 
-BYTE SAAAPI SAASNDReadAddress(SAASND object)
-{
-	return ((LPCSAASOUND)(object))->ReadAddress();
-}
-
 SAAPARAM SAAAPI SAASNDGetCurrentSoundParameters(SAASND object)
 {
 	return ((LPCSAASOUND)(object))->GetCurrentSoundParameters();

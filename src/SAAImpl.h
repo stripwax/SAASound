@@ -29,6 +29,9 @@ private:
 	unsigned short prev_output_mono;
 	stereolevel prev_output_stereo;
 
+	unsigned short oversample_buffer_mono[8];
+	stereolevel oversample_buffer_stereo[8];
+
 #ifdef DEBUGSAA
 	unsigned long m_nDebugSample;
 #endif

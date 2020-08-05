@@ -365,8 +365,7 @@ void CSAASoundInternal::WriteAddressData(BYTE nReg, BYTE nData)
 
 BYTE CSAASoundInternal::ReadAddress(void)
 {
-	// can't remember if this is actually supported by the real
-	// SAA-1099 hardware - but hey, sometimes it's useful, right?
+	// Not a real hardware function of the SAA-1099, which is write-only
 	return(m_nCurrentSaaReg);
 }
 

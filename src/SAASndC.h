@@ -21,7 +21,10 @@
 
 // Parameters for use with SetSoundParameters, for example,
 // SetSoundParameters(SAAP_NOFILTER | SAAP_44100 | SAAP_16BIT | SAAP_STEREO);
-#define SAAP_FILTER 0x00000300
+#define SAAP_FILTER_HIGHPASS_SIMPLE 0x00000400
+#define SAAP_FILTER_OVERSAMPLE8x 0x00000300
+#define SAAP_FILTER_OVERSAMPLE2x 0x00000200
+#define SAAP_FILTER SAAP_FILTER_OVERSAMPLE2x
 #define SAAP_NOFILTER 0x00000100
 #define SAAP_44100 0x00000030
 #define SAAP_22050 0x00000020
@@ -33,7 +36,9 @@
 
 // Bitmasks for use with GetCurrentSoundParameters, for example,
 // unsigned long CurrentSampleRateParameter = GetCurrentSoundParameters()
-#define SAAP_MASK_FILTER 0x00000300
+#define SAAP_MASK_FILTER 0x00000f00
+#define SAAP_MASK_FILTER_HIGHPASS 0x00000c00
+#define SAAP_MASK_FILTER_OVERSAMPLE 0x00000300
 #define SAAP_MASK_SAMPLERATE 0x000000030
 #define SAAP_MASK_BITDEPTH 0x0000000c
 #define SAAP_MASK_CHANNELS 0x00000003
@@ -115,12 +120,6 @@ unsigned long EXTAPI SAASNDGetCurrentSampleRate(SAASND object);
 unsigned long EXTAPI SAASNDGetSampleRate(SAAPARAM uParam);
 
 void EXTAPI SAASNDGenerateMany(SAASND object, BYTE * pBuffer, unsigned long nSamples);
-// ClickClick function has been removed from library
-// PLEASE DON'T USE IT AND THEN COMPLAIN IT DOESN'T WORK!!
-void EXTAPI SAASNDClickClick(bool bValue);
-// 'Generate' function has been obsolete since a few versions ago
-// PLEASE DON'T USE IT AND THEN COMPLAIN IT DOESN'T WORK!!
-unsigned long EXTAPI SAASNDGenerate(SAASND object);
 
 int EXTAPI SAASNDSendCommand(SAACMD nCommandID, long nData);
 void EXTAPI SAASNDSetClockRate(SAASND object, unsigned int nClockRate);

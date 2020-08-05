@@ -12,9 +12,9 @@
 class CSAAAmp  
 {
 private:
-	unsigned short leftleveltimes16, leftleveltimes32, leftlevela0x0e, leftlevela0x0etimes2;
-	unsigned short rightleveltimes16, rightleveltimes32, rightlevela0x0e, rightlevela0x0etimes2;
-	unsigned short monoleveltimes16, monoleveltimes32;
+	unsigned short leftleveltimes16, leftlevela0x0e;
+	unsigned short rightleveltimes16, rightlevela0x0e;
+	unsigned short monoleveltimes16;
 	unsigned short m_nOutputIntermediate;
 	unsigned int m_nMixMode;
 	CSAAFreq * const m_pcConnectedToneGenerator; // not const because amp calls ->Tick()

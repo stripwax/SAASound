@@ -24,9 +24,9 @@ m_pcConnectedNoiseGenerator(NoiseGenerator),
 m_pcConnectedEnvGenerator(EnvGenerator),
 m_bUseEnvelope(EnvGenerator != NULL)
 {
-	leftleveltimes32=leftleveltimes16=leftlevela0x0e=leftlevela0x0etimes2=0;
-	rightleveltimes32=rightleveltimes16=rightlevela0x0e=rightlevela0x0etimes2=0;
-	monoleveltimes32=monoleveltimes16=0;
+	leftleveltimes16=leftlevela0x0e=0;
+	rightleveltimes16=rightlevela0x0e=0;
+	monoleveltimes16=0;
 	m_nMixMode = 0;
 	m_bMute=true;
 	m_bSync = false;
@@ -48,17 +48,12 @@ void CSAAAmp::SetAmpLevel(BYTE level_byte)
 	{
 		last_level_byte = level_byte;
 		leftlevela0x0e = level_byte&0x0e;
-		leftlevela0x0etimes2 = leftlevela0x0e<<1;
 		leftleveltimes16 = (level_byte&0x0f) << 4;
-		leftleveltimes32 = leftleveltimes16 << 1;
 	
 		rightlevela0x0e = (level_byte>>4) & 0x0e;
-		rightlevela0x0etimes2 = rightlevela0x0e<<1;
 		rightleveltimes16 = level_byte & 0xf0;
-		rightleveltimes32 = rightleveltimes16 << 1;
 	
 		monoleveltimes16 = leftleveltimes16+rightleveltimes16;
-		monoleveltimes32 = leftleveltimes32+rightleveltimes32;
 	}
 
 }
@@ -75,35 +70,16 @@ unsigned short CSAAAmp::LeftOutput(void) const
 
 	if (m_bUseEnvelope && m_pcConnectedEnvGenerator->IsActive())
 	{
-//		Implement 
-//		return m_pcConnectedEnvGenerator->LeftLevel()*leftlevela0x0e*(2-m_nOutputIntermediate);
-//		as a simple switch statement:
-		switch (m_nOutputIntermediate)
-		{
-			case 0:
-				return EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e) * 2;
-			case 1:
-				return EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e);
-			case 2:
-			default:
-				return 0;
-		}
+		return m_pcConnectedEnvGenerator->LeftLevel()*leftlevela0x0e*(2-m_nOutputIntermediate);
 	}
 	else
 	{
-//		Implement 
-//		return leftleveltimes16 * m_nOutputIntermediate;
-//		as a simple switch statement:
-		switch (m_nOutputIntermediate)
-		{
-			case 0:
-			default:
-				return 0;
-			case 1:
-				return leftleveltimes16;
-			case 2:
-				return leftleveltimes32;
-		}
+		// m_nOutputIntermediate is 0, 1, or 2 , and is effectively our multiplier
+		// Everything has been renormalised already, so that regular oscillator-only output results
+		// in output levels 0 and 2 only, and we only see output level 1 when both osc and noise are enabled
+		// (this is due to the 'timeslicing' effect of the noise+oscillator mixing resulting in an effective
+		// multiplier of 0 or 0.5 when noise is enabled, compared to the just-oscillator or just-noise)
+		return leftleveltimes16 * m_nOutputIntermediate;
 	}
 }
 
@@ -116,35 +92,11 @@ unsigned short CSAAAmp::RightOutput(void) const
 
 	if (m_bUseEnvelope && m_pcConnectedEnvGenerator->IsActive())
 	{
-//		Implement 
-//		return m_pcConnectedEnvGenerator->RightLevel()*rightlevela0x0e*(2-m_nOutputIntermediate);
-//		as a simple switch statement:
-		switch (m_nOutputIntermediate)
-		{
-			case 0:
-				return EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e) * 2;
-			case 1:
-				return EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e);
-			case 2:
-			default:
-				return 0;
-		}
+		return m_pcConnectedEnvGenerator->RightLevel()*rightlevela0x0e*(2-m_nOutputIntermediate);
 	}
 	else
 	{
-//		Implement 
-//		return rightleveltimes16 * m_nOutputIntermediate;
-//		as a simple switch statement:
-		switch (m_nOutputIntermediate)
-		{
-			case 0:
-			default:
-				return 0;
-			case 1:
-				return rightleveltimes16;
-			case 2:
-				return rightleveltimes32;
-		}
+		return rightleveltimes16 * m_nOutputIntermediate;
 	}
 }
 
@@ -157,35 +109,11 @@ unsigned short CSAAAmp::MonoOutput(void) const
 
 	if (m_bUseEnvelope && m_pcConnectedEnvGenerator->IsActive())
 	{
-//		Implement something roughly equivalent to
-//		return ( (m_pcConnectedEnvGenerator->RightLevel()*rightlevela0x0e) + (m_pcConnectedEnvGenerator->LeftLevel()*leftlevela0x0e) ) * (2.0f-m_nOutputIntermediate);
-//		as a simple switch statement.  The nuance is in how the amplitude and envelope controls are combined (see EffectiveAmplitude)
-		switch (m_nOutputIntermediate)
-		{
-			case 0:
-				return (EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e) + EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e)) * 2;
-			case 1:
-				return EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e) + EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e);
-			case 2:
-			default:
-				return 0;
-		}
+		return ( (m_pcConnectedEnvGenerator->RightLevel()*rightlevela0x0e) + (m_pcConnectedEnvGenerator->LeftLevel()*leftlevela0x0e) ) * (2-m_nOutputIntermediate);
 	}
 	else
 	{
-//		Implement 
-//		return monoleveltimes16 * m_nOutputIntermediate;
-//		as a simple switch statement:
-		switch (m_nOutputIntermediate)
-		{
-			case 0:
-			default:
-				return 0;
-			case 1:
-				return monoleveltimes16;
-			case 2:
-				return monoleveltimes32;
-		}
+		return monoleveltimes16 * m_nOutputIntermediate;
 	}
 }
 
@@ -230,29 +158,38 @@ void CSAAAmp::Sync(bool bSync)
 
 void CSAAAmp::Tick(void)
 {
+	// updates m_nOutputIntermediate to 0, 1 or 2
+	//
+
+	// connected oscillator always ticks (this isn't really connected to the amp)
+	unsigned short level = m_pcConnectedToneGenerator->Tick();
+
 	switch (m_nMixMode)
 	{
 		case 0:
 			// no tone or noise for this channel
-			m_pcConnectedToneGenerator->Tick();
 			m_nOutputIntermediate=0;
 			break;
 		case 1:
 			// tone only for this channel
-			m_nOutputIntermediate=(m_pcConnectedToneGenerator->Tick());
+			m_nOutputIntermediate = level;
 			// NOTE: ConnectedToneGenerator returns either 0 or 2
 			break;
 		case 2:
 			// noise only for this channel
-			m_pcConnectedToneGenerator->Tick();
 			m_nOutputIntermediate= m_pcConnectedNoiseGenerator->LevelTimesTwo();
 			// NOTE: ConnectedNoiseFunction returns either 0 or 1 using ->Level()
 			// and either 0 or 2 when using ->LevelTimesTwo();
 			break;
 		case 3:
 			// tone+noise for this channel ... mixing algorithm :
-			m_nOutputIntermediate = m_pcConnectedToneGenerator->Tick();
-			if ( m_nOutputIntermediate==2 && (m_pcConnectedNoiseGenerator->Level())==1 )
+			//  tone   noise   output
+			//   0       0       0
+			//   2       0       2
+			//   0       1       0
+			//   2       1       1
+			m_nOutputIntermediate = level;
+			if (level == 2 && (m_pcConnectedNoiseGenerator->Level())==1 )
 			{
 				m_nOutputIntermediate=1;
 			}
@@ -319,44 +256,13 @@ stereolevel CSAAAmp::TickAndOutputStereo(void)
 	}
 	else if (m_bUseEnvelope && m_pcConnectedEnvGenerator->IsActive())
 	{
-//		Implement 
-//		return ( (m_pcConnectedEnvGenerator->RightLevel()*rightlevela0x0e) + (m_pcConnectedEnvGenerator->LeftLevel()*leftlevela0x0e) ) * (2.0f-m_nOutputIntermediate);
-//		as a simple switch statement:
-		switch (m_nOutputIntermediate)
-		{
-			case 0:
-				retval.sep.Left = EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e) * 2;
-				retval.sep.Right = EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e) * 2;
-				break;
-			case 1:
-				retval.sep.Left = EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e);
-				retval.sep.Right = EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e);
-				break;
-			case 2:
-			default:
-				retval = zeroval;
-		}
+		retval.sep.Left = EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e) * (2 - m_nOutputIntermediate);
+		retval.sep.Right = EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e) * (2 - m_nOutputIntermediate);
 	}
 	else
 	{
-//		Implement 
-//		return monoleveltimes16 * m_nOutputIntermediate;
-//		as a simple switch statement:
-		switch (m_nOutputIntermediate)
-		{
-			case 0:
-			default:
-				retval = zeroval;
-				break;
-			case 1:
-				retval.sep.Left=leftleveltimes16;
-				retval.sep.Right=rightleveltimes16;
-				break;
-			case 2:
-				retval.sep.Left = leftleveltimes32;
-				retval.sep.Right = rightleveltimes32;
-				break;
-		}
+		retval.sep.Left = leftleveltimes16 * m_nOutputIntermediate;
+		retval.sep.Right = rightleveltimes16 * m_nOutputIntermediate;
 	}
 
 	return retval;

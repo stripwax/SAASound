@@ -750,7 +750,6 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 
 				if (highpass)
 				{
-					// lowpass filter
 					stereoval.sep.Left = (stereoval.sep.Left + prev_stereo.sep.Left) >> 1;
 					stereoval.sep.Right = (stereoval.sep.Right + prev_stereo.sep.Right) >> 1;
 					prev_stereo.dword = stereoval.dword;

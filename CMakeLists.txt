@@ -14,7 +14,7 @@ file(GLOB HEADERS src/*.h)
 file(GLOB API_HEADERS include/*.h)
 
 if (MSVC)
-  set(RESOURCES VS17/SAASound.def)
+  set(RESOURCES resources/SAASound.def)
 endif ()
 
 add_library(SAASound SHARED ${SOURCES} ${HEADERS} ${API_HEADERS} ${RESOURCES})

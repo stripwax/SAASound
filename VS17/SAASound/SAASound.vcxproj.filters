@@ -72,7 +72,7 @@
     <None Include="..\..\src\SAAFreq.dat">
       <Filter>Data</Filter>
     </None>
-    <None Include="..\SAASound.def">
+    <None Include="..\..\resources\SAASound.def">
       <Filter>Resources</Filter>
     </None>
   </ItemGroup>

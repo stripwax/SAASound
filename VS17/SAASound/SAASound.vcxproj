@@ -49,8 +49,8 @@
     <None Include="..\..\INSTALL" />
     <None Include="..\..\LICENCE" />
     <None Include="..\..\README" />
+    <None Include="..\..\resources\SAASound.def" />
     <None Include="..\..\src\SAAFreq.dat" />
-    <None Include="..\SAASound.def" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SAASound.rc" />

@@ -25,7 +25,7 @@ EXPORTS
 	SAASNDGetSampleRate						@15
 ;	SAASNDGenerate							@16
 	SAASNDGenerateMany						@17
-	SAASNDSendCommand						@18
+;	SAASNDSendCommand						@18
 ;	SAASNDClickClick						@19
 
 	CreateCSAASound							@25

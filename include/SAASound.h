@@ -22,9 +22,9 @@
 
 // Parameters for use with SetSoundParameters, for example,
 // SetSoundParameters(SAAP_NOFILTER | SAAP_44100 | SAA_16BIT | SAA_STEREO);
-// SAAP_FILTER_HIGHPASS_SIMPLE can be ORd with SAAP_FILTER_OVERSAMPLE8x/2x
-#define SAAP_FILTER_HIGHPASS_SIMPLE 0x00000400
-#define SAAP_FILTER_OVERSAMPLE8x 0x00000300
+// SAAP_FILTER_LOWPASS_SIMPLE can be ORd with SAAP_FILTER_OVERSAMPLE64x/2x
+#define SAAP_FILTER_LOWPASS_SIMPLE 0x00000400
+#define SAAP_FILTER_OVERSAMPLE64x 0x00000300
 #define SAAP_FILTER_OVERSAMPLE2x 0x00000200
 #define SAAP_FILTER SAAP_FILTER_OVERSAMPLE2x
 #define SAAP_NOFILTER 0x00000100
@@ -39,7 +39,7 @@
 // Bitmasks for use with GetCurrentSoundParameters, for example,
 // unsigned long CurrentSampleRateParameter = GetCurrentSoundParameters()
 #define SAAP_MASK_FILTER 0x00000f00
-#define SAAP_MASK_FILTER_HIGHPASS 0x00000c00
+#define SAAP_MASK_FILTER_LOWPASS 0x00000c00
 #define SAAP_MASK_FILTER_OVERSAMPLE 0x00000300
 #define SAAP_MASK_SAMPLERATE 0x000000030
 #define SAAP_MASK_BITDEPTH 0x0000000c
@@ -48,30 +48,7 @@
 typedef unsigned long SAAPARAM;
 
 
-// command #defines for use with SendCommand function, eg, 
-// int nCurrentSampleRate = SendCommand(SAACMD_GetSampleRate,0);
-// or
-// int nError = SendCommand(SAACMD_SetSampleRate,44100);
-typedef unsigned long SAACMD;
-#define SAACMD_SetVolumeBoost	0x00000001
-#define SAACMD_GetVolumeBoost	0x00000002
-#define SAACMD_SetSampleRate	0x00000003
-#define SAACMD_GetSampleRate	0x00000004
-#define SAACMD_SetNumChannels	0x00000005
-#define SAACMD_GetNumChannels	0x00000006
-#define SAACMD_SetBitDepth		0x00000007
-#define SAACMD_GetBitDepth		0x00000008
-#define SAACMD_SetFilterMode	0x00000009
-#define SAACMD_GetFilterMode	0x0000000a
-
-// 'Special' return values.
-#define	SAASENDCOMMAND_UNKNOWN_INVALID_COMMAND			0x80000000
-#define	SAASENDCOMMAND_FEATURE_NOT_YET_IMPLEMENTED		0x80000001
-#define	SAASENDCOMMAND_OK								0x80000002
-#define SAASENDCOMMAND_INVALIDPARAMETERS				0x80000003
-
-
-#ifndef BYTE
+##ifndef BYTE
 #define BYTE unsigned char
 #endif
 
@@ -104,7 +81,6 @@ public:
 
 	virtual void GenerateMany (BYTE * pBuffer, unsigned long nSamples) = 0;
 
-	virtual int SendCommand (SAACMD nCommandID, long nData) = 0;
 	virtual void SetClockRate(unsigned int nClockRate) = 0;
 
 };
@@ -140,7 +116,6 @@ unsigned long SAAAPI SAASNDGetCurrentSampleRate(SAASND object);
 unsigned long SAAAPI SAASNDGetSampleRate(SAAPARAM uParam);
 
 void SAAAPI SAASNDGenerateMany(SAASND object, BYTE * pBuffer, unsigned long nSamples);
-int SAAAPI SAASNDSendCommand(SAASND object, SAACMD nCommandID, long nData);
 
 
 #ifdef __cplusplus

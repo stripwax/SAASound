@@ -19,11 +19,13 @@ unsigned long CSAAFreq::m_FreqTable[2048];
 
 CSAAFreq::CSAAFreq(CSAANoise * const NoiseGenerator, CSAAEnv * const EnvGenerator)
 :
-m_nCounter(0), m_nAdd(0), m_nLevel(0),
+m_nCounter(0), m_nCounter_low(0), m_nAdd(0),
+m_nLevel(0),
+m_nOversample(0), m_nCounterLimit_low(1),
 m_nCurrentOffset(0), m_nCurrentOctave(0), m_nNextOffset(0), m_nNextOctave(0),
 m_bIgnoreOffsetData(false), m_bNewData(false), 
 m_bSync(false),
-m_nSampleRateMode(2), m_nSampleRateTimes4K(11025<<12),
+m_nSampleRateMode(2), m_nSampleRate(11025),
 m_pcConnectedNoiseGenerator(NoiseGenerator),
 m_pcConnectedEnvGenerator(EnvGenerator),
 m_nConnectedMode((NoiseGenerator == NULL) ? ((EnvGenerator == NULL) ? 0 : 1) : 2)
@@ -134,17 +136,35 @@ void CSAAFreq::SetSampleRateMode(int nSampleRateMode)
 	if (nSampleRateMode < m_nSampleRateMode)
 	{
 		// samplerate has been increased; scale up counter value accordingly
-		m_nCounter<<=(m_nSampleRateMode - nSampleRateMode);
+		m_nCounter <<= (m_nSampleRateMode - nSampleRateMode);
 	}
 	else
 	{
 		// samplerate has been decreased (or maybe unchanged);
 		// scale down counter value accordingly
-		m_nCounter>>=(nSampleRateMode - m_nSampleRateMode);
+		m_nCounter >>= (nSampleRateMode - m_nSampleRateMode);
 	}
 
 	m_nSampleRateMode = nSampleRateMode;
-	m_nSampleRateTimes4K = 44100 << (12-nSampleRateMode);
+	m_nSampleRate = 44100 >> nSampleRateMode;
+}
+
+void CSAAFreq::SetOversample(unsigned int oversample)
+{
+	// oversample is a power of 2 i.e.
+	// if oversample == 2 then 4x oversample
+	// if oversample == 6 then 64x oversample
+	if (oversample < m_nOversample)
+	{
+		m_nCounter_low <<= (m_nOversample - oversample);
+	}
+	else
+	{
+		m_nCounter_low >>= (oversample - m_nOversample);
+	}
+
+	m_nCounterLimit_low = 1<<oversample;
+	m_nOversample = oversample;
 }
 
 #ifdef SAAFREQ_FIXED_CLOCKRATE
@@ -194,47 +214,42 @@ unsigned short CSAAFreq::Tick(void)
 	if (m_bSync)
 		return 0;
 
-	if (!m_bSync)
+	m_nCounter += m_nAdd;
+	while (m_nCounter >= (m_nSampleRate<<12))
 	{
-
-		m_nCounter+=m_nAdd;
-
-		if (m_nCounter >= m_nSampleRateTimes4K)
+		m_nCounter -= (m_nSampleRate<<12);
+		m_nCounter_low++;
+		if (m_nCounter_low >= m_nCounterLimit_low)
 		{
-			// period elapsed for one half-cycle of
+			// period elapsed for (at least) one half-cycle of
 			// current frequency
-			// reset counter to zero (or thereabouts, taking into account
-			// the fractional part in the lower 12 bits)
-			while (m_nCounter >= m_nSampleRateTimes4K)
+			m_nCounter_low = 0;
+			// flip state - from 0 to -2 or vice versa
+			m_nLevel = 2 - m_nLevel;
+
+			// trigger any connected devices
+			switch (m_nConnectedMode)
 			{
-				m_nCounter-=m_nSampleRateTimes4K;
-				// flip state - from 0 to -2 or vice versa
-				m_nLevel=2-m_nLevel;
-					
-				// trigger any connected devices
-				switch (m_nConnectedMode)
-				{
-					case 1:
-						// env trigger
-						m_pcConnectedEnvGenerator->InternalClock();
-						break;
-			
-					case 2:
-						// noise trigger
-						m_pcConnectedNoiseGenerator->Trigger();
-						break;
-				
-					default:
-						// do nothing
-						break;
-				}
+			case 1:
+				// env trigger
+				m_pcConnectedEnvGenerator->InternalClock();
+				break;
+
+			case 2:
+				// noise trigger
+				m_pcConnectedNoiseGenerator->Trigger();
+				break;
+
+			default:
+				// do nothing
+				break;
 			}
 
 			// get new frequency (set period length m_nAdd) if new data is waiting:
 			UpdateOctaveOffsetData();
 		}
-	
 	}
+	
 	return GetLevel(m_nLevel);
 }
 
@@ -256,6 +271,7 @@ void CSAAFreq::Sync(bool bSync)
 	if (m_bSync)
 	{
 		m_nCounter = 0;
+		m_nCounter_low = 0;
 		//m_nLevel=2;
 		m_nLevel = 0; // so..  what's actually correct here?
 		m_nCurrentOctave=m_nNextOctave;

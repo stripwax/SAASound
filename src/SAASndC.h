@@ -21,8 +21,8 @@
 
 // Parameters for use with SetSoundParameters, for example,
 // SetSoundParameters(SAAP_NOFILTER | SAAP_44100 | SAAP_16BIT | SAAP_STEREO);
-#define SAAP_FILTER_HIGHPASS_SIMPLE 0x00000400
-#define SAAP_FILTER_OVERSAMPLE8x 0x00000300
+#define SAAP_FILTER_LOWPASS_SIMPLE 0x00000400
+#define SAAP_FILTER_OVERSAMPLE64x 0x00000300
 #define SAAP_FILTER_OVERSAMPLE2x 0x00000200
 #define SAAP_FILTER SAAP_FILTER_OVERSAMPLE2x
 #define SAAP_NOFILTER 0x00000100
@@ -37,44 +37,13 @@
 // Bitmasks for use with GetCurrentSoundParameters, for example,
 // unsigned long CurrentSampleRateParameter = GetCurrentSoundParameters()
 #define SAAP_MASK_FILTER 0x00000f00
-#define SAAP_MASK_FILTER_HIGHPASS 0x00000c00
+#define SAAP_MASK_FILTER_LOWPASS 0x00000c00
 #define SAAP_MASK_FILTER_OVERSAMPLE 0x00000300
 #define SAAP_MASK_SAMPLERATE 0x000000030
 #define SAAP_MASK_BITDEPTH 0x0000000c
 #define SAAP_MASK_CHANNELS 0x00000003
 
 typedef unsigned long SAAPARAM;
-
-
-// command #defines for use with SendCommand function, eg, 
-// int nCurrentSampleRate = SendCommand(SAACMD_GetSampleRate,0);
-// or
-// int nError = SendCommand(SAACMD_SetSampleRate,44100);
-//
-// SendCommand(SAACMD_Set4BitAmpRes,BOOL) sets the resolution of the amplitude registers when
-// using 'digital audio' and any other envelope effects.
-// Use 0 or FALSE to set the resolution to just 3 bits when using envelope control (DEFAULT AND AUTHENTIC!)
-// or use non-zero or TRUE to set the resolution to 4 bits (NOT AUTHENTIC - BUT BETTER THAN A REAL SAA!)
-//
-#define SAACMD_SetVolumeBoost	0x00000001
-#define SAACMD_GetVolumeBoost	0x00000002
-#define SAACMD_SetSampleRate	0x00000003
-#define SAACMD_GetSampleRate	0x00000004
-#define SAACMD_SetNumChannels	0x00000005
-#define SAACMD_GetNumChannels	0x00000006
-#define SAACMD_SetBitDepth		0x00000007
-#define SAACMD_GetBitDepth		0x00000008
-#define SAACMD_SetFilterMode	0x00000009
-#define SAACMD_GetFilterMode	0x0000000a
-#define SAACMD_Set4BitAmpRes	0x0000000b
-#define SAACMD_LoadSettingsFromFile	0x10000000
-
-
-// 'Special' return values.
-#define	SAASENDCOMMAND_UNKNOWN_INVALID_COMMAND			0x80000000
-#define	SAASENDCOMMAND_FEATURE_NOT_YET_IMPLEMENTED		0x80000001
-#define	SAASENDCOMMAND_OK								0x80000002
-#define SAASENDCOMMAND_INVALIDPARAMETERS				0x80000003
 
 
 #ifndef BYTE
@@ -121,7 +90,6 @@ unsigned long EXTAPI SAASNDGetSampleRate(SAAPARAM uParam);
 
 void EXTAPI SAASNDGenerateMany(SAASND object, BYTE * pBuffer, unsigned long nSamples);
 
-int EXTAPI SAASNDSendCommand(SAACMD nCommandID, long nData);
 void EXTAPI SAASNDSetClockRate(SAASND object, unsigned int nClockRate);
 
 

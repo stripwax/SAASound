@@ -84,7 +84,3 @@ void SAAAPI SAASNDGenerateMany(SAASND object, BYTE * pBuffer, unsigned long nSam
 	((LPCSAASOUND)(object))->GenerateMany(pBuffer, nSamples);
 }
 
-int SAAAPI SAASNDSendCommand(SAASND object, SAACMD nCommandID, long nData)
-{
-	return ((LPCSAASOUND)(object))->SendCommand(nCommandID, nData);
-}

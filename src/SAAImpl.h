@@ -20,6 +20,7 @@ private:
 	bool m_bOutputEnabled;
 	bool m_bSync;
 	int m_uParam, m_uParamRate;
+	int m_nOversample;
 
 	CSAAFreq * Osc[6];
 	CSAANoise * Noise[2];
@@ -55,8 +56,6 @@ public:
 	static unsigned short GetBytesPerSample(SAAPARAM uParam);
 
 	void GenerateMany(BYTE * pBuffer, unsigned long nSamples);
-
-	int SendCommand(SAACMD nCommandID, long nData);
 
 };
 

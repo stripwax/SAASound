@@ -27,6 +27,9 @@ private:
 
 	unsigned long m_nCounter;
 	unsigned long m_nAdd;
+	unsigned long m_nCounter_low;
+	unsigned int m_nOversample;
+	unsigned long m_nCounterLimit_low;
 	unsigned short m_nLevel;
 
 	int m_nCurrentOffset;
@@ -38,7 +41,7 @@ private:
 	bool m_bSync;
 
 	int m_nSampleRateMode;
-	unsigned long m_nSampleRateTimes4K;
+	unsigned long m_nSampleRate;
 	CSAANoise * const m_pcConnectedNoiseGenerator;
 	CSAAEnv * const m_pcConnectedEnvGenerator;
 	const int m_nConnectedMode; // 0 = nothing; 1 = envgenerator; 2 = noisegenerator
@@ -52,6 +55,7 @@ public:
 	void SetFreqOffset(BYTE nOffset);
 	void SetFreqOctave(BYTE nOctave);
 	void SetSampleRateMode(int nSampleRateMode);
+	void SetOversample(unsigned int oversample);
 	void SetClockRate(int nClockRate);
 	void Sync(bool bSync);
 	unsigned short Tick(void);

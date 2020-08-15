@@ -48,7 +48,7 @@
 typedef unsigned long SAAPARAM;
 
 
-##ifndef BYTE
+#ifndef BYTE
 #define BYTE unsigned char
 #endif
 

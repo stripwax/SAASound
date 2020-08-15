@@ -867,7 +867,7 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 				for (int c = 0; c < 6; c++)
 				{
 					stereoval.sep.Left += (((chans[c].sep.Left * 10)+(1<<(m_nOversample-1))) >> m_nOversample);
-					stereoval.sep.Right += (((chans[c].sep.Left * 10)+(1<<(m_nOversample-1))) >> m_nOversample);
+					stereoval.sep.Right += (((chans[c].sep.Right * 10)+(1<<(m_nOversample-1))) >> m_nOversample);
 				}
 
 				if (lowpass)
@@ -901,7 +901,7 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 				for (int c = 0; c < 6; c++)
 				{
 					stereoval.sep.Left += (((chans[c].sep.Left * 10)+(1<<(m_nOversample-1))) >> m_nOversample);
-					stereoval.sep.Right += (((chans[c].sep.Left * 10)+(1<<(m_nOversample-1))) >> m_nOversample);
+					stereoval.sep.Right += (((chans[c].sep.Right * 10)+(1<<(m_nOversample-1))) >> m_nOversample);
 				}
 
 				if (lowpass)

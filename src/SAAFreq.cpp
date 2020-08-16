@@ -13,6 +13,8 @@
 
 unsigned long CSAAFreq::m_FreqTable[2048];
 
+const unsigned short INITIAL_LEVEL = 2;
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -20,7 +22,7 @@ unsigned long CSAAFreq::m_FreqTable[2048];
 CSAAFreq::CSAAFreq(CSAANoise * const NoiseGenerator, CSAAEnv * const EnvGenerator)
 :
 m_nCounter(0), m_nCounter_low(0), m_nAdd(0),
-m_nLevel(0),
+m_nLevel(INITIAL_LEVEL),
 m_nOversample(0), m_nCounterLimit_low(1),
 m_nCurrentOffset(0), m_nCurrentOctave(0), m_nNextOffset(0), m_nNextOctave(0),
 m_bIgnoreOffsetData(false), m_bNewData(false), 
@@ -198,7 +200,7 @@ void CSAAFreq::SetClockRate(int nClockRate)
 unsigned short CSAAFreq::Level(void) const
 {
 	if (m_bSync)
-		return 0;
+		return 2;
 
 	return GetLevel(m_nLevel);
 }
@@ -212,7 +214,7 @@ unsigned short CSAAFreq::Tick(void)
 {
 	// set to the absolute level (0 or 2)
 	if (m_bSync)
-		return 0;
+		return 2;
 
 	m_nCounter += m_nAdd;
 	while (m_nCounter >= (m_nSampleRate<<12))
@@ -272,8 +274,10 @@ void CSAAFreq::Sync(bool bSync)
 	{
 		m_nCounter = 0;
 		m_nCounter_low = 0;
-		//m_nLevel=2;
-		m_nLevel = 0; // so..  what's actually correct here?
+		
+		// this seems to need to be required to make the Fred59 SPACE DEMO audio work correctly
+		m_nLevel = INITIAL_LEVEL;
+
 		m_nCurrentOctave=m_nNextOctave;
 		m_nCurrentOffset=m_nNextOffset;
 		SetAdd();

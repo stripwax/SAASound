@@ -373,33 +373,37 @@ void CSAASoundInternal::SetSoundParameters(SAAPARAM uParam)
 {
 	int sampleratemode = CSAASound::GetSampleRate(m_uParamRate);
 
-	// enable filter modes
+	// set samplerate properties from uParam
+	switch (uParam & SAAP_MASK_SAMPLERATE)
+	{
+	case SAAP_44100:
+		sampleratemode = 0;
+		m_uParamRate = (m_uParamRate & ~SAAP_MASK_SAMPLERATE) | SAAP_44100;
+		break;
+	case SAAP_22050:
+		sampleratemode = 1;
+		m_uParamRate = (m_uParamRate & ~SAAP_MASK_SAMPLERATE) | SAAP_22050;
+		break;
+	case SAAP_11025:
+		sampleratemode = 2;
+		m_uParamRate = (m_uParamRate & ~SAAP_MASK_SAMPLERATE) | SAAP_11025;
+		break;
+	case 0:// change nothing!
+	default:
+		break;
+	}
+
+	// set filter properties from uParam
 	m_uParam = (m_uParam & ~SAAP_MASK_FILTER) | (uParam & SAAP_MASK_FILTER);
 
-	// temporarily default to OVERSAMPLE64x
+	// temporarily force OVERSAMPLE64x mode for testing
 	//if ( (m_uParam & SAAP_MASK_FILTER_OVERSAMPLE) < SAAP_FILTER_OVERSAMPLE2x)
 	//	m_uParam = (m_uParam & ~SAAP_MASK_FILTER_OVERSAMPLE) | SAAP_FILTER_OVERSAMPLE2x;
 	if ( (m_uParam & SAAP_MASK_FILTER_OVERSAMPLE) < SAAP_FILTER_OVERSAMPLE64x)
 		m_uParam = (m_uParam & ~SAAP_MASK_FILTER_OVERSAMPLE) | SAAP_FILTER_OVERSAMPLE64x;
 
-	switch (uParam & SAAP_MASK_SAMPLERATE)
-	{
-		case SAAP_44100:
-			sampleratemode = 0;
-			m_uParamRate = (m_uParamRate & ~SAAP_MASK_SAMPLERATE) | SAAP_44100;
-			break;
-		case SAAP_22050:
-			sampleratemode = 1;
-			m_uParamRate = (m_uParamRate & ~SAAP_MASK_SAMPLERATE) | SAAP_22050;
-			break;
-		case SAAP_11025:
-			sampleratemode = 2;
-			m_uParamRate = (m_uParamRate & ~SAAP_MASK_SAMPLERATE) | SAAP_11025;
-			break;
-		case 0:// change nothing!
-		default:
-			break;
-	}
+	// temporarily force lowpass filter on for testing
+	m_uParam = (m_uParam & ~SAAP_MASK_FILTER_LOWPASS) | SAAP_FILTER_LOWPASS_SIMPLE;
 
 	/* Enabling the oversampling filter puts the oscillators and noise generators
 	into a higher sample rate via a scaling factor on the multilevel counter */
@@ -433,6 +437,7 @@ void CSAASoundInternal::SetSoundParameters(SAAPARAM uParam)
 	Noise[0]->SetOversample(m_nOversample);
 	Noise[1]->SetOversample(m_nOversample);
 
+	// set bit depth properties from uParam
 	switch (uParam & SAAP_MASK_BITDEPTH)
 	{
 		case SAAP_8BIT: // set 8bit mode
@@ -446,6 +451,7 @@ void CSAASoundInternal::SetSoundParameters(SAAPARAM uParam)
 			break;
 	}
 
+	// set number of channels from uParam
 	switch (uParam & SAAP_MASK_CHANNELS)
 	{
 		case SAAP_MONO: // set mono
@@ -618,8 +624,9 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 	{
 		bool lowpass = (m_uParam & SAAP_MASK_FILTER_LOWPASS);
 
-		// FILTER : (high-quality mode + oversample filter + optional lowpass filter to remove very low frequency/DC)
-		// For oversampling, tick everything twice and take an unweighted mean
+		// FILTER : (high-quality mode + oversample filter + optional lowpass filter to remove aliasing
+		// and highpass filter (not yet implemented) to remove very low frequency/DC)
+		// For oversampling, tick everything n times and take an unweighted mean
 
 		switch (m_uParam & (SAAP_MASK_CHANNELS + SAAP_MASK_BITDEPTH))
 		{
@@ -777,8 +784,10 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 	{
 		bool lowpass = (m_uParam & SAAP_MASK_FILTER_LOWPASS);
 
-		// FILTER : (high-quality mode + oversample filter + optional lowpass filter to remove very low frequency/DC)
-		// For oversampling, tick everything 8 times and take an unweighted mean
+		// FILTER : (high-quality mode + oversample filter + optional lowpass filter to remove aliasing
+		// and highpass filter (not yet implemented) to remove very low frequency/DC)
+		// For oversampling, tick everything n times and take an unweighted mean
+
 		switch (m_uParam & (SAAP_MASK_CHANNELS + SAAP_MASK_BITDEPTH))
 		{
 		case SAAP_MONO | SAAP_8BIT:

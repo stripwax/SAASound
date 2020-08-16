@@ -393,10 +393,22 @@ void CSAASoundInternal::SetSoundParameters(SAAPARAM uParam)
 		break;
 	}
 
+	Osc[0]->SetSampleRateMode(sampleratemode);
+	Osc[1]->SetSampleRateMode(sampleratemode);
+	Osc[2]->SetSampleRateMode(sampleratemode);
+	Osc[3]->SetSampleRateMode(sampleratemode);
+	Osc[4]->SetSampleRateMode(sampleratemode);
+	Osc[5]->SetSampleRateMode(sampleratemode);
+	Noise[0]->SetSampleRateMode(sampleratemode);
+	Noise[1]->SetSampleRateMode(sampleratemode);
+
 	// set filter properties from uParam
 	m_uParam = (m_uParam & ~SAAP_MASK_FILTER) | (uParam & SAAP_MASK_FILTER);
+	 
+	m_nOversample = 0;
 
-	// temporarily force OVERSAMPLE64x mode for testing
+	/*
+// temporarily force OVERSAMPLE64x mode for testing
 	//if ( (m_uParam & SAAP_MASK_FILTER_OVERSAMPLE) < SAAP_FILTER_OVERSAMPLE2x)
 	//	m_uParam = (m_uParam & ~SAAP_MASK_FILTER_OVERSAMPLE) | SAAP_FILTER_OVERSAMPLE2x;
 	if ( (m_uParam & SAAP_MASK_FILTER_OVERSAMPLE) < SAAP_FILTER_OVERSAMPLE64x)
@@ -405,9 +417,8 @@ void CSAASoundInternal::SetSoundParameters(SAAPARAM uParam)
 	// temporarily force lowpass filter on for testing
 	m_uParam = (m_uParam & ~SAAP_MASK_FILTER_LOWPASS) | SAAP_FILTER_LOWPASS_SIMPLE;
 
-	/* Enabling the oversampling filter puts the oscillators and noise generators
-	into a higher sample rate via a scaling factor on the multilevel counter */
-	m_nOversample = 0;
+	// Enabling the oversampling filter puts the oscillators and noise generators
+	// into a higher sample rate via a scaling factor on the multilevel counter
 	if ( (m_uParam & SAAP_MASK_FILTER_OVERSAMPLE) == SAAP_FILTER_OVERSAMPLE2x)
 	{
 		// i.e. 2^1
@@ -418,15 +429,7 @@ void CSAASoundInternal::SetSoundParameters(SAAPARAM uParam)
 		// i.e. 2^6
 		m_nOversample = 6;
 	}
-
-	Osc[0]->SetSampleRateMode(sampleratemode);
-	Osc[1]->SetSampleRateMode(sampleratemode);
-	Osc[2]->SetSampleRateMode(sampleratemode);
-	Osc[3]->SetSampleRateMode(sampleratemode);
-	Osc[4]->SetSampleRateMode(sampleratemode);
-	Osc[5]->SetSampleRateMode(sampleratemode);
-	Noise[0]->SetSampleRateMode(sampleratemode);
-	Noise[1]->SetSampleRateMode(sampleratemode);
+*/
 
 	Osc[0]->SetOversample(m_nOversample);
 	Osc[1]->SetOversample(m_nOversample);

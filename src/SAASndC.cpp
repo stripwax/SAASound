@@ -54,11 +54,6 @@ void SAAAPI SAASNDClear(SAASND object)
 	((LPCSAASOUND)(object))->Clear();
 }
 
-BYTE SAAAPI SAASNDReadAddress(SAASND object)
-{
-	return ((LPCSAASOUND)(object))->ReadAddress();
-}
-
 SAAPARAM SAAAPI SAASNDGetCurrentSoundParameters(SAASND object)
 {
 	return ((LPCSAASOUND)(object))->GetCurrentSoundParameters();
@@ -89,7 +84,3 @@ void SAAAPI SAASNDGenerateMany(SAASND object, BYTE * pBuffer, unsigned long nSam
 	((LPCSAASOUND)(object))->GenerateMany(pBuffer, nSamples);
 }
 
-int SAAAPI SAASNDSendCommand(SAASND object, SAACMD nCommandID, long nData)
-{
-	return ((LPCSAASOUND)(object))->SendCommand(nCommandID, nData);
-}

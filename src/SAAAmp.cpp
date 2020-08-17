@@ -229,6 +229,7 @@ unsigned short CSAAAmp::EffectiveAmplitude(unsigned short amp, unsigned short en
 unsigned short CSAAAmp::TickAndOutputMono(void)
 {
 	if (m_bSync)
+		// TODO check this
 		return 0;
 
 	// first, do the Tick:
@@ -242,6 +243,7 @@ stereolevel CSAAAmp::TickAndOutputStereo(void)
 	static const stereolevel zeroval = { {0,0} };
 	
 	if (m_bSync)
+		// TODO check this
 		return zeroval;
 
 	// first, do the Tick:

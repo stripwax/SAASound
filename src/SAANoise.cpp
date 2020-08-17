@@ -23,9 +23,12 @@
 CSAANoise::CSAANoise()
 :
 m_nCounter(0),
+m_nCounter_low(0),
+m_nCounterLimit_low(1),
+m_nOversample(0),
 m_bSync(false),
 m_nSampleRateMode(2),
-m_nSampleRateTimes4K(11025<<12),
+m_nSampleRate(11025),
 m_nSourceMode(0),
 m_nRand(1)
 {
@@ -36,9 +39,12 @@ m_nRand(1)
 CSAANoise::CSAANoise(unsigned long seed)
 :
 m_nCounter(0),
+m_nCounter_low(0),
+m_nCounterLimit_low(1),
+m_nOversample(0),
 m_bSync(false),
 m_nSampleRateMode(2),
-m_nSampleRateTimes4K(11025<<12),
+m_nSampleRate(11025),
 m_nSourceMode(0),
 m_nRand(seed)
 {
@@ -111,12 +117,14 @@ unsigned short CSAANoise::Tick(void)
 	// then do nothing
 	if ( (!m_bSync) && (m_nSourceMode!=3) )
 	{
-		m_nCounter+=m_nAdd;
-		if (m_nCounter >= m_nSampleRateTimes4K)
+		m_nCounter += m_nAdd;
+		while (m_nCounter >= (m_nSampleRate<<12))
 		{
-			while (m_nCounter >= m_nSampleRateTimes4K)
+			m_nCounter -= (m_nSampleRate<<12);
+			m_nCounter_low++;
+			if (m_nCounter_low >= m_nCounterLimit_low)
 			{
-				m_nCounter-=m_nSampleRateTimes4K;
+				m_nCounter_low = 0;
 				ChangeLevel();
 			}
 		}
@@ -130,6 +138,7 @@ void CSAANoise::Sync(bool bSync)
 	if (bSync)
 	{
 		m_nCounter = 0;
+		m_nCounter_low = 0;
 	}
 	m_bSync = bSync;
 }
@@ -150,7 +159,26 @@ void CSAANoise::SetSampleRateMode(int nSampleRateMode)
 		m_nCounter>>=(nSampleRateMode - m_nSampleRateMode);
 	}
 	m_nSampleRateMode = nSampleRateMode;
-	m_nSampleRateTimes4K = 44100 << (12-m_nSampleRateMode);
+	m_nSampleRate = 44100 >> m_nSampleRateMode;
+}
+
+
+void CSAANoise::SetOversample(unsigned int oversample)
+{
+	// oversample is a power of 2 i.e.
+	// if oversample == 2 then 4x oversample
+	// if oversample == 6 then 64x oversample
+	if (oversample < m_nOversample)
+	{
+		m_nCounter_low <<= (m_nOversample - oversample);
+	}
+	else
+	{
+		m_nCounter_low >>= (oversample - m_nOversample);
+	}
+
+	m_nCounterLimit_low = 1<<oversample;
+	m_nOversample = oversample;
 }
 
 inline void CSAANoise::ChangeLevel(void)

@@ -28,10 +28,7 @@ private:
 	CSAAEnv * Env[2];
 
 	unsigned short prev_output_mono;
-	stereolevel prev_output_stereo;
-
-	unsigned short oversample_buffer_mono[8];
-	stereolevel oversample_buffer_stereo[8];
+	unsigned short prev_output_left, prev_output_right;
 
 #ifdef DEBUGSAA
 	unsigned long m_nDebugSample;

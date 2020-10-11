@@ -237,14 +237,14 @@ unsigned short CSAAAmp::TickAndOutputMono(void)
 	return MonoOutput();
 }
 
-stereolevel CSAAAmp::TickAndOutputStereo(void)
+void CSAAAmp::TickAndOutputStereo(unsigned short & left, unsigned short & right)
 {
-	static stereolevel retval;
-	static const stereolevel zeroval = { {0,0} };
-	
 	if (m_bSync)
+	{
 		// TODO check this
-		return zeroval;
+		left = right = 0;
+		return;
+	}
 
 	// first, do the Tick:
 	Tick();
@@ -254,18 +254,16 @@ stereolevel CSAAAmp::TickAndOutputStereo(void)
 
 	if (m_bMute)
 	{
-		retval = zeroval;
+		left = right = 0;
 	}
 	else if (m_bUseEnvelope && m_pcConnectedEnvGenerator->IsActive())
 	{
-		retval.sep.Left = EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e) * (2 - m_nOutputIntermediate);
-		retval.sep.Right = EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e) * (2 - m_nOutputIntermediate);
+		left = EffectiveAmplitude(m_pcConnectedEnvGenerator->LeftLevel(), leftlevela0x0e) * (2 - m_nOutputIntermediate);
+		right = EffectiveAmplitude(m_pcConnectedEnvGenerator->RightLevel(), rightlevela0x0e) * (2 - m_nOutputIntermediate);
 	}
 	else
 	{
-		retval.sep.Left = leftleveltimes16 * m_nOutputIntermediate;
-		retval.sep.Right = rightleveltimes16 * m_nOutputIntermediate;
+		left = leftleveltimes16 * m_nOutputIntermediate;
+		right = rightleveltimes16 * m_nOutputIntermediate;
 	}
-
-	return retval;
 }

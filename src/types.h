@@ -20,16 +20,6 @@
 #define NULL	0
 #endif
 
-
-typedef union
-{
-	struct {
-		unsigned short Left;
-		unsigned short Right;
-	} sep;
-	unsigned long dword;
-} stereolevel;
-
 typedef struct
 {
 	int nNumberOfPhases;

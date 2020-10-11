@@ -40,7 +40,7 @@ public:
 	void Sync(bool bSync);
 	void Tick(void);
 	unsigned short TickAndOutputMono(void);
-	stereolevel TickAndOutputStereo(void);
+	void TickAndOutputStereo(unsigned short & left, unsigned short & right);
 
 };
 

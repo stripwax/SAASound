@@ -28,6 +28,7 @@
 // Globals
 //////////////////////////////////////////////////////////////////////
 
+// TODO: Support DEBUGSAA via runtime flag / config file
 #ifdef DEBUGSAA
 #include <stdio.h>	// for sprintf
 FILE * dbgfile = NULL;
@@ -47,7 +48,7 @@ m_uParam(0),
 m_uParamRate(0)
 {
 	prev_output_mono = 0;
-	prev_output_stereo.sep.Left = prev_output_stereo.sep.Right = 0;
+	prev_output_left = prev_output_right = 0;
 
 	#ifdef DEBUGSAA
 	dbgfile = fopen("debugsaa.txt","wt");
@@ -93,6 +94,7 @@ m_uParamRate(0)
 	}
 
 	// set parameters
+	// TODO support defaults and overrides from config file
 	SetSoundParameters(SAAP_FILTER | SAAP_11025 | SAAP_8BIT | SAAP_MONO);
 	// reset the virtual SAA
 	Clear();
@@ -516,11 +518,12 @@ unsigned long CSAASoundInternal::GetCurrentSampleRate(void)
 void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 {
 	unsigned short mono1, mono2, mono;
-	stereolevel stereoval, stereoval1, stereoval2;
+	unsigned short left, right, temp_left, temp_right;
 
 	unsigned short prev_mono = prev_output_mono;
-	stereolevel prev_stereo;
-	prev_stereo.dword = prev_output_stereo.dword;
+	unsigned short prev_left, prev_right;
+	prev_left = prev_output_left;
+	prev_right = prev_output_right;
 
 	static double filterout_z1_left = 0, filterout_z1_right = 0;
 
@@ -581,19 +584,24 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 				Noise[0]->Tick();
 				Noise[1]->Tick();
 
-				stereoval.dword = (Amp[0]->TickAndOutputStereo()).dword;
-				stereoval.dword += (Amp[1]->TickAndOutputStereo()).dword;
-				stereoval.dword += (Amp[2]->TickAndOutputStereo()).dword;
-				stereoval.dword += (Amp[3]->TickAndOutputStereo()).dword;
-				stereoval.dword += (Amp[4]->TickAndOutputStereo()).dword;
-				stereoval.dword += (Amp[5]->TickAndOutputStereo()).dword;
+				Amp[0]->TickAndOutputStereo(left, right);
+				Amp[1]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[2]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[3]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[4]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[5]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
 
 				// force output into the range 0<=x<=255
-				stereoval.sep.Left = stereoval.sep.Left * 10;
-				stereoval.sep.Right = stereoval.sep.Right * 10;
+				left *= 10;
+				right *= 10;
 
-				*pBuffer++ = 0x80 + ((stereoval.sep.Left) >> 8);
-				*pBuffer++ = 0x80 + ((stereoval.sep.Right) >> 8);
+				*pBuffer++ = 0x80 + (left >> 8);
+				*pBuffer++ = 0x80 + (right >> 8);
 			}
 			break;
 
@@ -603,22 +611,27 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 				Noise[0]->Tick();
 				Noise[1]->Tick();
 
-				stereoval.dword = (Amp[0]->TickAndOutputStereo()).dword;
-				stereoval.dword += (Amp[1]->TickAndOutputStereo()).dword;
-				stereoval.dword += (Amp[2]->TickAndOutputStereo()).dword;
-				stereoval.dword += (Amp[3]->TickAndOutputStereo()).dword;
-				stereoval.dword += (Amp[4]->TickAndOutputStereo()).dword;
-				stereoval.dword += (Amp[5]->TickAndOutputStereo()).dword;
+				Amp[0]->TickAndOutputStereo(left, right);
+				Amp[1]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[2]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[3]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[4]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[5]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
 
 				// force output into the range 0<=x<=65535
 				// (strictly, the following gives us 0<=x<=63360)
-				stereoval.sep.Left = stereoval.sep.Left * 10;
-				stereoval.sep.Right = stereoval.sep.Right * 10;
+				left *= 10;
+				right *= 10;
 
-				*pBuffer++ = stereoval.sep.Left & 0x00ff;
-				*pBuffer++ = stereoval.sep.Left >> 8;
-				*pBuffer++ = stereoval.sep.Right & 0x00ff;
-				*pBuffer++ = stereoval.sep.Right >> 8;
+				*pBuffer++ = left & 0x00ff;
+				*pBuffer++ = left >> 8;
+				*pBuffer++ = right & 0x00ff;
+				*pBuffer++ = right >> 8;
 			}
 			break;
 		}
@@ -710,35 +723,49 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 			{
 				Noise[0]->Tick();
 				Noise[1]->Tick();
-				stereoval1.dword = (Amp[0]->TickAndOutputStereo()).dword;
-				stereoval1.dword += (Amp[1]->TickAndOutputStereo()).dword;
-				stereoval1.dword += (Amp[2]->TickAndOutputStereo()).dword;
-				stereoval1.dword += (Amp[3]->TickAndOutputStereo()).dword;
-				stereoval1.dword += (Amp[4]->TickAndOutputStereo()).dword;
-				stereoval1.dword += (Amp[5]->TickAndOutputStereo()).dword;
+
+				Amp[0]->TickAndOutputStereo(left, right);
+				Amp[1]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[2]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[3]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[4]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[5]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
 
 				Noise[0]->Tick();
 				Noise[1]->Tick();
-				stereoval2.dword = (Amp[0]->TickAndOutputStereo()).dword;
-				stereoval2.dword += (Amp[1]->TickAndOutputStereo()).dword;
-				stereoval2.dword += (Amp[2]->TickAndOutputStereo()).dword;
-				stereoval2.dword += (Amp[3]->TickAndOutputStereo()).dword;
-				stereoval2.dword += (Amp[4]->TickAndOutputStereo()).dword;
-				stereoval2.dword += (Amp[5]->TickAndOutputStereo()).dword;
+
+				Amp[0]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[1]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[2]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[3]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[4]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[5]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
 
 				// force output into the range 0<=x<=255
-				stereoval.sep.Left = ((stereoval1.sep.Left + stereoval2.sep.Left) * 10) >> 1;
-				stereoval.sep.Right = ((stereoval1.sep.Right + stereoval2.sep.Right) * 10) >> 1;
+				left = (left * 10) >> 1;
+				right = (right * 10) >> 1;
 
 				if (highpass)
 				{
-					stereoval.sep.Left = (stereoval.sep.Left + prev_stereo.sep.Left) >> 1;
-					stereoval.sep.Right = (stereoval.sep.Right + prev_stereo.sep.Right) >> 1;
-					prev_stereo.dword = stereoval.dword;
+					left = (left + prev_left) >> 1;
+					right = (right + prev_right) >> 1;
+					prev_left = left;
+					prev_right = right;
 				}
 
-				*pBuffer++ = 0x80 + ((stereoval.sep.Left) >> 8);
-				*pBuffer++ = 0x80 + ((stereoval.sep.Right) >> 8);
+				*pBuffer++ = 0x80 + (left >> 8);
+				*pBuffer++ = 0x80 + (left >> 8);
 			}
 			break;
 
@@ -747,38 +774,52 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 			{
 				Noise[0]->Tick();
 				Noise[1]->Tick();
-				stereoval1.dword = (Amp[0]->TickAndOutputStereo()).dword;
-				stereoval1.dword += (Amp[1]->TickAndOutputStereo()).dword;
-				stereoval1.dword += (Amp[2]->TickAndOutputStereo()).dword;
-				stereoval1.dword += (Amp[3]->TickAndOutputStereo()).dword;
-				stereoval1.dword += (Amp[4]->TickAndOutputStereo()).dword;
-				stereoval1.dword += (Amp[5]->TickAndOutputStereo()).dword;
+
+				Amp[0]->TickAndOutputStereo(left, right);
+				Amp[1]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[2]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[3]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[4]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[5]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
 
 				Noise[0]->Tick();
 				Noise[1]->Tick();
-				stereoval2.dword = (Amp[0]->TickAndOutputStereo()).dword;
-				stereoval2.dword += (Amp[1]->TickAndOutputStereo()).dword;
-				stereoval2.dword += (Amp[2]->TickAndOutputStereo()).dword;
-				stereoval2.dword += (Amp[3]->TickAndOutputStereo()).dword;
-				stereoval2.dword += (Amp[4]->TickAndOutputStereo()).dword;
-				stereoval2.dword += (Amp[5]->TickAndOutputStereo()).dword;
+
+				Amp[0]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[1]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[2]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[3]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[4]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
+				Amp[5]->TickAndOutputStereo(temp_left, temp_right);
+				left += temp_left; right += temp_right;
 
 				// force output into the range 0<=x<=65535
 				// (strictly, the following gives us 0<=x<=63360)
-				stereoval.sep.Left = ((stereoval1.sep.Left + stereoval2.sep.Left) * 10) >> 1;
-				stereoval.sep.Right = ((stereoval1.sep.Right + stereoval2.sep.Right) * 10) >> 1;
+				left = (left * 10) >> 1;
+				right = (right * 10) >> 1;
 
 				if (highpass)
 				{
-					stereoval.sep.Left = (stereoval.sep.Left + prev_stereo.sep.Left) >> 1;
-					stereoval.sep.Right = (stereoval.sep.Right + prev_stereo.sep.Right) >> 1;
-					prev_stereo.dword = stereoval.dword;
+					left = (left + prev_left) >> 1;
+					right = (right + prev_right) >> 1;
+					prev_left = left;
+					prev_right = right;
 				}
 
-				*pBuffer++ = stereoval.sep.Left & 0x00ff;
-				*pBuffer++ = stereoval.sep.Left >> 8;
-				*pBuffer++ = stereoval.sep.Right & 0x00ff;
-				*pBuffer++ = stereoval.sep.Right >> 8;
+				*pBuffer++ = left & 0x00ff;
+				*pBuffer++ = left >> 8;
+				*pBuffer++ = right & 0x00ff;
+				*pBuffer++ = right >> 8;
 			}
 			break;
 		}
@@ -863,81 +904,49 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 		case SAAP_STEREO | SAAP_8BIT:
 			while (nSamples--)
 			{
-				stereolevel chans[6] = { 0 };
+				unsigned short lefts[6] = { 0 };
+				unsigned short rights[6] = { 0 };
 				for (int i = 0; i < 1<<m_nOversample; i++)
 				{
 					Noise[0]->Tick();
 					Noise[1]->Tick();
 					for (int c = 0; c < 6; c++)
 					{
-						chans[c].dword += (Amp[c]->TickAndOutputStereo()).dword;
+//						chans[c].dword += (Amp[c]->TickAndOutputStereo()).dword;
+						Amp[c]->TickAndOutputStereo(temp_left, temp_right);
+						lefts[c] += temp_left;
+						rights[c] += temp_right;
 					}
 				}
 
 				// force output into the range 0<=x<=255
-				stereoval.dword = 0;
+				left = right = 0;
 				for (int c = 0; c < 6; c++)
 				{
-					stereoval.sep.Left += (((chans[c].sep.Left * 10)+(1<<(m_nOversample-1))) >> m_nOversample);
-					stereoval.sep.Right += (((chans[c].sep.Right * 10)+(1<<(m_nOversample-1))) >> m_nOversample);
+					left += (((lefts[c] * 10)+(1<<(m_nOversample-1))) >> m_nOversample);
+					right += (((rights[c] * 10)+(1<<(m_nOversample-1))) >> m_nOversample);
 				}
 
 				if (highpass)
 				{
-					stereoval.sep.Left = (stereoval.sep.Left + prev_stereo.sep.Left) >> 1;
-					stereoval.sep.Right = (stereoval.sep.Right + prev_stereo.sep.Right) >> 1;
-					prev_stereo.dword = stereoval.dword;
+					left = (left + prev_left) >> 1;
+					right = (right + prev_right) >> 1;
+					prev_left = left;
+					prev_right = right;
 				}
 
-				*pBuffer++ = 0x80 + ((stereoval.sep.Left) >> 8);
-				*pBuffer++ = 0x80 + ((stereoval.sep.Right) >> 8);
+				*pBuffer++ = 0x80 + (left >> 8);
+				*pBuffer++ = 0x80 + (right >> 8);
 			}
 			break;
 
 		case SAAP_STEREO | SAAP_16BIT:
+			// for now, this is the only case that has full support and tested
+			// accumulate and mix at the same time
+			// Of course, this means we can't separately filter and generate
+			// per-channel outputs (see notes at end of file)
 			while (nSamples--)
 			{
-				// if separate channel outputs:
-				/*
-				double f_left[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-				double f_right[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-				for (int i = 0; i < 1<<m_nOversample; i++)
-				{
-					Noise[0]->Tick();
-					Noise[1]->Tick();
-					for (int c = 0; c < 6; c++)
-					{
-						stereoval = Amp[c]->TickAndOutputStereo();
-						f_left[c] += (double)level.sep.Left;
-						f_right[c] += (double)level.sep.Right;
-					}
-				}
-
-				// force output into the range 0<=x<=255
-				stereoval.dword = 0;
-				for (int c = 0; c < 6; c++)
-				{
-					stereoval.sep.Left += (((chans[c].sep.Left * 10)+(1<<(m_nOversample-1))) >> m_nOversample);
-					stereoval.sep.Right += (((chans[c].sep.Right * 10)+(1<<(m_nOversample-1))) >> m_nOversample);
-				}
-				if (highpass)
-				{
-					// cutoff = 20 Hz (say)
-					// const double b1 = exp(-2.0 * M_PI * (Fc/Fs))
-					// const double a0 = 1.0 - b1;
-					const double b1 = 0.99715453887401748389231103340904;
-					const double a0 = 1.0 - b1;
-
-					double in_left = double(stereoval.sep.Left);
-					double in_right = double(stereoval.sep.Right);
-					filterout_z1_left = in_left * a0 + filterout_z1_left * b1;
-					filterout_z1_right = in_right * a0 + filterout_z1_right * b1;
-					stereoval.sep.Left = in_left - filterout_z1_left;
-					stereoval.sep.Right = in_right - filterout_z1_right;
-				}
-				*/
-
-				// if combined channel outputs:
 				double f_left = 0.0, f_right = 0.0;
 				for (int i = 0; i < 1<<m_nOversample; i++)
 				{
@@ -945,14 +954,14 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 					Noise[1]->Tick();
 					for (int c = 0; c < 6; c++)
 					{
-						stereoval = Amp[c]->TickAndOutputStereo();
-						f_left += (double)(stereoval.sep.Left);
-						f_right += (double)(stereoval.sep.Right);
+						Amp[c]->TickAndOutputStereo(temp_left, temp_right);
+						f_left += (double)temp_left;
+						f_right += (double)temp_right;
 					}
 				}
 
-				f_left /= (1<<m_nOversample);
-				f_right /= (1 << m_nOversample);
+				f_left /= (double)(1 << m_nOversample);
+				f_right /= (double)(1 << m_nOversample);
 
 				// scale output into good range
 				f_left *= 10;
@@ -960,11 +969,11 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 
 				if (highpass)
 				{
-					/* cutoff = 20 Hz (say) 
+					/* cutoff = 5 Hz (say) 
 						const double b1 = exp(-2.0 * M_PI * (Fc/Fs))
 						const double a0 = 1.0 - b1;
 					*/
-					const double b1 = 0.99715453887401748389231103340904;
+					const double b1 = 0.99928787;
 					const double a0 = 1.0 - b1;
 
 					filterout_z1_left = f_left * a0 + filterout_z1_left * b1;
@@ -973,13 +982,13 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 					f_right -= filterout_z1_right;
 				}
 
-				stereoval.sep.Left = f_left;
-				stereoval.sep.Right = f_right;
+				left = (unsigned short)f_left; // hm this should be signed
+				right = (unsigned short)f_right; // hm this should be signed
 
-				*pBuffer++ = stereoval.sep.Left & 0x00ff;
-				*pBuffer++ = stereoval.sep.Left >> 8;
-				*pBuffer++ = stereoval.sep.Right & 0x00ff;
-				*pBuffer++ = stereoval.sep.Right >> 8;
+				*pBuffer++ = left & 0x00ff;
+				*pBuffer++ = left >> 8; // if this is signed, won't this do the wrong thing?
+				*pBuffer++ = right & 0x00ff;
+				*pBuffer++ = right >> 8;
 			}
 			break;
 		default: // ie - the m_uParam contains modes not implemented yet
@@ -1003,7 +1012,8 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 #endif
 
 	prev_output_mono = prev_mono;
-	prev_output_stereo.dword = prev_stereo.dword;
+	prev_output_left = prev_left;
+	prev_output_right = prev_right;
 }
 
 ///////////////////////////////////////////////////////
@@ -1017,5 +1027,114 @@ void SAAAPI DestroyCSAASound(LPCSAASOUND object)
 {
 	delete (object);
 }
+
+
+/* thoughts on lowpass filtering as part of oversampling.
+I tried this and really it didn't seem to make a lot of (audible) difference.
+
+// lowpass oversample filter adds complexity and not particularly audibly better than simple averaging.
+// use_lowpass_oversample_filter_average_output adds an additional averaging step to the output of the oversample
+// filter.  this seems critical, because without this, the raw output of the lowpass filter is full of aliases
+// If use_lowpass_oversample_filter is False, then the _average_output flag is ignored.
+// Default, use_lowpass_oversample_filter is False, it sounds just fine really.
+
+//#define USE_LOWPASS_OVERSAMPLE_FILTER
+#undef USE_LOWPASS_OVERSAMPLE_FILTER
+//#define USE_LOWPASS_OVERSAMPLE_FILTER_AVERAGE_OUTPUT
+#undef USE_LOWPASS_OVERSAMPLE_FILTER_AVERAGE_OUTPUT
+
+#ifdef USE_LOWPASS_OVERSAMPLE_FILTER
+static double oversample_lp_filterout_z1_left_stages[10] = { 0,0,0,0,0,0,0,0,0,0 };
+static double oversample_lp_filterout_z1_right_stages[10] = { 0,0,0,0,0,0,0,0,0,0 };
+double averaged_filterout_left = 0.0, averaged_filterout_right = 0.0;
+const int nStages = 10;
+for (int i = 0; i < 1 << m_nOversample; i++)
+{
+	Noise[0]->Tick();
+	Noise[1]->Tick();
+	f_left = f_right = 0;
+	for (int c = 0; c < 6; c++)
+	{
+		Amp[c]->TickAndOutputStereo(temp_left, temp_right);
+		f_left += (double)temp_left;
+		f_right += (double)temp_right;
+	}
+	// apply lowpass here.
+	// HACK: ASSUME m_nOversample is 64 (I was experimenting only using the 64x oversample anyway)
+	// therefore Fs = 44100*64
+	// let's set Fc = 10kHz
+	// so Fc/Fs = 0.00354308390022675736961451247166
+	// const double b1 = exp(-2.0 * M_PI * (Fc/Fs))
+	// const double a0 = 1.0 - b1;
+	// const double b1 = 0.9779841137335348363722276130195;
+	const double b1 = 0.977;
+	const double a0 = 1.0 - b1;
+
+	oversample_lp_filterout_z1_left_stages[0] = f_left * a0 + oversample_lp_filterout_z1_left_stages[0] * b1;
+	for (int stage = 1; stage < nStages; stage++)
+		oversample_lp_filterout_z1_left_stages[stage] = oversample_lp_filterout_z1_left_stages[stage - 1] * a0 + oversample_lp_filterout_z1_left_stages[stage] * b1;
+	oversample_lp_filterout_z1_right_stages[0] = f_right * a0 + oversample_lp_filterout_z1_right_stages[0] * b1;
+	for (int stage = 1; stage < nStages; stage++)
+		oversample_lp_filterout_z1_right_stages[stage] = oversample_lp_filterout_z1_right_stages[stage - 1] * a0 + oversample_lp_filterout_z1_right_stages[stage] * b1;
+
+#ifdef USE_LOWPASS_OVERSAMPLE_FILTER_AVERAGE_OUTPUT
+	averaged_filterout_left += oversample_lp_filterout_4z1_left;
+	averaged_filterout_right += oversample_lp_filterout_4z1_right;
+#endif
+}
+
+// by the end of this loop we will have computed the oversample lowpass filter m_nOversample times
+// and yielded exactly ONE sample output.
+#ifdef USE_LOWPASS_OVERSAMPLE_FILTER_AVERAGE_OUTPUT
+f_left = averaged_filterout_left / (1 << m_nOversample);
+f_right = averaged_filterout_right / (1 << m_nOversample);
+#else
+f_left = oversample_lp_filterout_z1_left_stages[nStages - 1];
+f_right = oversample_lp_filterout_z1_right_stages[nStages - 1];
+#endif
+
+#else
+	// do the simple 1/N averaging which is easier and sounds good enough
+
+#endif
+
+*/
+
+/* notes about multiple channel output (not implemented)
+* 
+* I'm thinking I should just implement a Render stage to handle final mixing
+* but I want to handle the following two cases:
+* 
+* 1.  If only mixed final stereo result is required, only need to perform filtering
+*     on the mixed output
+* 2.  If separate channel outputs are required, each needs to have filtering applied
+*     (but then, mixing is trivial)
+* 
+* I want to optimise for 1, since that's what most people will actually be doing (i.e.
+* listening to the output, rather than generating separate channels as separate outputs
+* and doing their own analysis/mixing)
+* 
+* If I needed to do filtering for multiple outputs, I might do it like this:
+
+
+				// if separate channel outputs:
+				double f_left[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+				double f_right[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+				for (int i = 0; i < 1<<m_nOversample; i++)
+				{
+					Noise[0]->Tick();
+					Noise[1]->Tick();
+					for (int c = 0; c < 6; c++)
+					{
+						Amp[c]->TickAndOutputStereo(temp_left, temp_right);
+						f_left[c] += (double)temp_left;
+						f_right[c] += (double)temp_right;
+					}
+				}
+				// ...
+				// now downsample each of f_left[i], f_right[i]
+
+*/
+
 
 ///////////////////////////////////////////////////////

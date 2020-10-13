@@ -69,30 +69,24 @@ void CSAAEnv::ExternalClock(void)
 
 void CSAAEnv::SetEnvControl(int nData)
 {
-	
 	// process immediate stuff first:
-	m_nResolution = ((nData & 0x10)==0x10) ? 2 : 1;
-	m_bEnabled = ((nData & 0x80)==0x80);
+	// start with the Enabled flag.  if env is disabled,
+	// there's not much to do
+	bool bEnabled = ((nData & 0x80)==0x80);
+	if (!bEnabled && !m_bEnabled)
+		return;
+	m_bEnabled = bEnabled;
 	if (!m_bEnabled)
 	{
-		// env control was enabled, and now disabled, so reset
-		// pointers to start of envelope waveform
-		m_nPhase = 0;
-		m_nPhasePosition = 0;
+		// env control was enabled, and now disabled
+		// Any subsequent env control changes are immediate.
 		m_bEnvelopeEnded = true;
 		m_bOkForNewData = true;
-		// store current new data, and set the newdata flag:
-		m_bNewData = true;
-		m_nNextData = nData;
-		// IS THIS REALLY CORRECT THOUGH?? Should disabling
-		// it REALLY RESET THESE THINGS?
-
-		SetLevels();
-
 		return;
 	}
 
-	// else if (m_bEnabled)
+	// Resolution (3bit/4bit) is also immediately processed
+	m_nResolution = ((nData & 0x10) == 0x10) ? 2 : 1;
 
 	// now buffered stuff: but only if it's ok to, and only if the
 	// envgenerator is not disabled. otherwise it just stays buffered until
@@ -102,7 +96,11 @@ void CSAAEnv::SetEnvControl(int nData)
 	{
 		SetNewEnvData(nData); // also does the SetLevels() call for us.
 		m_bNewData=false;
-		m_bOkForNewData=false; // is this right?
+		// m_bOkForNewData=false;
+		// is this right?
+		// NO.  See test case EnvExt_34 (setting data multiple times
+		// when m_bOkForNewData is already true, should not reset
+		// m_bOkForNewData)
 	}
 	else
 	{
@@ -164,6 +162,14 @@ inline void CSAAEnv::Tick(void)
 	// SetLevels also handles left-right channel inverting
 
 	// increment phase position
+	// NOTE: additional test case required: If I change resolution mid-waveform
+	// is the result consistent with the below?  for example:
+	// phase = 0
+	// tick with 4-bit resolution: phase = 1  ; should sound different when flipping resolution between 3/4
+	// tick with 3-bit resolution: phase = 3  ; should sound different when flipping resolution between 3/4
+	// tick with 4-bit resolution: phase = 4  ; should sound identical when flipping resolution between 3/4
+	// tick with 3-bit resolution: phase = 6  ; should sound identical when flipping resolution between 3/4
+	// tick with 4-bit resolution: phase = 5  ; should sound different , .. etc
 	m_nPhasePosition += m_nResolution;
 
 	// if this means we've gone past 16 (the end of a phase)
@@ -185,10 +191,9 @@ inline void CSAAEnv::Tick(void)
 			if (!m_bLooping)
 			{
 				// position (3) only
+				// note that it seems that the sustain level is ALWAYS zero
+				// in the case of non-looping waveforms
 				m_bEnvelopeEnded = true;
-				// keep pointer at end of envelope for sustain
-				m_nPhase = m_nNumberOfPhases-1;
-				m_nPhasePosition = 15;
 				m_bOkForNewData = true;
 			}
 			else
@@ -229,10 +234,17 @@ inline void CSAAEnv::Tick(void)
 	if (m_bNewData && m_bOkForNewData)
 	{
 		m_bNewData = false;
-		m_bOkForNewData=false; // is this right?
-		// do we need to reset OkForNewData?
-		// if we do, then we can't overwrite env data just prior to
-		// a new envelope starting - but what's correct? Who knows?
+		// m_bOkForNewData=false;
+		// is this right? do we need to reset OkForNewData?
+		// NO.  See test case EnvExt_34
+		// If we do set m_bOkForNewData=false, then we cannot change the envelope
+		// values multiple times at point (4)
+		// test case required: can we send two (or more) changes when we're at point (3)
+		// or (4) in envelope waveform, prior to receiving the next tick?
+		// Another test case required:  what happens if we're at point (4) in the first
+		// cycle of a repetitive decay or repetitive attack, and then change waveform to
+		// triangle  -  does our point (4) move and now we can NOT change waveform again
+		// until the NEXT point (4)?
 		SetNewEnvData(m_nNextData);
 	}
 	else
@@ -253,12 +265,27 @@ inline void CSAAEnv::SetLevels(void)
 
 	// m_nResolution: 1 means 4-bit resolution; 2 means 3-bit resolution. Resolution of envelope waveform.
 
+	// Note that this is handled 'immediately', and doesn't wait for synchronisation of
+	// the envelope waveform (this is important, see test case EnvExt_imm)
+	// It is therefore possible to switch between 4-bit and 3-bit resolution in the middle of
+	// an envelope waveform.  if you are at an 'odd' phase position, you would be able to hear
+	// the difference.  if you are at an 'even' phase position, the volume level for 4-bit
+	// and 3-bit would be the same.
+	// NOTE: additional test cases are required.
+
 	switch (m_nResolution)
 	{
 		case 1: // 4 bit res waveforms
 		default:
 			{
-				m_nLeftLevel = m_pEnvData->nLevels[0][m_nPhase][m_nPhasePosition];
+				// special case: if envelope is not a looping one, and we're at the end
+				// then our level should be zero (all of the non-looping waveforms have
+				// a sustain level of zero):
+				if (m_bEnvelopeEnded && !m_bLooping)
+					m_nLeftLevel = 0;
+				else
+					m_nLeftLevel = m_pEnvData->nLevels[0][m_nPhase][m_nPhasePosition];
+
 				if (m_bInvertRightChannel)
 					m_nRightLevel = 15-m_nLeftLevel;
 				else
@@ -267,7 +294,13 @@ inline void CSAAEnv::SetLevels(void)
 			}
 		case 2: // 3 bit res waveforms
 			{
-				m_nLeftLevel = m_pEnvData->nLevels[1][m_nPhase][m_nPhasePosition];
+				// special case: if envelope is not a looping one, and we're at the end
+				// then our level should be zero (all of the non-looping waveforms have
+				// a sustain level of zero):
+				if (m_bEnvelopeEnded && !m_bLooping)
+					m_nLeftLevel = 0;
+				else
+					m_nLeftLevel = m_pEnvData->nLevels[1][m_nPhase][m_nPhasePosition];
 				if (m_bInvertRightChannel)
 					m_nRightLevel = 14-m_nLeftLevel;
 				else

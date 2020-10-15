@@ -123,11 +123,6 @@ void CSAAEnv::SetEnvControl(int nData)
 	{
 		SetNewEnvData(nData); // also does the SetLevels() call for us.
 		m_bNewData=false;
-		// m_bOkForNewData=false;
-		// is this right?
-		// NO.  See test case EnvExt_34 (setting data multiple times
-		// when m_bOkForNewData is already true, should not reset
-		// m_bOkForNewData)
 	}
 	else
 	{
@@ -290,17 +285,6 @@ inline void CSAAEnv::Tick(void)
 	if (m_bNewData && bProcessNewDataIfAvailable)
 	{
 		m_bNewData = false;
-		// m_bOkForNewData=false;
-		// is this right? do we need to reset OkForNewData?
-		// NO.  See test case EnvExt_34
-		// If we do set m_bOkForNewData=false, then we cannot change the envelope
-		// values multiple times at point (4)
-		// test case required: can we send two (or more) changes when we're at point (3)
-		// or (4) in envelope waveform, prior to receiving the next tick?
-		// Another test case required:  what happens if we're at point (4) in the first
-		// cycle of a repetitive decay or repetitive attack, and then change waveform to
-		// triangle  -  does our point (4) move and now we can NOT change waveform again
-		// until the NEXT point (4)?
 		SetNewEnvData(m_nNextData);
 	}
 	else
@@ -384,6 +368,11 @@ inline void CSAAEnv::SetNewEnvData(int nData)
 	if (m_bEnabled)
 	{
 		m_bEnvelopeEnded = false;
+		m_bOkForNewData = false;
+		// is this right?
+		// YES.  See test case EnvExt_34c (setting data multiple times
+		// when at a point (3) resets the waveform so you're no longer
+		// at a point (3).
 	}
 	else
 	{

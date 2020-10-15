@@ -42,7 +42,6 @@ CSAAEnv::CSAAEnv()
 m_bEnabled(false),
 m_bNewData(false),
 m_nNextData(0),
-m_bOkForNewData(true),
 m_bEnvelopeEnded(true),
 m_nPhase(0),
 m_nPhasePosition(0),
@@ -85,7 +84,6 @@ void CSAAEnv::SetEnvControl(int nData)
 		// env control was enabled, and now disabled
 		// Any subsequent env control changes are immediate.
 		m_bEnvelopeEnded = true;
-		m_bOkForNewData = true;
 		return;
 	}
 
@@ -117,9 +115,9 @@ void CSAAEnv::SetEnvControl(int nData)
 
 	// now buffered stuff: but only if it's ok to, and only if the
 	// envgenerator is not disabled. otherwise it just stays buffered until
-	// the Tick() function sets okfornewdata to true and realises there is
+	// the Tick() function sets m_bEnvelopeEnded to true and realises there is
 	// already some new data waiting
-	if (m_bOkForNewData)
+	if (m_bEnvelopeEnded)
 	{
 		SetNewEnvData(nData); // also does the SetLevels() call for us.
 		m_bNewData=false;
@@ -156,7 +154,6 @@ inline void CSAAEnv::Tick(void)
 		m_bEnvelopeEnded = true;
 		m_nPhase = 0;
 		m_nPhasePosition = 0;
-		m_bOkForNewData = true;
 		return;
 	}
 
@@ -232,7 +229,6 @@ inline void CSAAEnv::Tick(void)
 				// note that it seems that the sustain level is ALWAYS zero
 				// in the case of non-looping waveforms
 				m_bEnvelopeEnded = true;
-				m_bOkForNewData = true;
 				bProcessNewDataIfAvailable = true;
 			}
 			else
@@ -242,11 +238,10 @@ inline void CSAAEnv::Tick(void)
 				// at THIS point. If (after this Tick has completed) any new
 				// env data is written, it will NOT be acted upon, until
 				// we get back to position (4) again.
-				// this is why m_bOkForNewData (which affects the behaviour
-				// of the SetEnvControl method) is NOT set true here.
+				// this is why m_bEnvelopeEnded (which affects the behaviour
+				// of the SetEnvControl method) is FALSE here.
 				// See test case: envext_34c  (as noted earlier)
 				m_bEnvelopeEnded = false;
-				m_bOkForNewData = false;
 				// set phase pointer to start of envelope for loop
 				// and reset m_nPhasePosition
 				m_nPhase=0;
@@ -264,7 +259,7 @@ inline void CSAAEnv::Tick(void)
 
 			// any commands sent to this envelope controller
 			// will be buffered. Set the flag to indicate this.
-			m_bOkForNewData = false;
+			m_bEnvelopeEnded = false;
 			m_nPhasePosition -= 16;
 		}
 	}
@@ -274,7 +269,7 @@ inline void CSAAEnv::Tick(void)
 		// but, importantly, we are no longer at the start of the phase ...
 		// so new data cannot be acted on immediately, and must
 		// be buffered
-		m_bOkForNewData = false;
+		m_bEnvelopeEnded = false;
 		// Phase and PhasePosition have already been updated.
 		// SetLevels() will need to be called to actually calculate
 		// the output 'level' of this envelope controller
@@ -368,7 +363,6 @@ inline void CSAAEnv::SetNewEnvData(int nData)
 	if (m_bEnabled)
 	{
 		m_bEnvelopeEnded = false;
-		m_bOkForNewData = false;
 		// is this right?
 		// YES.  See test case EnvExt_34c (setting data multiple times
 		// when at a point (3) resets the waveform so you're no longer
@@ -380,7 +374,6 @@ inline void CSAAEnv::SetNewEnvData(int nData)
 		m_bEnvelopeEnded = true;
 		m_nPhase = 0;
 		m_nPhasePosition = 0;
-		m_bOkForNewData = true;
 	}
 	
 	SetLevels();

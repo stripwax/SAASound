@@ -26,7 +26,6 @@ private:
 	char m_nInitialLevel;
 	bool m_bNewData;
 	BYTE m_nNextData;
-	bool m_bOkForNewData;
 	bool m_bClockExternally;
 	static const ENVDATA cs_EnvData[8];
 

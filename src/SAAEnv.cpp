@@ -42,10 +42,13 @@ CSAAEnv::CSAAEnv()
 m_bEnabled(false),
 m_bNewData(false),
 m_nNextData(0),
-m_bOkForNewData(false)
+m_bEnvelopeEnded(true),
+m_nPhase(0),
+m_nPhasePosition(0),
+m_nResolution(1)
 {
 	// initialise itself with the value 'zero'
-	SetNewEnvData(0);
+	SetEnvControl(0);
 }
 
 CSAAEnv::~CSAAEnv()
@@ -81,26 +84,43 @@ void CSAAEnv::SetEnvControl(int nData)
 		// env control was enabled, and now disabled
 		// Any subsequent env control changes are immediate.
 		m_bEnvelopeEnded = true;
-		m_bOkForNewData = true;
 		return;
 	}
 
 	// Resolution (3bit/4bit) is also immediately processed
-	m_nResolution = ((nData & 0x10) == 0x10) ? 2 : 1;
+	int new_resolution = ((nData & 0x10) == 0x10) ? 2 : 1;
+	// NOTE: undocumented behaviour when changing resolution mid-waveform
+	// Empirically, the following matches observations:
+	// * When ticking the env generator with 4-bit resolution, the position += 1
+	// * When ticking the env generator with 3-bit resolution, the position += 2
+	// * When changing between 4-bit resolution and 3-bit resolution
+	//   without ticking the env generator, the position is unchanged
+	//   (although, effectively, the LSB is ignored. Purely as an implementation
+	//    detail, I'm implementing this as clearing the LSB ie LSB=0; see next point)
+	// * When changing between 3-bit resolution and 4-bit resolution
+	//   without ticking the env generator, the position LSB is set to 1
+	// See test case: envext_34b
+	//
+	if (m_nResolution == 1 && new_resolution == 2)
+	{
+		// change from 4-bit to 3-bit
+		m_nPhasePosition &= 0xe;
+	}
+	else if (m_nResolution == 2 && new_resolution == 1)
+	{
+		// change from 3-bit to 4-bit
+		m_nPhasePosition |= 0x1;
+	}
+	m_nResolution = new_resolution;
 
 	// now buffered stuff: but only if it's ok to, and only if the
 	// envgenerator is not disabled. otherwise it just stays buffered until
-	// the Tick() function sets okfornewdata to true and realises there is
+	// the Tick() function sets m_bEnvelopeEnded to true and realises there is
 	// already some new data waiting
-	if (m_bOkForNewData)
+	if (m_bEnvelopeEnded)
 	{
 		SetNewEnvData(nData); // also does the SetLevels() call for us.
 		m_bNewData=false;
-		// m_bOkForNewData=false;
-		// is this right?
-		// NO.  See test case EnvExt_34 (setting data multiple times
-		// when m_bOkForNewData is already true, should not reset
-		// m_bOkForNewData)
 	}
 	else
 	{
@@ -134,7 +154,6 @@ inline void CSAAEnv::Tick(void)
 		m_bEnvelopeEnded = true;
 		m_nPhase = 0;
 		m_nPhasePosition = 0;
-		m_bOkForNewData = true;
 		return;
 	}
 
@@ -162,22 +181,40 @@ inline void CSAAEnv::Tick(void)
 	// SetLevels also handles left-right channel inverting
 
 	// increment phase position
-	// NOTE: additional test case required: If I change resolution mid-waveform
-	// is the result consistent with the below?  for example:
-	// phase = 0
-	// tick with 4-bit resolution: phase = 1  ; should sound different when flipping resolution between 3/4
-	// tick with 3-bit resolution: phase = 3  ; should sound different when flipping resolution between 3/4
-	// tick with 4-bit resolution: phase = 4  ; should sound identical when flipping resolution between 3/4
-	// tick with 3-bit resolution: phase = 6  ; should sound identical when flipping resolution between 3/4
-	// tick with 4-bit resolution: phase = 5  ; should sound different , .. etc
 	m_nPhasePosition += m_nResolution;
 
 	// if this means we've gone past 16 (the end of a phase)
 	// then change phase, and if necessary, loop
+	// Refer to datasheet for meanings of (3) and (4) in following text
+	// w.r.t SAA1099 envelopes
+
+	// Note that we will always reach position (3) or (4), even if we keep toggling
+	// resolution from 4-bit to 3-bit and back, because the counter will always wrap to 0.
+	// In fact it's quite elegant:
+	// No matter how you increment and toggle and increment and toggle, the counter
+	// will at some point be either 0xe (either 4-bit mode or 3-bit mode) or 0xf (4-bit mode only).
+	// Depending on the mode, even if you change the mode, the next increment,
+	// or the one after it, will then take it to 0.
+	// 0xe + 2  (3bit mode)  => 0x0
+	// 0xe + 1  (4bit mode)  => 0xf
+	// 0xf + 1  (4bit mode)  => 0x0
+	// 0xe -> (toggle 3bit mode to 4bit mode) => 0xf
+	// 0xe -> (toggle 4bit mode to 3bit mode) => 0xe
+	// 0xf -> (toggle 4bit mode to 3bit mode) => 0xe
+	//
+	// but there is a subtlety (of course), which is that any changes at point (3)
+	// can take place immediately you hit point (3), but changes at point (4) are actually
+	// only acted upon when the counter transitions from 0xe (or 0xf) to 0x0 (which also
+	// means that, for these looping envelopes, which are the ones that have a point(4),
+	// immediately after the counter wrapping to 0x0, a write to the env data register will
+	// NOT set the waveform and will NOT reset the phase/phaseposition (even though it
+	// will still let you toggle the 4bit/3bit mode, which will change the phaseposition LSB!)
+	// See test case: envext_34c
+
+	bool bProcessNewDataIfAvailable = false;
 	if (m_nPhasePosition >= 16)
 	{
 		m_nPhase++;
-		m_nPhasePosition-=16;
 			
 		// if we should loop, then do so - and we've reached position (4)
 		// otherwise, if we shouldn't loop,
@@ -186,22 +223,30 @@ inline void CSAAEnv::Tick(void)
 		if (m_nPhase == m_nNumberOfPhases)
 		{
 			// at position (3) or (4)
-			m_bOkForNewData = true;
-
 			if (!m_bLooping)
 			{
 				// position (3) only
 				// note that it seems that the sustain level is ALWAYS zero
 				// in the case of non-looping waveforms
 				m_bEnvelopeEnded = true;
-				m_bOkForNewData = true;
+				bProcessNewDataIfAvailable = true;
 			}
 			else
 			{
 				// position (4) only
+				// note that any data already latched is ONLY acted upon
+				// at THIS point. If (after this Tick has completed) any new
+				// env data is written, it will NOT be acted upon, until
+				// we get back to position (4) again.
+				// this is why m_bEnvelopeEnded (which affects the behaviour
+				// of the SetEnvControl method) is FALSE here.
+				// See test case: envext_34c  (as noted earlier)
 				m_bEnvelopeEnded = false;
 				// set phase pointer to start of envelope for loop
+				// and reset m_nPhasePosition
 				m_nPhase=0;
+				m_nPhasePosition -= 16;
+				bProcessNewDataIfAvailable = true;
 			}
 		}
 		else // (m_nPhase < m_nNumberOfPhases)
@@ -214,7 +259,8 @@ inline void CSAAEnv::Tick(void)
 
 			// any commands sent to this envelope controller
 			// will be buffered. Set the flag to indicate this.
-			m_bOkForNewData = false;
+			m_bEnvelopeEnded = false;
+			m_nPhasePosition -= 16;
 		}
 	}
 	else // (m_nPhasePosition < 16)
@@ -223,7 +269,7 @@ inline void CSAAEnv::Tick(void)
 		// but, importantly, we are no longer at the start of the phase ...
 		// so new data cannot be acted on immediately, and must
 		// be buffered
-		m_bOkForNewData = false;
+		m_bEnvelopeEnded = false;
 		// Phase and PhasePosition have already been updated.
 		// SetLevels() will need to be called to actually calculate
 		// the output 'level' of this envelope controller
@@ -231,20 +277,9 @@ inline void CSAAEnv::Tick(void)
 
 	
 	// if we have new (buffered) data, now is the time to act on it
-	if (m_bNewData && m_bOkForNewData)
+	if (m_bNewData && bProcessNewDataIfAvailable)
 	{
 		m_bNewData = false;
-		// m_bOkForNewData=false;
-		// is this right? do we need to reset OkForNewData?
-		// NO.  See test case EnvExt_34
-		// If we do set m_bOkForNewData=false, then we cannot change the envelope
-		// values multiple times at point (4)
-		// test case required: can we send two (or more) changes when we're at point (3)
-		// or (4) in envelope waveform, prior to receiving the next tick?
-		// Another test case required:  what happens if we're at point (4) in the first
-		// cycle of a repetitive decay or repetitive attack, and then change waveform to
-		// triangle  -  does our point (4) move and now we can NOT change waveform again
-		// until the NEXT point (4)?
 		SetNewEnvData(m_nNextData);
 	}
 	else
@@ -328,6 +363,10 @@ inline void CSAAEnv::SetNewEnvData(int nData)
 	if (m_bEnabled)
 	{
 		m_bEnvelopeEnded = false;
+		// is this right?
+		// YES.  See test case EnvExt_34c (setting data multiple times
+		// when at a point (3) resets the waveform so you're no longer
+		// at a point (3).
 	}
 	else
 	{
@@ -335,11 +374,9 @@ inline void CSAAEnv::SetNewEnvData(int nData)
 		m_bEnvelopeEnded = true;
 		m_nPhase = 0;
 		m_nPhasePosition = 0;
-		m_bOkForNewData = true;
 	}
 	
 	SetLevels();
-
 }
 
 

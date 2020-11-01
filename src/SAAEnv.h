@@ -10,7 +10,7 @@
 class CSAAEnv  
 {
 private:
-	unsigned short m_nLeftLevel, m_nRightLevel;
+	int m_nLeftLevel, m_nRightLevel;
 	ENVDATA const * m_pEnvData;
 
 	bool m_bEnabled;
@@ -41,10 +41,15 @@ public:
 	void InternalClock(void);
 	void ExternalClock(void);
 	void SetEnvControl(int nData); // really just a BYTE
-	unsigned short LeftLevel(void) const;
-	unsigned short RightLevel(void) const;
+	int LeftLevel(void) const;
+	int RightLevel(void) const;
 	bool IsActive(void) const;
 
 };
+
+inline bool CSAAEnv::IsActive(void) const
+{
+	return m_bEnabled;
+}
 
 #endif	// SAAENV_H_INCLUDED

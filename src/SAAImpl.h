@@ -12,27 +12,17 @@
 #define SAAIMPL_H_INCLUDED
 
 #include "SAASound.h"
+#include "SAADevice.h"
 
 class CSAASoundInternal : public CSAASound
 {
 private:
-	int m_nCurrentSaaReg;
-	bool m_bOutputEnabled;
-	bool m_bSync;
+	CSAADevice m_chip;
 	int m_uParam, m_uParamRate;
-	int m_nOversample;
-
-	CSAAFreq * Osc[6];
-	CSAANoise * Noise[2];
-	CSAAAmp * Amp[6];
-	CSAAEnv * Env[2];
-
-	unsigned short prev_output_mono;
-	unsigned short prev_output_left, prev_output_right;
-
-#ifdef DEBUGSAA
-	unsigned long m_nDebugSample;
-#endif
+	unsigned int m_nSampleRateMode;
+	unsigned int m_nClockRate;
+	unsigned int m_nOversample;
+	bool m_bHighpass;
 
 public:
 	CSAASoundInternal();
@@ -43,8 +33,8 @@ public:
 	void WriteAddress(BYTE nReg);
 	void WriteData(BYTE nData);
 	void WriteAddressData(BYTE nReg, BYTE nData);
-	void Clear(void);
 	BYTE ReadAddress(void);
+	void Clear(void);
 
 	SAAPARAM GetCurrentSoundParameters(void);
 	unsigned long GetCurrentSampleRate(void);

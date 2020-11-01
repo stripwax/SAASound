@@ -39,11 +39,17 @@ public:
 	void SetClockRate(int nClockRate);
 	void Seed(unsigned long seed);
 
-	unsigned short Tick(void);
-	unsigned short Level(void) const;
-	unsigned short LevelTimesTwo(void) const;
+	void Tick(void);
+	int Level(void) const;
 	void Sync(bool bSync);
 
 };
+
+inline int CSAANoise::Level(void) const
+{
+	// returns 0 or 1
+	return (m_nRand & 0x00000001);
+}
+
 
 #endif	// SAANOISE_H_INCLUDED

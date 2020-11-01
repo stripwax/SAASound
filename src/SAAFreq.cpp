@@ -10,10 +10,11 @@
 #include "SAANoise.h"
 #include "SAAEnv.h"
 #include "SAAFreq.h"
+#include "defns.h"
 
 unsigned long CSAAFreq::m_FreqTable[2048];
 
-const unsigned short INITIAL_LEVEL = 2;
+const int INITIAL_LEVEL = 1;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -27,12 +28,12 @@ m_nOversample(0), m_nCounterLimit_low(1),
 m_nCurrentOffset(0), m_nCurrentOctave(0), m_nNextOffset(0), m_nNextOctave(0),
 m_bIgnoreOffsetData(false), m_bNewData(false), 
 m_bSync(false),
-m_nSampleRateMode(2), m_nSampleRate(11025),
+m_nSampleRateMode(0), m_nSampleRate(SAMPLE_RATE_HZ),
 m_pcConnectedNoiseGenerator(NoiseGenerator),
 m_pcConnectedEnvGenerator(EnvGenerator),
 m_nConnectedMode((NoiseGenerator == NULL) ? ((EnvGenerator == NULL) ? 0 : 1) : 2)
 {
-	SetClockRate(8000000);
+	SetClockRate(EXTERNAL_CLK_HZ);
 	SetAdd(); // current octave, current offset
 }
 
@@ -56,6 +57,13 @@ void CSAAFreq::SetFreqOffset(BYTE nOffset)
 			// order, on the next half-cycle of the current frequency
 			// generator, ONLY the octave data is acted upon.
 			// The offset data will be acted upon next time.
+
+			// ?? TEST CASE :    if you set the octave and then the offset
+			// but the octave you set it to is the same one it already was.
+			// Will this ignore the offset data?
+			// Do you get the same behaviour if you set offset THEN octave
+			// even if you set octave to the same value it was before?
+
 			m_bIgnoreOffsetData=true;
 		}
 	}
@@ -148,7 +156,7 @@ void CSAAFreq::SetSampleRateMode(int nSampleRateMode)
 	}
 
 	m_nSampleRateMode = nSampleRateMode;
-	m_nSampleRate = 44100 >> nSampleRateMode;
+	m_nSampleRate = SAMPLE_RATE_HZ >> nSampleRateMode;
 }
 
 void CSAAFreq::SetOversample(unsigned int oversample)
@@ -197,24 +205,11 @@ void CSAAFreq::SetClockRate(int nClockRate)
 }
 #endif
 
-unsigned short CSAAFreq::Level(void) const
+int CSAAFreq::Tick(void)
 {
+	// set to the absolute level (0 or 1)
 	if (m_bSync)
-		return 2;
-
-	return GetLevel(m_nLevel);
-}
-
-/*static*/ inline unsigned short CSAAFreq::GetLevel(unsigned short nLevel)
-{
-	return nLevel;
-}
-
-unsigned short CSAAFreq::Tick(void)
-{
-	// set to the absolute level (0 or 2)
-	if (m_bSync)
-		return 2;
+		return 1;
 
 	m_nCounter += m_nAdd;
 	while (m_nCounter >= (m_nSampleRate<<12))
@@ -226,8 +221,8 @@ unsigned short CSAAFreq::Tick(void)
 			// period elapsed for (at least) one half-cycle of
 			// current frequency
 			m_nCounter_low = 0;
-			// flip state - from 0 to -2 or vice versa
-			m_nLevel = 2 - m_nLevel;
+			// flip state - from 0 to 1 or vice versa
+			m_nLevel = 1 - m_nLevel;
 
 			// trigger any connected devices
 			switch (m_nConnectedMode)
@@ -252,7 +247,7 @@ unsigned short CSAAFreq::Tick(void)
 		}
 	}
 	
-	return GetLevel(m_nLevel);
+	return m_nLevel;
 }
 
 void CSAAFreq::SetAdd(void)

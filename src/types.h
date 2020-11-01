@@ -24,7 +24,7 @@ typedef struct
 {
 	int nNumberOfPhases;
 	bool bLooping;
-	unsigned short nLevels[2][2][16]; // [Resolution][Phase][Withinphase]
+	int nLevels[2][2][16]; // [Resolution][Phase][Withinphase]
 } ENVDATA;
 
 #ifdef WIN32

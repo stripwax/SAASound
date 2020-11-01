@@ -14,6 +14,7 @@
 
 #include "types.h"
 #include "SAANoise.h"
+#include "defns.h"
 
 
 //////////////////////////////////////////////////////////////////////
@@ -28,11 +29,11 @@ m_nCounterLimit_low(1),
 m_nOversample(0),
 m_bSync(false),
 m_nSampleRateMode(2),
-m_nSampleRate(11025),
+m_nSampleRate(SAMPLE_RATE_HZ),
 m_nSourceMode(0),
 m_nRand(1)
 {
-	SetClockRate(8000000);
+	SetClockRate(EXTERNAL_CLK_HZ);
 	m_nAdd = m_nAddBase;
 }
 
@@ -44,11 +45,11 @@ m_nCounterLimit_low(1),
 m_nOversample(0),
 m_bSync(false),
 m_nSampleRateMode(2),
-m_nSampleRate(11025),
+m_nSampleRate(SAMPLE_RATE_HZ),
 m_nSourceMode(0),
 m_nRand(seed)
 {
-	SetClockRate(8000000);
+	SetClockRate(EXTERNAL_CLK_HZ);
 	m_nAdd = m_nAddBase;
 }
 
@@ -71,16 +72,6 @@ void CSAANoise::Seed(unsigned long seed)
 	m_nRand = seed;
 }
 
-unsigned short CSAANoise::Level(void) const
-{
-	return (unsigned short)(m_nRand & 0x00000001);
-}
-
-unsigned short CSAANoise::LevelTimesTwo(void) const
-{
-	return (unsigned short)((m_nRand & 0x00000001) << 1);
-}
-
 void CSAANoise::SetSource(int nSource)
 {
 	m_nSourceMode = nSource;
@@ -99,14 +90,17 @@ void CSAANoise::Trigger(void)
 //	No point actually checking m_bSync here ... because if sync is true,
 //	then frequency generators won't actually be generating Trigger pulses
 //	so we wouldn't even get here!
-//	if ( (!m_bSync) && m_bUseFreqGen)
+	// EXCEPT - cool edge case:  if sync is set, then actually the Noise Generator
+	// is triggered on EVERY CLOCK PULSE (i.e. 8MHz noise).  So indeed it is correct
+	// to not check for sync here.  NEEDS TEST CASE.
+
 	if (m_nSourceMode == 3)
 	{
 		ChangeLevel();
 	}
 }
 
-unsigned short CSAANoise::Tick(void)
+void CSAANoise::Tick(void)
 {
 	// Tick only does anything useful when we're
 	// clocking from the noise generator clock
@@ -129,8 +123,6 @@ unsigned short CSAANoise::Tick(void)
 			}
 		}
 	}
-
-	return (unsigned short)(m_nRand & 0x00000001);
 }
 
 void CSAANoise::Sync(bool bSync)
@@ -159,7 +151,7 @@ void CSAANoise::SetSampleRateMode(int nSampleRateMode)
 		m_nCounter>>=(nSampleRateMode - m_nSampleRateMode);
 	}
 	m_nSampleRateMode = nSampleRateMode;
-	m_nSampleRate = 44100 >> m_nSampleRateMode;
+	m_nSampleRate = SAMPLE_RATE_HZ >> m_nSampleRateMode;
 }
 
 

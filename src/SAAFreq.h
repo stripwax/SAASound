@@ -23,14 +23,12 @@ private:
 	static unsigned long m_FreqTable[2048];
 #endif
 
-	static inline unsigned short GetLevel(unsigned short nLevel);
-
 	unsigned long m_nCounter;
 	unsigned long m_nAdd;
 	unsigned long m_nCounter_low;
 	unsigned int m_nOversample;
 	unsigned long m_nCounterLimit_low;
-	unsigned short m_nLevel;
+	int m_nLevel;
 
 	int m_nCurrentOffset;
 	int m_nCurrentOctave;
@@ -58,9 +56,17 @@ public:
 	void SetOversample(unsigned int oversample);
 	void SetClockRate(int nClockRate);
 	void Sync(bool bSync);
-	unsigned short Tick(void);
-	unsigned short Level(void) const;
+	int Tick(void);
+	int Level(void) const;
 
 };
+
+inline int CSAAFreq::Level(void) const
+{
+	if (m_bSync)
+		return 1;
+
+	return m_nLevel;
+}
 
 #endif	// SAAFREQ_H_INCLUDE

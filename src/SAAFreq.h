@@ -52,9 +52,9 @@ public:
 	~CSAAFreq();
 	void SetFreqOffset(BYTE nOffset);
 	void SetFreqOctave(BYTE nOctave);
-	void SetSampleRate(unsigned int nSampleRate);
-	void SetOversample(unsigned int oversample);
-	void SetClockRate(int nClockRate);
+	void _SetSampleRate(unsigned int nSampleRate);
+	void _SetOversample(unsigned int oversample);
+	void _SetClockRate(int nClockRate);
 	void Sync(bool bSync);
 	int Tick(void);
 	int Level(void) const;

@@ -33,9 +33,9 @@ public:
 
 	void SetSource(int nSource);
 	void Trigger(void);
-	void SetSampleRate(int nSampleRate);
-	void SetOversample(unsigned int oversample);
-	void SetClockRate(int nClockRate);
+	void _SetSampleRate(int nSampleRate);
+	void _SetOversample(unsigned int oversample);
+	void _SetClockRate(int nClockRate);
 	void Seed(unsigned long seed);
 
 	void Tick(void);

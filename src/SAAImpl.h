@@ -29,6 +29,8 @@ public:
 	~CSAASoundInternal();
 
 	void SetClockRate(unsigned int nClockRate);
+	void SetSampleRate(unsigned int nClockRate);
+	void SetOversample(unsigned int nOversample);
 	void SetSoundParameters(SAAPARAM uParam);
 	void WriteAddress(BYTE nReg);
 	void WriteData(BYTE nData);

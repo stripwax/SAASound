@@ -6,14 +6,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifdef WIN32
-#include <assert.h>
-#else
-#define assert(exp)	((void)0)
-#endif
-
 #include "SAASound.h"
-
 #include "types.h"
 #include "SAAEnv.h"
 #include "SAANoise.h"
@@ -45,6 +38,7 @@ CSAADevice::CSAADevice()
 	m_bOutputEnabled(false),
 	m_bSync(false),
 	m_bHighpass(true),
+	m_nOversample(0),
 	m_Noise0(0xffffffff),
 	m_Noise1(0xffffffff),
 	m_Env0(),
@@ -87,6 +81,7 @@ CSAADevice::CSAADevice()
 	Amp[5] = &m_Amp5;
 
 	_SetClockRate(EXTERNAL_CLK_HZ);
+	_SetOversample(DEFAULT_OVERSAMPLE);
 }
 
 CSAADevice::~CSAADevice()
@@ -99,38 +94,42 @@ CSAADevice::~CSAADevice()
 
 void CSAADevice::_SetClockRate(unsigned int nClockRate)
 {
-	m_Osc0.SetClockRate(nClockRate);
-	m_Osc1.SetClockRate(nClockRate);
-	m_Osc2.SetClockRate(nClockRate);
-	m_Osc3.SetClockRate(nClockRate);
-	m_Osc4.SetClockRate(nClockRate);
-	m_Osc5.SetClockRate(nClockRate);
-	m_Noise0.SetClockRate(nClockRate);
-	m_Noise1.SetClockRate(nClockRate);
+	m_Osc0._SetClockRate(nClockRate);
+	m_Osc1._SetClockRate(nClockRate);
+	m_Osc2._SetClockRate(nClockRate);
+	m_Osc3._SetClockRate(nClockRate);
+	m_Osc4._SetClockRate(nClockRate);
+	m_Osc5._SetClockRate(nClockRate);
+	m_Noise0._SetClockRate(nClockRate);
+	m_Noise1._SetClockRate(nClockRate);
 }
 
 void CSAADevice::_SetSampleRate(unsigned int nSampleRate)
 {
-	m_Osc0.SetSampleRate(nSampleRate);
-	m_Osc1.SetSampleRate(nSampleRate);
-	m_Osc2.SetSampleRate(nSampleRate);
-	m_Osc3.SetSampleRate(nSampleRate);
-	m_Osc4.SetSampleRate(nSampleRate);
-	m_Osc5.SetSampleRate(nSampleRate);
-	m_Noise0.SetSampleRate(nSampleRate);
-	m_Noise1.SetSampleRate(nSampleRate);
+	m_Osc0._SetSampleRate(nSampleRate);
+	m_Osc1._SetSampleRate(nSampleRate);
+	m_Osc2._SetSampleRate(nSampleRate);
+	m_Osc3._SetSampleRate(nSampleRate);
+	m_Osc4._SetSampleRate(nSampleRate);
+	m_Osc5._SetSampleRate(nSampleRate);
+	m_Noise0._SetSampleRate(nSampleRate);
+	m_Noise1._SetSampleRate(nSampleRate);
 }
 
 void CSAADevice::_SetOversample(unsigned int nOversample)
 {
-	m_Osc0.SetOversample(nOversample);
-	m_Osc1.SetOversample(nOversample);
-	m_Osc2.SetOversample(nOversample);
-	m_Osc3.SetOversample(nOversample);
-	m_Osc4.SetOversample(nOversample);
-	m_Osc5.SetOversample(nOversample);
-	m_Noise0.SetOversample(nOversample);
-	m_Noise1.SetOversample(nOversample);
+	if (nOversample != m_nOversample)
+	{
+		m_nOversample = nOversample;
+		m_Osc0._SetOversample(nOversample);
+		m_Osc1._SetOversample(nOversample);
+		m_Osc2._SetOversample(nOversample);
+		m_Osc3._SetOversample(nOversample);
+		m_Osc4._SetOversample(nOversample);
+		m_Osc5._SetOversample(nOversample);
+		m_Noise0._SetOversample(nOversample);
+		m_Noise1._SetOversample(nOversample);
+	}
 }
 
 void CSAADevice::_WriteData(BYTE nData)

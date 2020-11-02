@@ -41,7 +41,7 @@ CSAASoundInternal::CSAASoundInternal()
 m_nClockRate(EXTERNAL_CLK_HZ),
 m_bHighpass(false),
 m_nSampleRate(SAMPLE_RATE_HZ),
-m_nOversample(0),
+m_nOversample(DEFAULT_OVERSAMPLE),
 m_uParam(0),
 m_uParamRate(0),
 m_chip()
@@ -57,6 +57,7 @@ m_chip()
 	// m_chip.Clear();
 
 	m_chip._SetClockRate(m_nClockRate);
+	m_chip._SetOversample(m_nOversample);
 }
 
 CSAASoundInternal::~CSAASoundInternal()
@@ -173,32 +174,25 @@ void CSAASoundInternal::SetSoundParameters(SAAPARAM uParam)
 	// set filter properties from uParam
 	m_uParam = (m_uParam & ~SAAP_MASK_FILTER) | (uParam & SAAP_MASK_FILTER);
 	 
-	m_nOversample = 0;
-
-	// temporarily force OVERSAMPLE64x mode for testing
-	//if ( (m_uParam & SAAP_MASK_FILTER_OVERSAMPLE) < SAAP_FILTER_OVERSAMPLE2x)
-	//	m_uParam = (m_uParam & ~SAAP_MASK_FILTER_OVERSAMPLE) | SAAP_FILTER_OVERSAMPLE2x;
-	if ( (m_uParam & SAAP_MASK_FILTER_OVERSAMPLE) < SAAP_FILTER_OVERSAMPLE64x)
-		m_uParam = (m_uParam & ~SAAP_MASK_FILTER_OVERSAMPLE) | SAAP_FILTER_OVERSAMPLE64x;
-
-	// temporarily force highpass filter on for testing
-	m_uParam = (m_uParam & ~SAAP_MASK_FILTER_HIGHPASS) | SAAP_FILTER_HIGHPASS_SIMPLE;
-
-	// Enabling the oversampling filter puts the oscillators and noise generators
-	// into a higher sample rate via a scaling factor on the multilevel counter
-	if ( (m_uParam & SAAP_MASK_FILTER_OVERSAMPLE) == SAAP_FILTER_OVERSAMPLE2x)
-	{
-		// i.e. 2^1
-		m_nOversample = 1;
-	}
-	else if ((m_uParam & SAAP_MASK_FILTER_OVERSAMPLE) == SAAP_FILTER_OVERSAMPLE64x)
-	{
-		// i.e. 2^6
-		m_nOversample = 6;
-	}
-
-	m_chip._SetOversample(m_nOversample);
 	m_bHighpass=true;
+}
+
+void CSAASoundInternal::SetSampleRate(unsigned int nSampleRate)
+{
+	if (nSampleRate != m_nSampleRate)
+	{
+		m_nSampleRate = nSampleRate;
+		m_chip._SetSampleRate(m_nSampleRate);
+	}
+}
+
+void CSAASoundInternal::SetOversample(unsigned int nOversample)
+{
+	if (nOversample != m_nOversample)
+	{
+		m_nOversample = nOversample;
+		m_chip._SetOversample(m_nOversample);
+	}
 }
 
 SAAPARAM CSAASoundInternal::GetCurrentSoundParameters(void)
@@ -260,15 +254,9 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 	// per-channel outputs (see notes at end of file)
 	while (nSamples--)
 	{
-		f_left = 0.0;
-		f_right = 0.0;
-		for (int i = 0; i < 1<<m_nOversample; i++)
-		{
-			m_chip._TickAndOutputStereo(temp_left, temp_right);
-			f_left += (double)temp_left;
-			f_right += (double)temp_right;
-		}
-
+		m_chip._TickAndOutputStereo(temp_left, temp_right);
+		f_left = (double)temp_left;
+		f_right = (double)temp_right;
 		f_left /= (double)(1 << m_nOversample);
 		f_right /= (double)(1 << m_nOversample);
 

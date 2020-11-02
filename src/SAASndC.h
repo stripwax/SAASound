@@ -91,6 +91,8 @@ unsigned long EXTAPI SAASNDGetSampleRate(SAAPARAM uParam);
 void EXTAPI SAASNDGenerateMany(SAASND object, BYTE * pBuffer, unsigned long nSamples);
 
 void EXTAPI SAASNDSetClockRate(SAASND object, unsigned int nClockRate);
+void EXTAPI SAASNDSetSampleRate(SAASND object, unsigned int nSampleRate);
+void EXTAPI SAASNDSetOversample(SAASND object, unsigned int nOversample);
 
 
 #ifdef __cplusplus

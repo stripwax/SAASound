@@ -82,7 +82,8 @@ public:
 	virtual void GenerateMany (BYTE * pBuffer, unsigned long nSamples) = 0;
 
 	virtual void SetClockRate(unsigned int nClockRate) = 0;
-
+	virtual void SetSampleRate(unsigned int nSampleRate) = 0;
+	virtual void SetOversample(unsigned int nOversample) = 0;
 };
 
 typedef class CSAASound * LPCSAASOUND;
@@ -116,6 +117,9 @@ unsigned long SAAAPI SAASNDGetCurrentSampleRate(SAASND object);
 unsigned long SAAAPI SAASNDGetSampleRate(SAAPARAM uParam);
 
 void SAAAPI SAASNDGenerateMany(SAASND object, BYTE * pBuffer, unsigned long nSamples);
+void SAAAPI SAASNDSetClockRate(SAASND object, unsigned int nClockRate);
+void SAAAPI SAASNDSetSampleRate(SAASND object, unsigned int nSampleRate);
+void SAAAPI SAASNDSetOversample(SAASND object, unsigned int nOversample);
 
 
 #ifdef __cplusplus

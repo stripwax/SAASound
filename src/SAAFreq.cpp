@@ -43,7 +43,7 @@ m_pcConnectedNoiseGenerator(NoiseGenerator),
 m_pcConnectedEnvGenerator(EnvGenerator),
 m_nConnectedMode((NoiseGenerator == NULL) ? ((EnvGenerator == NULL) ? 0 : 1) : 2)
 {
-	SetClockRate(EXTERNAL_CLK_HZ);
+	_SetClockRate(EXTERNAL_CLK_HZ);
 	SetAdd(); // current octave, current offset
 }
 
@@ -150,12 +150,12 @@ void CSAAFreq::UpdateOctaveOffsetData(void)
 	SetAdd();
 }
 
-void CSAAFreq::SetSampleRate(unsigned int nSampleRate)
+void CSAAFreq::_SetSampleRate(unsigned int nSampleRate)
 {
 	m_nSampleRate = nSampleRate;
 }
 
-void CSAAFreq::SetOversample(unsigned int oversample)
+void CSAAFreq::_SetOversample(unsigned int oversample)
 {
 	// oversample is a power of 2 i.e.
 	// if oversample == 2 then 4x oversample
@@ -174,13 +174,13 @@ void CSAAFreq::SetOversample(unsigned int oversample)
 }
 
 #ifdef SAAFREQ_FIXED_CLOCKRATE
-void CSAAFreq::SetClockRate(int nClockRate)
+void CSAAFreq::_SetClockRate(int nClockRate)
 {
 	// if SAAFREQ clock rate is hardcoded, then we don't support dynamically
 	// adjusting the SAA clock rate, so this is a no-op
 }
 #else
-void CSAAFreq::SetClockRate(int nClockRate)
+void CSAAFreq::_SetClockRate(int nClockRate)
 {
 	// initialise the frequency table based on the SAA clockrate
 	// Each item in m_FreqTable corresponds to the frequency calculated by

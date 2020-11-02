@@ -32,7 +32,7 @@ m_nSampleRate(SAMPLE_RATE_HZ),
 m_nSourceMode(0),
 m_nRand(1)
 {
-	SetClockRate(EXTERNAL_CLK_HZ);
+	_SetClockRate(EXTERNAL_CLK_HZ);
 	m_nAdd = m_nAddBase;
 }
 
@@ -47,7 +47,7 @@ m_nSampleRate(SAMPLE_RATE_HZ),
 m_nSourceMode(0),
 m_nRand(seed)
 {
-	SetClockRate(EXTERNAL_CLK_HZ);
+	_SetClockRate(EXTERNAL_CLK_HZ);
 	m_nAdd = m_nAddBase;
 }
 
@@ -56,7 +56,7 @@ CSAANoise::~CSAANoise()
 	// Nothing to do
 }
 
-void CSAANoise::SetClockRate(int nClockRate)
+void CSAANoise::_SetClockRate(int nClockRate)
 {
 	// at 8MHz the clock rate is 31.250kHZ
 	// This is simply the clock rate divided by 256 i.e. 2^8
@@ -134,13 +134,13 @@ void CSAANoise::Sync(bool bSync)
 }
 
 
-void CSAANoise::SetSampleRate(int nSampleRate)
+void CSAANoise::_SetSampleRate(int nSampleRate)
 {
 	m_nSampleRate = nSampleRate;
 }
 
 
-void CSAANoise::SetOversample(unsigned int oversample)
+void CSAANoise::_SetOversample(unsigned int oversample)
 {
 	// oversample is a power of 2 i.e.
 	// if oversample == 2 then 4x oversample

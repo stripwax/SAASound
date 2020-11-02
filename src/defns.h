@@ -8,9 +8,9 @@
 #define DEFNS_H_INCLUDED
 
 #ifdef HAVE_CONFIG_H
+// using CMAKE
 #include "config.h"
-//#else
-#endif
+#else
 
 // initial default SAA1099 crystal clock rate in HZ (can be changed subsequently by calling SetClockRate)
 #define EXTERNAL_CLK_HZ 8000000
@@ -35,6 +35,6 @@
 #define CONFIG_FILE_PATH ""
 #endif // USE_CONFIG_FILE
 
-//#endif // HAVE_CONFIG_H
+#endif // HAVE_CONFIG_H
 
 #endif //  DEFNS_H_INCLUDED

@@ -21,6 +21,8 @@
 #include "SAAAmp.h"
 #include "SAASound.h"
 #include "SAAImpl.h"
+#include "defns.h"
+
 
 //////////////////////////////////////////////////////////////////////
 // Globals
@@ -84,7 +86,7 @@ CSAADevice::CSAADevice()
 	Amp[4] = &m_Amp4;
 	Amp[5] = &m_Amp5;
 
-	_SetClockRate(8000000);
+	_SetClockRate(EXTERNAL_CLK_HZ);
 }
 
 CSAADevice::~CSAADevice()
@@ -307,7 +309,7 @@ void CSAADevice::_TickAndOutputStereo(unsigned int& left, unsigned int& right)
 {
 	unsigned int temp_left, temp_right;
 	unsigned int accum_left = 0, accum_right = 0;
-	for (int i = 0; i < 1 << m_nOversample; i++)
+	for (int i = 1 << m_nOversample; i > 0; i--)
 	{
 		m_Noise0.Tick();
 		m_Noise1.Tick();

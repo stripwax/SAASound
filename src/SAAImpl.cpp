@@ -40,7 +40,7 @@ CSAASoundInternal::CSAASoundInternal()
 	:
 m_nClockRate(EXTERNAL_CLK_HZ),
 m_bHighpass(false),
-m_nSampleRateMode(2),
+m_nSampleRateMode(0),
 m_nOversample(0),
 m_uParam(0),
 m_uParamRate(0),

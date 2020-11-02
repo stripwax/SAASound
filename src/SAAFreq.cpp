@@ -12,7 +12,16 @@
 #include "SAAFreq.h"
 #include "defns.h"
 
+#ifdef SAAFREQ_FIXED_CLOCKRATE
+// 'load in' the data for the static frequency lookup table
+// precomputed for a fixed clockrate
+// See: tools/freqdat.py
+const unsigned long CSAAFreq::m_FreqTable[2048] = {
+#include "SAAFreq.dat"
+};
+#else
 unsigned long CSAAFreq::m_FreqTable[2048];
+#endif // SAAFREQ_FIXED_CLOCKRATE
 
 const int INITIAL_LEVEL = 1;
 

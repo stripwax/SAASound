@@ -8,6 +8,8 @@
 #ifndef SAAFREQ_H_INCLUDE
 #define SAAFREQ_H_INCLUDE
 
+#include "defns.h"
+
 class CSAAFreq  
 {
 private:
@@ -15,9 +17,7 @@ private:
 	// 'load in' the data for the static frequency lookup table
 	// precomputed for a fixed clockrate
 	// See: tools/freqdat.py
-	const static unsigned long m_FreqTable[2048] = {
-#include "SAAFreq.dat"
-	}
+	const static unsigned long m_FreqTable[2048];
 #else
 	// we'll calculate the frequency lookup table at runtime.
 	static unsigned long m_FreqTable[2048];

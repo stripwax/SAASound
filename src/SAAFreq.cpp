@@ -189,7 +189,7 @@ void CSAAFreq::SetOversample(unsigned int oversample)
 #ifdef SAAFREQ_FIXED_CLOCKRATE
 void CSAAFreq::SetClockRate(int nClockRate)
 {
-	// if SAAFREQ 8MHZ is hardcoded, then we don't support dynamically
+	// if SAAFREQ clock rate is hardcoded, then we don't support dynamically
 	// adjusting the SAA clock rate, so this is a no-op
 }
 #else

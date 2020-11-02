@@ -18,6 +18,9 @@
 // initial default sample rate (audio samplerate)
 #define SAMPLE_RATE_HZ 44100
 
+// initial default oversample (audio quality) recommend 0<=oversample<=6
+#define DEFAULT_OVERSAMPLE 0
+
 // Whether to support a startup configuration file that is parsed at load time
 // #undef USE_CONFIG_FILE
 #define USE_CONFIG_FILE

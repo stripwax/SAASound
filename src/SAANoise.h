@@ -16,7 +16,6 @@ private:
 	unsigned int m_nOversample;
 	unsigned long m_nCounterLimit_low;
 	bool m_bSync; // see description of "SYNC" bit of register 28
-	BYTE m_nSampleRateMode; // 0=44100, 1=22050; 2=11025
 	unsigned long m_nSampleRate; // = 44100 when RateMode=0, for example
 	int m_nSourceMode;
 	unsigned long m_nAddBase; // nAdd for 31.25 kHz noise at 44.1 kHz samplerate
@@ -34,7 +33,7 @@ public:
 
 	void SetSource(int nSource);
 	void Trigger(void);
-	void SetSampleRateMode(int nSampleRateMode);
+	void SetSampleRate(int nSampleRate);
 	void SetOversample(unsigned int oversample);
 	void SetClockRate(int nClockRate);
 	void Seed(unsigned long seed);

@@ -109,6 +109,18 @@ void CSAADevice::_SetClockRate(unsigned int nClockRate)
 	m_Noise1.SetClockRate(nClockRate);
 }
 
+void CSAADevice::_SetSampleRate(unsigned int nSampleRate)
+{
+	m_Osc0.SetSampleRate(nSampleRate);
+	m_Osc1.SetSampleRate(nSampleRate);
+	m_Osc2.SetSampleRate(nSampleRate);
+	m_Osc3.SetSampleRate(nSampleRate);
+	m_Osc4.SetSampleRate(nSampleRate);
+	m_Osc5.SetSampleRate(nSampleRate);
+	m_Noise0.SetSampleRate(nSampleRate);
+	m_Noise1.SetSampleRate(nSampleRate);
+}
+
 void CSAADevice::_SetOversample(unsigned int nOversample)
 {
 	m_Osc0.SetOversample(nOversample);

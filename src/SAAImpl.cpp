@@ -40,7 +40,7 @@ CSAASoundInternal::CSAASoundInternal()
 	:
 m_nClockRate(EXTERNAL_CLK_HZ),
 m_bHighpass(false),
-m_nSampleRateMode(0),
+m_nSampleRate(SAMPLE_RATE_HZ),
 m_nOversample(0),
 m_uParam(0),
 m_uParamRate(0),
@@ -56,7 +56,7 @@ m_chip()
 	// reset the virtual SAA
 	// m_chip.Clear();
 
-	m_chip._SetClockRate(m_nClockRate << m_nSampleRateMode);
+	m_chip._SetClockRate(m_nClockRate);
 }
 
 CSAASoundInternal::~CSAASoundInternal()
@@ -73,7 +73,7 @@ CSAASoundInternal::~CSAASoundInternal()
 void CSAASoundInternal::SetClockRate(unsigned int nClockRate)
 {
 	m_nClockRate = nClockRate;
-	m_chip._SetClockRate(m_nClockRate << m_nSampleRateMode);
+	m_chip._SetClockRate(m_nClockRate);
 }
 
 void CSAASoundInternal::Clear(void)
@@ -143,19 +143,20 @@ BYTE CSAASoundInternal::ReadAddress(void)
 
 void CSAASoundInternal::SetSoundParameters(SAAPARAM uParam)
 {
-	// set samplerate properties from uParam
+	// set samplerate properties from uParam (deprecated but still supported)
+	unsigned int nSampleRate = m_nSampleRate;
 	switch (uParam & SAAP_MASK_SAMPLERATE)
 	{
 	case SAAP_44100:
-		m_nSampleRateMode = 0;
+		nSampleRate = 44100;
 		m_uParamRate = (m_uParamRate & ~SAAP_MASK_SAMPLERATE) | SAAP_44100;
 		break;
 	case SAAP_22050:
-		m_nSampleRateMode = 1;
+		nSampleRate = 22050;
 		m_uParamRate = (m_uParamRate & ~SAAP_MASK_SAMPLERATE) | SAAP_22050;
 		break;
 	case SAAP_11025:
-		m_nSampleRateMode = 2;
+		nSampleRate = 11025;
 		m_uParamRate = (m_uParamRate & ~SAAP_MASK_SAMPLERATE) | SAAP_11025;
 		break;
 	case 0:// change nothing!
@@ -163,7 +164,11 @@ void CSAASoundInternal::SetSoundParameters(SAAPARAM uParam)
 		break;
 	}
 	
-	m_chip._SetClockRate(m_nClockRate << m_nSampleRateMode);
+	if (nSampleRate != m_nSampleRate)
+	{
+		m_nSampleRate = nSampleRate;
+		m_chip._SetSampleRate(m_nSampleRate);
+	}
 
 	// set filter properties from uParam
 	m_uParam = (m_uParam & ~SAAP_MASK_FILTER) | (uParam & SAAP_MASK_FILTER);
@@ -210,11 +215,6 @@ unsigned short CSAASoundInternal::GetCurrentBytesPerSample(void)
 {
 	switch (uParam & (SAAP_MASK_CHANNELS | SAAP_MASK_BITDEPTH))
 	{
-		case SAAP_MONO | SAAP_8BIT:
-			return 1;
-		case SAAP_MONO | SAAP_16BIT:
-		case SAAP_STEREO | SAAP_8BIT:
-			return 2;
 		case SAAP_STEREO | SAAP_16BIT:
 			return 4;
 		default:
@@ -254,408 +254,50 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 	unsigned long nTotalSamples = nSamples;
 #endif
 
-/*	if ( (m_uParam & SAAP_MASK_FILTER_OVERSAMPLE) == SAAP_NOFILTER)
+	// for now, this is the only case that has full support and tested
+	// accumulate and mix at the same time
+	// Of course, this means we can't separately filter and generate
+	// per-channel outputs (see notes at end of file)
+	while (nSamples--)
 	{
-		// NO FILTER
-		switch (m_uParam & (SAAP_MASK_CHANNELS + SAAP_MASK_BITDEPTH))
+		f_left = 0.0;
+		f_right = 0.0;
+		for (int i = 0; i < 1<<m_nOversample; i++)
 		{
-			case SAAP_STEREO | SAAP_16BIT:
-				while (nSamples--)
-				{
-					Noise[0]->Tick();
-					Noise[1]->Tick();
-
-					Amp[0]->TickAndOutputStereo(left, right);
-					Amp[1]->TickAndOutputStereo(temp_left, temp_right);
-					left += temp_left; right += temp_right;
-					Amp[2]->TickAndOutputStereo(temp_left, temp_right);
-					left += temp_left; right += temp_right;
-					Amp[3]->TickAndOutputStereo(temp_left, temp_right);
-					left += temp_left; right += temp_right;
-					Amp[4]->TickAndOutputStereo(temp_left, temp_right);
-					left += temp_left; right += temp_right;
-					Amp[5]->TickAndOutputStereo(temp_left, temp_right);
-					left += temp_left; right += temp_right;
-
-					// force output into the range 0<=x<=65535
-					// (strictly, the following gives us 0<=x<=63360)
-					left *= 10;
-					right *= 10;
-
-					*pBuffer++ = left & 0x00ff;
-					*pBuffer++ = left >> 8;
-					*pBuffer++ = right & 0x00ff;
-					*pBuffer++ = right >> 8;
-				}
-				break;
-			}
-	}
-	else if ((m_uParam & SAAP_MASK_FILTER_OVERSAMPLE) == SAAP_FILTER_OVERSAMPLE2x)
-	{
-		bool highpass = (m_uParam & SAAP_MASK_FILTER_HIGHPASS);
-
-		// FILTER : (high-quality mode + oversample filter + optional
-		// highpass filter (not yet implemented) to remove very low frequency/DC)
-		// For oversampling, tick everything n times and take an unweighted mean
-
-		switch (m_uParam & (SAAP_MASK_CHANNELS + SAAP_MASK_BITDEPTH))
-		{
-		case SAAP_MONO | SAAP_8BIT:
-			while (nSamples--)
-			{
-				Noise[0]->Tick();
-				Noise[1]->Tick();
-				mono1 = (Amp[0]->TickAndOutputMono() +
-					Amp[1]->TickAndOutputMono() +
-					Amp[2]->TickAndOutputMono() +
-					Amp[3]->TickAndOutputMono() +
-					Amp[4]->TickAndOutputMono() +
-					Amp[5]->TickAndOutputMono());
-
-				Noise[0]->Tick();
-				Noise[1]->Tick();
-				mono2 = (Amp[0]->TickAndOutputMono() +
-					Amp[1]->TickAndOutputMono() +
-					Amp[2]->TickAndOutputMono() +
-					Amp[3]->TickAndOutputMono() +
-					Amp[4]->TickAndOutputMono() +
-					Amp[5]->TickAndOutputMono());
-
-				// force output into the range 0<=x<=255
-				mono = ((mono1 + mono2) * 5) >> 1;
-				mono = 0x80 + (mono >> 8);
-
-				if (highpass)
-				{
-					mono = (prev_mono + mono) >> 1;
-					prev_mono = mono;
-				}
-				*pBuffer++ = (unsigned char)mono;
-			}
-			break;
-
-		case SAAP_MONO | SAAP_16BIT:
-			while (nSamples--)
-			{
-				Noise[0]->Tick();
-				Noise[1]->Tick();
-				mono1 = (Amp[0]->TickAndOutputMono() +
-					Amp[1]->TickAndOutputMono() +
-					Amp[2]->TickAndOutputMono() +
-					Amp[3]->TickAndOutputMono() +
-					Amp[4]->TickAndOutputMono() +
-					Amp[5]->TickAndOutputMono());
-
-				Noise[0]->Tick();
-				Noise[1]->Tick();
-				mono2 = (Amp[0]->TickAndOutputMono() +
-					Amp[1]->TickAndOutputMono() +
-					Amp[2]->TickAndOutputMono() +
-					Amp[3]->TickAndOutputMono() +
-					Amp[4]->TickAndOutputMono() +
-					Amp[5]->TickAndOutputMono());
-
-				// force output into the range 0<=x<=65535
-				// (strictly, the following gives us 0<=x<=63360)
-				mono1 *= 5;
-				mono2 *= 5;
-				mono = (mono1 + mono2) >> 1;
-
-				if (highpass)
-				{
-					mono = (prev_mono + mono) >> 1;
-					prev_mono = mono;
-				}
-
-				*pBuffer++ = (unsigned char)(mono & 0x00ff);
-				*pBuffer++ = (unsigned char)(mono >> 8);
-			}
-			break;
-
-		case SAAP_STEREO | SAAP_8BIT:
-			while (nSamples--)
-			{
-				Noise[0]->Tick();
-				Noise[1]->Tick();
-
-				Amp[0]->TickAndOutputStereo(left, right);
-				Amp[1]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[2]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[3]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[4]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[5]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-
-				Noise[0]->Tick();
-				Noise[1]->Tick();
-
-				Amp[0]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[1]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[2]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[3]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[4]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[5]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-
-				// force output into the range 0<=x<=255
-				left = (left * 10) >> 1;
-				right = (right * 10) >> 1;
-
-				if (highpass)
-				{
-					left = (left + prev_left) >> 1;
-					right = (right + prev_right) >> 1;
-					prev_left = left;
-					prev_right = right;
-				}
-
-				*pBuffer++ = 0x80 + (left >> 8);
-				*pBuffer++ = 0x80 + (left >> 8);
-			}
-			break;
-
-		case SAAP_STEREO | SAAP_16BIT:
-			while (nSamples--)
-			{
-				Noise[0]->Tick();
-				Noise[1]->Tick();
-
-				Amp[0]->TickAndOutputStereo(left, right);
-				Amp[1]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[2]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[3]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[4]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[5]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-
-				Noise[0]->Tick();
-				Noise[1]->Tick();
-
-				Amp[0]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[1]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[2]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[3]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[4]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-				Amp[5]->TickAndOutputStereo(temp_left, temp_right);
-				left += temp_left; right += temp_right;
-
-				// force output into the range 0<=x<=65535
-				// (strictly, the following gives us 0<=x<=63360)
-				left = (left * 10) >> 1;
-				right = (right * 10) >> 1;
-
-				if (highpass)
-				{
-					left = (left + prev_left) >> 1;
-					right = (right + prev_right) >> 1;
-					prev_left = left;
-					prev_right = right;
-				}
-
-				*pBuffer++ = left & 0x00ff;
-				*pBuffer++ = left >> 8;
-				*pBuffer++ = right & 0x00ff;
-				*pBuffer++ = right >> 8;
-			}
-			break;
+			m_chip._TickAndOutputStereo(temp_left, temp_right);
+			f_left += (double)temp_left;
+			f_right += (double)temp_right;
 		}
-	}
-	else if ((m_uParam & SAAP_MASK_FILTER_OVERSAMPLE) == SAAP_FILTER_OVERSAMPLE64x)
-	*/
-	{
-		// FILTER : (high-quality mode + oversample filter +
-		// optional highpass filter (not yet implemented) to remove very low frequency/DC)
-		// For oversampling, tick everything n times and take an unweighted mean
 
-/*		switch (m_uParam & (SAAP_MASK_CHANNELS + SAAP_MASK_BITDEPTH))
+		f_left /= (double)(1 << m_nOversample);
+		f_right /= (double)(1 << m_nOversample);
+
+		// scale output into good range
+		f_left *= 10;
+		f_right *= 10;
+
+		if (m_bHighpass)
 		{
-		case SAAP_MONO | SAAP_8BIT:
-			while (nSamples--)
-			{
-				unsigned long chans[6] = { 0 };
-				for (int i = 0; i < 1<<m_nOversample; i++)
-				{
-					Noise[0]->Tick();
-					Noise[1]->Tick();
-					for (int c = 0; c < 6; c++)
-					{
-						chans[c] += Amp[c]->TickAndOutputMono();
-					}
-				}
+			/* cutoff = 5 Hz (say) 
+				const double b1 = exp(-2.0 * M_PI * (Fc/Fs))
+				const double a0 = 1.0 - b1;
+			*/
+			const double b1 = 0.99928787;
+			const double a0 = 1.0 - b1;
 
-				mono = 0;
-				for (int c = 0; c < 6; c++)
-				{
-					mono += (unsigned short)((((chans[c] * 5)+(1<<(m_nOversample-1))) >> m_nOversample));
-				}
-
-				// force output into the range 0<=x<=255
-				mono = 0x80 + (mono >> 8);
-
-				if (highpass)
-				{
-					mono = (prev_mono + mono) >> 1;
-					prev_mono = mono;
-				}
-
-				*pBuffer++ = (unsigned char)mono;
-				}
-			break;
-
-		case SAAP_MONO | SAAP_16BIT:
-			while (nSamples--)
-			{
-				unsigned long chans[6] = { 0 };
-				for (int i = 0; i < 1<<m_nOversample; i++)
-				{
-					Noise[0]->Tick();
-					Noise[1]->Tick();
-					for (int c = 0; c < 6; c++)
-					{
-						chans[c] += Amp[c]->TickAndOutputMono();
-					}
-				}
-
-				mono = 0;
-				for (int c = 0; c < 6; c++)
-				{
-					mono += (unsigned short)((((chans[c] * 5)+(1<<(m_nOversample-1))) >> m_nOversample));
-				}
-
-				// force output into the range 0<=x<=255
-				mono = 0x80 + (mono >> 8);
-
-				if (highpass)
-				{
-					mono = (prev_mono + mono) >> 1;
-					prev_mono = mono;
-				}
-
-				*pBuffer++ = (unsigned char)(mono & 0x00ff);
-				*pBuffer++ = (unsigned char)(mono >> 8);
-			}
-			break;
-
-		case SAAP_STEREO | SAAP_8BIT:
-			while (nSamples--)
-			{
-				unsigned short lefts[6] = { 0 };
-				unsigned short rights[6] = { 0 };
-				for (int i = 0; i < 1<<m_nOversample; i++)
-				{
-					Noise[0]->Tick();
-					Noise[1]->Tick();
-					for (int c = 0; c < 6; c++)
-					{
-//						chans[c].dword += (Amp[c]->TickAndOutputStereo()).dword;
-						Amp[c]->TickAndOutputStereo(temp_left, temp_right);
-						lefts[c] += temp_left;
-						rights[c] += temp_right;
-					}
-				}
-
-				// force output into the range 0<=x<=255
-				left = right = 0;
-				for (int c = 0; c < 6; c++)
-				{
-					left += (((lefts[c] * 10)+(1<<(m_nOversample-1))) >> m_nOversample);
-					right += (((rights[c] * 10)+(1<<(m_nOversample-1))) >> m_nOversample);
-				}
-
-				if (highpass)
-				{
-					left = (left + prev_left) >> 1;
-					right = (right + prev_right) >> 1;
-					prev_left = left;
-					prev_right = right;
-				}
-
-				*pBuffer++ = 0x80 + (left >> 8);
-				*pBuffer++ = 0x80 + (right >> 8);
-			}
-			break;
-
-		case SAAP_STEREO | SAAP_16BIT:
-		*/
-			// for now, this is the only case that has full support and tested
-			// accumulate and mix at the same time
-			// Of course, this means we can't separately filter and generate
-			// per-channel outputs (see notes at end of file)
-			while (nSamples--)
-			{
-				f_left = 0.0;
-				f_right = 0.0;
-				for (int i = 0; i < 1<<m_nOversample; i++)
-				{
-					m_chip._TickAndOutputStereo(temp_left, temp_right);
-					f_left += (double)temp_left;
-					f_right += (double)temp_right;
-				}
-
-				f_left /= (double)(1 << m_nOversample);
-				f_right /= (double)(1 << m_nOversample);
-
-				// scale output into good range
-				f_left *= 10;
-				f_right *= 10;
-
-				if (m_bHighpass)
-				{
-					/* cutoff = 5 Hz (say) 
-						const double b1 = exp(-2.0 * M_PI * (Fc/Fs))
-						const double a0 = 1.0 - b1;
-					*/
-					const double b1 = 0.99928787;
-					const double a0 = 1.0 - b1;
-
-					filterout_z1_left = f_left * a0 + filterout_z1_left * b1;
-					filterout_z1_right = f_right * a0 + filterout_z1_right * b1;
-					f_left -= filterout_z1_left;
-					f_right -= filterout_z1_right;
-				}
-
-				left = (signed short)f_left;
-				right = (signed short)f_right;
-
-				*pBuffer++ = left & 0x00ff;
-				*pBuffer++ = (left >> 8) & 0x00ff;
-				*pBuffer++ = right & 0x00ff;
-				*pBuffer++ = (right >> 8) & 0x00ff;
-			}
-/*			break;
-		default: // ie - the m_uParam contains modes not implemented yet
-			{
-	#ifdef DEBUGSAA
-				char error[256];
-				sprintf(error, "not implemented: uParam=%#L.64x\n", m_uParam);
-	#ifdef WIN32
-				OutputDebugStringA(error);
-	#else
-				fprintf(stderr, error);
-	#endif
-	#endif
-			}
+			filterout_z1_left = f_left * a0 + filterout_z1_left * b1;
+			filterout_z1_right = f_right * a0 + filterout_z1_right * b1;
+			f_left -= filterout_z1_left;
+			f_right -= filterout_z1_right;
 		}
-*/
 
+		left = (signed short)f_left;
+		right = (signed short)f_right;
+
+		*pBuffer++ = left & 0x00ff;
+		*pBuffer++ = (left >> 8) & 0x00ff;
+		*pBuffer++ = right & 0x00ff;
+		*pBuffer++ = (right >> 8) & 0x00ff;
 	}
 
 #ifdef DEBUGSAA

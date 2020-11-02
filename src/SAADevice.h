@@ -50,6 +50,7 @@ public:
 #endif
 
 	void _SetClockRate(unsigned int nClockRate);
+	void _SetSampleRate(unsigned int nSampleRate);
 	void _SetOversample(unsigned int nOversample);
 	void _TickAndOutputStereo(unsigned int& left, unsigned int& right);
 };

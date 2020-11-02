@@ -39,7 +39,6 @@ private:
 	bool m_bNewData;
 	bool m_bSync;
 
-	int m_nSampleRateMode;
 	unsigned long m_nSampleRate;
 	CSAANoise * const m_pcConnectedNoiseGenerator;
 	CSAAEnv * const m_pcConnectedEnvGenerator;
@@ -53,7 +52,7 @@ public:
 	~CSAAFreq();
 	void SetFreqOffset(BYTE nOffset);
 	void SetFreqOctave(BYTE nOctave);
-	void SetSampleRateMode(int nSampleRateMode);
+	void SetSampleRate(unsigned int nSampleRate);
 	void SetOversample(unsigned int oversample);
 	void SetClockRate(int nClockRate);
 	void Sync(bool bSync);

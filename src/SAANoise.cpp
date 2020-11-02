@@ -28,7 +28,6 @@ m_nCounter_low(0),
 m_nCounterLimit_low(1),
 m_nOversample(0),
 m_bSync(false),
-m_nSampleRateMode(0),
 m_nSampleRate(SAMPLE_RATE_HZ),
 m_nSourceMode(0),
 m_nRand(1)
@@ -44,7 +43,6 @@ m_nCounter_low(0),
 m_nCounterLimit_low(1),
 m_nOversample(0),
 m_bSync(false),
-m_nSampleRateMode(0),
 m_nSampleRate(SAMPLE_RATE_HZ),
 m_nSourceMode(0),
 m_nRand(seed)
@@ -136,22 +134,9 @@ void CSAANoise::Sync(bool bSync)
 }
 
 
-void CSAANoise::SetSampleRateMode(int nSampleRateMode)
+void CSAANoise::SetSampleRate(int nSampleRate)
 {
-	// first, adjust the current value of the counter:
-	if (nSampleRateMode < m_nSampleRateMode)
-	{
-		// samplerate has been increased; scale up counter value accordingly
-		m_nCounter<<=(m_nSampleRateMode - nSampleRateMode);
-	}
-	else
-	{
-		// samplerate has been decreased (or maybe unchanged);
-		// scale down counter value accordingly
-		m_nCounter>>=(nSampleRateMode - m_nSampleRateMode);
-	}
-	m_nSampleRateMode = nSampleRateMode;
-	m_nSampleRate = SAMPLE_RATE_HZ >> m_nSampleRateMode;
+	m_nSampleRate = nSampleRate;
 }
 
 

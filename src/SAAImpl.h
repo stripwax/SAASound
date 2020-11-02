@@ -19,8 +19,8 @@ class CSAASoundInternal : public CSAASound
 private:
 	CSAADevice m_chip;
 	int m_uParam, m_uParamRate;
-	unsigned int m_nSampleRateMode;
-	unsigned int m_nClockRate;
+	unsigned int m_nClockRate; 
+	unsigned int m_nSampleRate;
 	unsigned int m_nOversample;
 	bool m_bHighpass;
 

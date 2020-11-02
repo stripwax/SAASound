@@ -38,7 +38,7 @@ m_nOversample(0), m_nCounterLimit_low(1),
 m_nCurrentOffset(0), m_nCurrentOctave(0), m_nNextOffset(0), m_nNextOctave(0),
 m_bIgnoreOffsetData(false), m_bNewData(false), 
 m_bSync(false),
-m_nSampleRateMode(0), m_nSampleRate(SAMPLE_RATE_HZ),
+m_nSampleRate(SAMPLE_RATE_HZ),
 m_pcConnectedNoiseGenerator(NoiseGenerator),
 m_pcConnectedEnvGenerator(EnvGenerator),
 m_nConnectedMode((NoiseGenerator == NULL) ? ((EnvGenerator == NULL) ? 0 : 1) : 2)
@@ -150,23 +150,9 @@ void CSAAFreq::UpdateOctaveOffsetData(void)
 	SetAdd();
 }
 
-void CSAAFreq::SetSampleRateMode(int nSampleRateMode)
+void CSAAFreq::SetSampleRate(unsigned int nSampleRate)
 {
-	// first, adjust the current value of the counter:
-	if (nSampleRateMode < m_nSampleRateMode)
-	{
-		// samplerate has been increased; scale up counter value accordingly
-		m_nCounter <<= (m_nSampleRateMode - nSampleRateMode);
-	}
-	else
-	{
-		// samplerate has been decreased (or maybe unchanged);
-		// scale down counter value accordingly
-		m_nCounter >>= (nSampleRateMode - m_nSampleRateMode);
-	}
-
-	m_nSampleRateMode = nSampleRateMode;
-	m_nSampleRate = SAMPLE_RATE_HZ >> nSampleRateMode;
+	m_nSampleRate = nSampleRate;
 }
 
 void CSAAFreq::SetOversample(unsigned int oversample)

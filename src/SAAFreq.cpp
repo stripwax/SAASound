@@ -21,6 +21,7 @@ const unsigned long CSAAFreq::m_FreqTable[2048] = {
 };
 #else
 unsigned long CSAAFreq::m_FreqTable[2048];
+unsigned long CSAAFreq::m_nClockRate = 0;
 #endif // SAAFREQ_FIXED_CLOCKRATE
 
 const int INITIAL_LEVEL = 1;
@@ -207,10 +208,14 @@ void CSAAFreq::SetClockRate(int nClockRate)
 	// Finally, note that the standard formula corresponds to a 8MHz base clock
 	// so we rescale the final result by the ratio nClockRate/8000000
 
-	int ix = 0;
-	for (int nOctave = 0; nOctave < 8; nOctave++)
-		for (int nOffset = 0; nOffset < 256; nOffset++)
-			m_FreqTable[ix++] = (unsigned long)((8192.0 * 15625.0 * double(1<<nOctave) * (double(nClockRate)/8000000.0)) / (511.0 - double(nOffset)));
+	if (nClockRate != m_nClockRate)
+	{
+		m_nClockRate = nClockRate;
+		int ix = 0;
+		for (int nOctave = 0; nOctave < 8; nOctave++)
+			for (int nOffset = 0; nOffset < 256; nOffset++)
+				m_FreqTable[ix++] = (unsigned long)((8192.0 * 15625.0 * double(1 << nOctave) * (double(nClockRate) / 8000000.0)) / (511.0 - double(nOffset)));
+	}
 }
 #endif
 

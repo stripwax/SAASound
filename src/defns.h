@@ -12,8 +12,8 @@
 
 // define SAAFREQ_FIXED_CLOCKRATE if the above external clock rate is the only supported clock rate
 // i.e. only support a single compile-time clock rate (=> this also prevents using the SetClockRate method)
-// #undef SAAFREQ_FIXED_CLOCKRATE
-#define SAAFREQ_FIXED_CLOCKRATE
+#undef SAAFREQ_FIXED_CLOCKRATE
+// #define SAAFREQ_FIXED_CLOCKRATE
 
 // initial default sample rate (audio samplerate)
 #define SAMPLE_RATE_HZ 44100

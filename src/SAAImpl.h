@@ -23,8 +23,9 @@ private:
 	unsigned int m_nSampleRate;
 	unsigned int m_nOversample;
 	bool m_bHighpass;
+#ifdef DEBUGSAA
 	unsigned long m_nDebugSample;
-
+#endif
 
 public:
 	CSAASoundInternal();

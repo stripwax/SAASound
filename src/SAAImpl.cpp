@@ -48,7 +48,6 @@ m_uParamRate(0),
 m_chip()
 {
 	#ifdef DEBUGSAA
-#pragma warning(disable: 4996)
 	dbgfile.open(DEBUG_SAA_REGISTER_LOG, std::ios_base::out);
 	pcmfile.open(DEBUG_SAA_PCM_LOG, std::ios_base::out|std::ios_base::binary);
 	m_nDebugSample = 0;

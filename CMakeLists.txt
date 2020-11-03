@@ -30,7 +30,7 @@ endif ()
 add_library(SAASound SHARED ${SOURCES} ${HEADERS} ${API_HEADERS} ${RESOURCES})
 
 set_target_properties(SAASound PROPERTIES
-  VERSION 3.4
+  VERSION 3.5
   SOVERSION 3
   CXX_STANDARD 11)
 

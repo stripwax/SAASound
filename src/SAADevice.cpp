@@ -18,17 +18,6 @@
 
 
 //////////////////////////////////////////////////////////////////////
-// Globals
-//////////////////////////////////////////////////////////////////////
-
-// TODO: Support DEBUGSAA via runtime flag / config file
-#ifdef DEBUGSAA
-#include <stdio.h>	// for sprintf
-FILE* dbgfile = NULL;
-FILE* pcmfile = NULL;
-#endif
-
-//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -134,8 +123,8 @@ void CSAADevice::_SetOversample(unsigned int nOversample)
 
 void CSAADevice::_WriteData(BYTE nData)
 {
-#ifdef DEBUG
-	m_reg[m_nCurrentSaaReg] = nData;
+#if defined(DEBUG) || defined(DEBUGSAA)
+	m_Reg[m_nCurrentSaaReg] = nData;
 #endif
 
 	// route nData to the appropriate place
@@ -302,7 +291,7 @@ void CSAADevice::_WriteAddress(BYTE nReg)
 	}
 }
 
-#ifdef DEBUG
+#if defined(DEBUG) || defined(DEBUGSAA)
 BYTE CSAADevice::_ReadAddress(void)
 {
 	// Not a real hardware function of the SAA-1099, which is write-only

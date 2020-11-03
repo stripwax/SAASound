@@ -27,9 +27,10 @@
 
 // TODO: Support DEBUGSAA via runtime flag / config file
 #ifdef DEBUGSAA
-#include <stdio.h>	// for sprintf
-FILE * dbgfile = NULL;
-FILE * pcmfile = NULL;
+#include <ios>
+#include <iostream>
+#include <fstream>
+std::ofstream dbgfile, pcmfile;
 #endif
 
 //////////////////////////////////////////////////////////////////////
@@ -47,8 +48,10 @@ m_uParamRate(0),
 m_chip()
 {
 	#ifdef DEBUGSAA
-	dbgfile = fopen("debugsaa.txt","wt");
-	pcmfile = fopen("debugsaa.pcm","wb");
+#pragma warning(disable: 4996)
+	dbgfile.open(DEBUG_SAA_REGISTER_LOG, std::ios_base::out);
+	pcmfile.open(DEBUG_SAA_PCM_LOG, std::ios_base::out|std::ios_base::binary);
+	m_nDebugSample = 0;
 	#endif
 	// set parameters
 	// TODO support defaults and overrides from config file
@@ -63,7 +66,8 @@ m_chip()
 CSAASoundInternal::~CSAASoundInternal()
 {
 #ifdef DEBUGSAA
-	if (dbgfile) fclose(dbgfile);
+	dbgfile.close();
+	pcmfile.close();
 #endif
 }
 
@@ -98,7 +102,7 @@ void CSAASoundInternal::WriteData(BYTE nData)
 	// originated from an OUT 255,d call
 	m_chip._WriteData(nData);
 #ifdef DEBUGSAA
-	fprintf(dbgfile, "%lu %02d:%02x\n", m_nDebugSample, m_nCurrentSaaReg, nData);
+	dbgfile << m_nDebugSample << " " << (int)m_chip._ReadAddress() << ":" << (int)nData << std::endl;
 #endif
 }
 
@@ -107,17 +111,16 @@ void CSAASoundInternal::WriteAddress(BYTE nReg)
 	// originated from an OUT 511,r call
 	m_chip._WriteAddress(nReg);
 #ifdef DEBUGSAA
-	fprintf(dbgfile, "%lu %02d:", m_nDebugSample, nReg);
-	m_nCurrentSaaReg = nReg & 31;
-	if (m_nCurrentSaaReg==24)
+	dbgfile << m_nDebugSample << " " << (int)nReg << ":";
+	if (nReg==24)
 	{
-		fprintf(dbgfile, "<!ENVO!>");
+		dbgfile << "<!ENVO!>";
 	}
-	else if (m_nCurrentSaaReg==25)
+	else if (nReg==25)
 	{
-		fprintf(dbgfile, "<!ENV1!>");
+		dbgfile << "<!ENV1!>";
 	}
-	fprintf(dbgfile,"\n");
+	dbgfile << std::endl;
 #endif
 }
 
@@ -202,11 +205,13 @@ SAAPARAM CSAASoundInternal::GetCurrentSoundParameters(void)
 
 unsigned short CSAASoundInternal::GetCurrentBytesPerSample(void)
 {
-	return CSAASound::GetBytesPerSample(m_uParam);
+	// 16 bit stereo => 4 bytes per sample
+	return 4;
 }
 
 /*static*/ unsigned short CSAASound::GetBytesPerSample(SAAPARAM uParam)
 {
+	// 16 bit stereo => 4 bytes per sample
 	switch (uParam & (SAAP_MASK_CHANNELS | SAAP_MASK_BITDEPTH))
 	{
 		case SAAP_STEREO | SAAP_16BIT:
@@ -289,7 +294,7 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 	}
 
 #ifdef DEBUGSAA
-	fwrite(pBufferStart, GetCurrentBytesPerSample(), nTotalSamples, pcmfile);
+	pcmfile.write((const char *)pBufferStart, nTotalSamples * (unsigned long)GetCurrentBytesPerSample());
 	m_nDebugSample += nTotalSamples;
 #endif
 }

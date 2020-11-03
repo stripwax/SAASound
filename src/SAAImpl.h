@@ -23,6 +23,8 @@ private:
 	unsigned int m_nSampleRate;
 	unsigned int m_nOversample;
 	bool m_bHighpass;
+	unsigned long m_nDebugSample;
+
 
 public:
 	CSAASoundInternal();

@@ -26,6 +26,12 @@
 // initial default oversample (audio quality) recommend 0<=oversample<=6
 #define DEFAULT_OVERSAMPLE 0
 
+// Whether to dump out a log of all register and value changes and raw output pcm
+#undef DEBUGSAA
+//#define DEBUGSAA
+//#define DEBUG_SAA_REGISTER_LOG "debugsaa.txt"
+//#define DEBUG_SAA_PCM_LOG "debugsaa.pcm" 
+
 // Whether to support a startup configuration file that is parsed at load time
 // #undef USE_CONFIG_FILE
 #define USE_CONFIG_FILE

@@ -34,7 +34,7 @@ private:
 	CSAAFreq* Osc[6];
 	CSAAAmp* Amp[6];
 
-#ifdef DEBUGSAA
+#if defined(DEBUG) || defined(DEBUGSAA)
 	BYTE m_Reg[32];
 #endif
 
@@ -44,7 +44,7 @@ public:
 
 	void _WriteAddress(BYTE nReg);
 	void _WriteData(BYTE nData);
-#ifdef DEBUG
+#if defined(DEBUG) || defined(DEBUGSAA)
 	BYTE _ReadAddress(void);
 	BYTE _ReadData(void);
 #endif

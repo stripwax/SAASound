@@ -24,7 +24,7 @@
 #define SAMPLE_RATE_HZ 44100
 
 // initial default oversample (audio quality) recommend 0<=oversample<=6
-#define DEFAULT_OVERSAMPLE 0
+#define DEFAULT_OVERSAMPLE 6
 
 // Whether to dump out a log of all register and value changes and raw output pcm
 #undef DEBUGSAA
@@ -38,7 +38,7 @@
 
 // and if so, what is its location
 #ifdef USE_CONFIG_FILE
-#define CONFIG_FILE_PATH ""
+#define CONFIG_FILE_PATH "SAASound.cfg"
 #endif // USE_CONFIG_FILE
 
 #endif // HAVE_CONFIG_H

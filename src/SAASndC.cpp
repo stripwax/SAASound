@@ -84,3 +84,12 @@ void SAAAPI SAASNDGenerateMany(SAASND object, BYTE * pBuffer, unsigned long nSam
 	((LPCSAASOUND)(object))->GenerateMany(pBuffer, nSamples);
 }
 
+void SAAAPI SAASNDSetSampleRate(SAASND object, unsigned int nSampleRate)
+{
+	return ((LPCSAASOUND)(object))->SetSampleRate(nSampleRate);
+}
+
+void SAAAPI SAASNDSetOversample(SAASND object, unsigned int nOversample)
+{
+	return ((LPCSAASOUND)(object))->SetOversample(nOversample);
+}

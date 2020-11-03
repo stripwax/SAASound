@@ -1,4 +1,5 @@
 Debug/*
+DebugWithSymbols/*
 Release/*
 Release-SSE/*
 ReleaseWithSymbols/*
@@ -7,6 +8,7 @@ unused/*
 Backup*/*
 .vs/*
 SAASound/Debug/*
+SAASound/DebugWithSymbols/*
 SAASound/Release/*
 SAASound/Release-SSE/*
 SAASound/ReleaseWithSymbols/*

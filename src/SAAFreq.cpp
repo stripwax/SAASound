@@ -10,10 +10,21 @@
 #include "SAANoise.h"
 #include "SAAEnv.h"
 #include "SAAFreq.h"
+#include "defns.h"
 
+#ifdef SAAFREQ_FIXED_CLOCKRATE
+// 'load in' the data for the static frequency lookup table
+// precomputed for a fixed clockrate
+// See: tools/freqdat.py
+const unsigned long CSAAFreq::m_FreqTable[2048] = {
+#include "SAAFreq.dat"
+};
+#else
 unsigned long CSAAFreq::m_FreqTable[2048];
+unsigned long CSAAFreq::m_nClockRate = 0;
+#endif // SAAFREQ_FIXED_CLOCKRATE
 
-const unsigned short INITIAL_LEVEL = 2;
+const int INITIAL_LEVEL = 1;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -27,12 +38,12 @@ m_nOversample(0), m_nCounterLimit_low(1),
 m_nCurrentOffset(0), m_nCurrentOctave(0), m_nNextOffset(0), m_nNextOctave(0),
 m_bIgnoreOffsetData(false), m_bNewData(false), 
 m_bSync(false),
-m_nSampleRateMode(2), m_nSampleRate(11025),
+m_nSampleRate(SAMPLE_RATE_HZ),
 m_pcConnectedNoiseGenerator(NoiseGenerator),
 m_pcConnectedEnvGenerator(EnvGenerator),
 m_nConnectedMode((NoiseGenerator == NULL) ? ((EnvGenerator == NULL) ? 0 : 1) : 2)
 {
-	SetClockRate(8000000);
+	_SetClockRate(EXTERNAL_CLK_HZ);
 	SetAdd(); // current octave, current offset
 }
 
@@ -56,6 +67,13 @@ void CSAAFreq::SetFreqOffset(BYTE nOffset)
 			// order, on the next half-cycle of the current frequency
 			// generator, ONLY the octave data is acted upon.
 			// The offset data will be acted upon next time.
+
+			// ?? TEST CASE :    if you set the octave and then the offset
+			// but the octave you set it to is the same one it already was.
+			// Will this ignore the offset data?
+			// Do you get the same behaviour if you set offset THEN octave
+			// even if you set octave to the same value it was before?
+
 			m_bIgnoreOffsetData=true;
 		}
 	}
@@ -132,26 +150,12 @@ void CSAAFreq::UpdateOctaveOffsetData(void)
 	SetAdd();
 }
 
-void CSAAFreq::SetSampleRateMode(int nSampleRateMode)
+void CSAAFreq::_SetSampleRate(unsigned int nSampleRate)
 {
-	// first, adjust the current value of the counter:
-	if (nSampleRateMode < m_nSampleRateMode)
-	{
-		// samplerate has been increased; scale up counter value accordingly
-		m_nCounter <<= (m_nSampleRateMode - nSampleRateMode);
-	}
-	else
-	{
-		// samplerate has been decreased (or maybe unchanged);
-		// scale down counter value accordingly
-		m_nCounter >>= (nSampleRateMode - m_nSampleRateMode);
-	}
-
-	m_nSampleRateMode = nSampleRateMode;
-	m_nSampleRate = 44100 >> nSampleRateMode;
+	m_nSampleRate = nSampleRate;
 }
 
-void CSAAFreq::SetOversample(unsigned int oversample)
+void CSAAFreq::_SetOversample(unsigned int oversample)
 {
 	// oversample is a power of 2 i.e.
 	// if oversample == 2 then 4x oversample
@@ -170,13 +174,13 @@ void CSAAFreq::SetOversample(unsigned int oversample)
 }
 
 #ifdef SAAFREQ_FIXED_CLOCKRATE
-void CSAAFreq::SetClockRate(int nClockRate)
+void CSAAFreq::_SetClockRate(int nClockRate)
 {
-	// if SAAFREQ 8MHZ is hardcoded, then we don't support dynamically
+	// if SAAFREQ clock rate is hardcoded, then we don't support dynamically
 	// adjusting the SAA clock rate, so this is a no-op
 }
 #else
-void CSAAFreq::SetClockRate(int nClockRate)
+void CSAAFreq::_SetClockRate(int nClockRate)
 {
 	// initialise the frequency table based on the SAA clockrate
 	// Each item in m_FreqTable corresponds to the frequency calculated by
@@ -190,31 +194,22 @@ void CSAAFreq::SetClockRate(int nClockRate)
 	// Finally, note that the standard formula corresponds to a 8MHz base clock
 	// so we rescale the final result by the ratio nClockRate/8000000
 
-	int ix = 0;
-	for (int nOctave = 0; nOctave < 8; nOctave++)
-		for (int nOffset = 0; nOffset < 256; nOffset++)
-			m_FreqTable[ix++] = (unsigned long)((8192.0 * 15625.0 * double(1<<nOctave) * (double(nClockRate)/8000000.0)) / (511.0 - double(nOffset)));
+	if (nClockRate != m_nClockRate)
+	{
+		m_nClockRate = nClockRate;
+		int ix = 0;
+		for (int nOctave = 0; nOctave < 8; nOctave++)
+			for (int nOffset = 0; nOffset < 256; nOffset++)
+				m_FreqTable[ix++] = (unsigned long)((8192.0 * 15625.0 * double(1 << nOctave) * (double(nClockRate) / 8000000.0)) / (511.0 - double(nOffset)));
+	}
 }
 #endif
 
-unsigned short CSAAFreq::Level(void) const
+int CSAAFreq::Tick(void)
 {
+	// set to the absolute level (0 or 1)
 	if (m_bSync)
-		return 2;
-
-	return GetLevel(m_nLevel);
-}
-
-/*static*/ inline unsigned short CSAAFreq::GetLevel(unsigned short nLevel)
-{
-	return nLevel;
-}
-
-unsigned short CSAAFreq::Tick(void)
-{
-	// set to the absolute level (0 or 2)
-	if (m_bSync)
-		return 2;
+		return 1;
 
 	m_nCounter += m_nAdd;
 	while (m_nCounter >= (m_nSampleRate<<12))
@@ -226,8 +221,8 @@ unsigned short CSAAFreq::Tick(void)
 			// period elapsed for (at least) one half-cycle of
 			// current frequency
 			m_nCounter_low = 0;
-			// flip state - from 0 to -2 or vice versa
-			m_nLevel = 2 - m_nLevel;
+			// flip state - from 0 to 1 or vice versa
+			m_nLevel = 1 - m_nLevel;
 
 			// trigger any connected devices
 			switch (m_nConnectedMode)
@@ -252,7 +247,7 @@ unsigned short CSAAFreq::Tick(void)
 		}
 	}
 	
-	return GetLevel(m_nLevel);
+	return m_nLevel;
 }
 
 void CSAAFreq::SetAdd(void)

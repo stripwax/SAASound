@@ -1,7 +1,12 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#pragma once
 
-// ToDo: add definitions as needed
-//#cmakedefine HAVE_STRUCT_DIRENT_D_TYPE 1
+#define EXTERNAL_CLK_HZ @EXTERNAL_CLK_HZ@
+#cmakedefine SAAFREQ_FIXED_CLOCKRATE
+#define SAMPLE_RATE_HZ @SAMPLE_RATE_HZ@
+#define DEFAULT_OVERSAMPLE @DEFAULT_OVERSAMPLE@
+#cmakedefine DEBUGSAA
+#define DEBUG_SAA_REGISTER_LOG "@DEBUG_SAA_REGISTER_LOG@"
+#define DEBUG_SAA_PCM_LOG "@DEBUG_SAA_PCM_LOG@"
 
-#endif // CONFIG_H
+#cmakedefine USE_CONFIG_FILE
+#cmakedefine CONFIG_FILE_PATH "@CONFIG_FILE_PATH@"

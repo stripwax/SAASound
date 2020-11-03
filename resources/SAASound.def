@@ -27,6 +27,8 @@ EXPORTS
 	SAASNDGenerateMany						@17
 ;	SAASNDSendCommand						@18
 ;	SAASNDClickClick						@19
+	SAASNDSetClockRate						@20
+	SAASNDSetSampleRate						@21
 
 	CreateCSAASound							@25
 	DestroyCSAASound						@26
@@ -46,3 +48,5 @@ EXPORTS
 	GenerateMany							@42
 ;	SendCommand								@43
 ;	ClickClick								@44
+	SetClockRate							@45
+	SetSampleRate							@46

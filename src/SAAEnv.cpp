@@ -135,12 +135,12 @@ void CSAAEnv::SetEnvControl(int nData)
 			
 }
 	
-unsigned short CSAAEnv::LeftLevel(void) const
+int CSAAEnv::LeftLevel(void) const
 {
 	return m_nLeftLevel;
 }
 
-unsigned short CSAAEnv::RightLevel(void) const
+int CSAAEnv::RightLevel(void) const
 {
 	return m_nRightLevel;
 }
@@ -377,10 +377,4 @@ inline void CSAAEnv::SetNewEnvData(int nData)
 	}
 	
 	SetLevels();
-}
-
-
-bool CSAAEnv::IsActive(void) const
-{
-	return m_bEnabled;
 }

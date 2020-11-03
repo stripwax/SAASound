@@ -44,6 +44,12 @@
     <ClInclude Include="resource.h">
       <Filter>C++ Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\SAADevice.h">
+      <Filter>C++ Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\defns.h">
+      <Filter>C++ Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\SAAAmp.cpp">
@@ -62,6 +68,9 @@
       <Filter>C++ Source Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\SAASndC.cpp">
+      <Filter>C++ Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SAADevice.cpp">
       <Filter>C++ Source Code</Filter>
     </ClCompile>
   </ItemGroup>

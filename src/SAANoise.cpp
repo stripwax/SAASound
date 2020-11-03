@@ -14,6 +14,7 @@
 
 #include "types.h"
 #include "SAANoise.h"
+#include "defns.h"
 
 
 //////////////////////////////////////////////////////////////////////
@@ -27,12 +28,11 @@ m_nCounter_low(0),
 m_nCounterLimit_low(1),
 m_nOversample(0),
 m_bSync(false),
-m_nSampleRateMode(2),
-m_nSampleRate(11025),
+m_nSampleRate(SAMPLE_RATE_HZ),
 m_nSourceMode(0),
 m_nRand(1)
 {
-	SetClockRate(8000000);
+	_SetClockRate(EXTERNAL_CLK_HZ);
 	m_nAdd = m_nAddBase;
 }
 
@@ -43,12 +43,11 @@ m_nCounter_low(0),
 m_nCounterLimit_low(1),
 m_nOversample(0),
 m_bSync(false),
-m_nSampleRateMode(2),
-m_nSampleRate(11025),
+m_nSampleRate(SAMPLE_RATE_HZ),
 m_nSourceMode(0),
 m_nRand(seed)
 {
-	SetClockRate(8000000);
+	_SetClockRate(EXTERNAL_CLK_HZ);
 	m_nAdd = m_nAddBase;
 }
 
@@ -57,7 +56,7 @@ CSAANoise::~CSAANoise()
 	// Nothing to do
 }
 
-void CSAANoise::SetClockRate(int nClockRate)
+void CSAANoise::_SetClockRate(int nClockRate)
 {
 	// at 8MHz the clock rate is 31.250kHZ
 	// This is simply the clock rate divided by 256 i.e. 2^8
@@ -69,16 +68,6 @@ void CSAANoise::SetClockRate(int nClockRate)
 void CSAANoise::Seed(unsigned long seed)
 {
 	m_nRand = seed;
-}
-
-unsigned short CSAANoise::Level(void) const
-{
-	return (unsigned short)(m_nRand & 0x00000001);
-}
-
-unsigned short CSAANoise::LevelTimesTwo(void) const
-{
-	return (unsigned short)((m_nRand & 0x00000001) << 1);
 }
 
 void CSAANoise::SetSource(int nSource)
@@ -99,14 +88,17 @@ void CSAANoise::Trigger(void)
 //	No point actually checking m_bSync here ... because if sync is true,
 //	then frequency generators won't actually be generating Trigger pulses
 //	so we wouldn't even get here!
-//	if ( (!m_bSync) && m_bUseFreqGen)
+	// EXCEPT - cool edge case:  if sync is set, then actually the Noise Generator
+	// is triggered on EVERY CLOCK PULSE (i.e. 8MHz noise).  So indeed it is correct
+	// to not check for sync here.  NEEDS TEST CASE.
+
 	if (m_nSourceMode == 3)
 	{
 		ChangeLevel();
 	}
 }
 
-unsigned short CSAANoise::Tick(void)
+void CSAANoise::Tick(void)
 {
 	// Tick only does anything useful when we're
 	// clocking from the noise generator clock
@@ -129,8 +121,6 @@ unsigned short CSAANoise::Tick(void)
 			}
 		}
 	}
-
-	return (unsigned short)(m_nRand & 0x00000001);
 }
 
 void CSAANoise::Sync(bool bSync)
@@ -144,26 +134,13 @@ void CSAANoise::Sync(bool bSync)
 }
 
 
-void CSAANoise::SetSampleRateMode(int nSampleRateMode)
+void CSAANoise::_SetSampleRate(int nSampleRate)
 {
-	// first, adjust the current value of the counter:
-	if (nSampleRateMode < m_nSampleRateMode)
-	{
-		// samplerate has been increased; scale up counter value accordingly
-		m_nCounter<<=(m_nSampleRateMode - nSampleRateMode);
-	}
-	else
-	{
-		// samplerate has been decreased (or maybe unchanged);
-		// scale down counter value accordingly
-		m_nCounter>>=(nSampleRateMode - m_nSampleRateMode);
-	}
-	m_nSampleRateMode = nSampleRateMode;
-	m_nSampleRate = 44100 >> m_nSampleRateMode;
+	m_nSampleRate = nSampleRate;
 }
 
 
-void CSAANoise::SetOversample(unsigned int oversample)
+void CSAANoise::_SetOversample(unsigned int oversample)
 {
 	// oversample is a power of 2 i.e.
 	// if oversample == 2 then 4x oversample

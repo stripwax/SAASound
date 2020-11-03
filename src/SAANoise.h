@@ -16,7 +16,6 @@ private:
 	unsigned int m_nOversample;
 	unsigned long m_nCounterLimit_low;
 	bool m_bSync; // see description of "SYNC" bit of register 28
-	BYTE m_nSampleRateMode; // 0=44100, 1=22050; 2=11025
 	unsigned long m_nSampleRate; // = 44100 when RateMode=0, for example
 	int m_nSourceMode;
 	unsigned long m_nAddBase; // nAdd for 31.25 kHz noise at 44.1 kHz samplerate
@@ -34,16 +33,22 @@ public:
 
 	void SetSource(int nSource);
 	void Trigger(void);
-	void SetSampleRateMode(int nSampleRateMode);
-	void SetOversample(unsigned int oversample);
-	void SetClockRate(int nClockRate);
+	void _SetSampleRate(int nSampleRate);
+	void _SetOversample(unsigned int oversample);
+	void _SetClockRate(int nClockRate);
 	void Seed(unsigned long seed);
 
-	unsigned short Tick(void);
-	unsigned short Level(void) const;
-	unsigned short LevelTimesTwo(void) const;
+	void Tick(void);
+	int Level(void) const;
 	void Sync(bool bSync);
 
 };
+
+inline int CSAANoise::Level(void) const
+{
+	// returns 0 or 1
+	return (m_nRand & 0x00000001);
+}
+
 
 #endif	// SAANOISE_H_INCLUDED

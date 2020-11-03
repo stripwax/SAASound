@@ -6,12 +6,22 @@ if (APPLE)
   set(CMAKE_OSX_ARCHITECTURES "i386;x86_64")
 endif ()
 
+set(EXTERNAL_CLK_HZ "8000000" CACHE STRING "External clock in Hz")
+option(SAAFREQ_FIXED_CLOCKRATE "Use precomputed frequency table, external clock is locked" OFF)
+set(SAMPLE_RATE_HZ "44100" CACHE STRING "Output sample rate in Hz")
+set(DEFAULT_OVERSAMPLE "0" CACHE STRING "Default oversample factor")
+option(DEBUGSAA "Create a text log of all register:value writes as well as a raw PCM output file" OFF)
+set(DEBUG_SAA_REGISTER_LOG "debugsaa.txt" CACHE STRING "Path to register log file (if DEBUGSAA)")
+set(DEBUG_SAA_PCM_LOG "debugsaa.pcm" CACHE STRING "Path to raw PCM output file (if DEBUGSAA)")
+option(USE_CONFIG_FILE "Compile support for loading a config file on startup (SAAsound.cfg)" ON)
+set(CONFIG_FILE_PATH "SAASound.cfg" CACHE STRING "Path to config file (if USE_CONFIG_FILE)")
+
 #include(CheckStructHasMember)
 #CHECK_STRUCT_HAS_MEMBER("struct dirent" d_type dirent.h HAVE_STRUCT_DIRENT_D_TYPE LANGUAGE CXX)
 
-file(GLOB SOURCES src/*.cpp)
-file(GLOB HEADERS src/*.h)
-file(GLOB API_HEADERS include/*.h)
+file(GLOB SOURCES src/*.cpp LIST_DIRECTORIES false)
+file(GLOB HEADERS src/*.h LIST_DIRECTORIES false)
+file(GLOB API_HEADERS include/*.h LIST_DIRECTORIES false)
 
 if (MSVC)
   set(RESOURCES resources/SAASound.def)
@@ -20,7 +30,7 @@ endif ()
 add_library(SAASound SHARED ${SOURCES} ${HEADERS} ${API_HEADERS} ${RESOURCES})
 
 set_target_properties(SAASound PROPERTIES
-  VERSION 3.2
+  VERSION 3.5
   SOVERSION 3
   CXX_STANDARD 11)
 

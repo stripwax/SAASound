@@ -8,6 +8,8 @@
 #ifndef SAAFREQ_H_INCLUDE
 #define SAAFREQ_H_INCLUDE
 
+#include "defns.h"
+
 class CSAAFreq  
 {
 private:
@@ -15,22 +17,19 @@ private:
 	// 'load in' the data for the static frequency lookup table
 	// precomputed for a fixed clockrate
 	// See: tools/freqdat.py
-	const static unsigned long m_FreqTable[2048] = {
-#include "SAAFreq.dat"
-	}
+	const static unsigned long m_FreqTable[2048];
 #else
 	// we'll calculate the frequency lookup table at runtime.
 	static unsigned long m_FreqTable[2048];
+	static unsigned long m_nClockRate;
 #endif
-
-	static inline unsigned short GetLevel(unsigned short nLevel);
 
 	unsigned long m_nCounter;
 	unsigned long m_nAdd;
 	unsigned long m_nCounter_low;
 	unsigned int m_nOversample;
 	unsigned long m_nCounterLimit_low;
-	unsigned short m_nLevel;
+	int m_nLevel;
 
 	int m_nCurrentOffset;
 	int m_nCurrentOctave;
@@ -40,7 +39,6 @@ private:
 	bool m_bNewData;
 	bool m_bSync;
 
-	int m_nSampleRateMode;
 	unsigned long m_nSampleRate;
 	CSAANoise * const m_pcConnectedNoiseGenerator;
 	CSAAEnv * const m_pcConnectedEnvGenerator;
@@ -54,13 +52,21 @@ public:
 	~CSAAFreq();
 	void SetFreqOffset(BYTE nOffset);
 	void SetFreqOctave(BYTE nOctave);
-	void SetSampleRateMode(int nSampleRateMode);
-	void SetOversample(unsigned int oversample);
-	void SetClockRate(int nClockRate);
+	void _SetSampleRate(unsigned int nSampleRate);
+	void _SetOversample(unsigned int oversample);
+	void _SetClockRate(int nClockRate);
 	void Sync(bool bSync);
-	unsigned short Tick(void);
-	unsigned short Level(void) const;
+	int Tick(void);
+	int Level(void) const;
 
 };
+
+inline int CSAAFreq::Level(void) const
+{
+	if (m_bSync)
+		return 1;
+
+	return m_nLevel;
+}
 
 #endif	// SAAFREQ_H_INCLUDE

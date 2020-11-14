@@ -44,8 +44,10 @@ public:
 
 	void _WriteAddress(BYTE nReg);
 	void _WriteData(BYTE nData);
-#if defined(DEBUG) || defined(DEBUGSAA)
+#if defined(DEBUG) || defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
 	BYTE _ReadAddress(void);
+#endif
+#if defined(DEBUG)
 	BYTE _ReadData(void);
 #endif
 

@@ -291,16 +291,19 @@ void CSAADevice::_WriteAddress(BYTE nReg)
 	}
 }
 
-#if defined(DEBUG) || defined(DEBUGSAA)
+#if defined(DEBUG) || defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
 BYTE CSAADevice::_ReadAddress(void)
 {
 	// Not a real hardware function of the SAA-1099, which is write-only
+	// However, this is used by SAAImpl to generate debug logs (if enabled)
 	return(m_nCurrentSaaReg);
 }
-
+#endif
+#if defined(DEBUG)
 BYTE CSAADevice::_ReadData(void)
 {
 	// Not a real hardware function of the SAA-1099, which is write-only
+	// This is only compiled for Debug builds
 	return(m_Reg[m_nCurrentSaaReg]);
 }
 #endif

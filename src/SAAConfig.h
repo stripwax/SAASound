@@ -23,8 +23,8 @@ private:
 public:
 	bool m_bGenerateRegisterLogs;
 	bool m_bGeneratePcmLogs;
-	std::wstring m_strRegisterLogPath;
-	std::wstring m_strPcmOutputPath;
+	t_string m_strRegisterLogPath;
+	t_string m_strPcmOutputPath;
 
 	SAAConfig();
 	void ReadConfig();

@@ -33,8 +33,10 @@
 
 #if defined UNICODE
 #include <tchar.h>
+#define t_string std::wstring
 #else
 #define TCHAR char
+#define t_string std::string
 #define _tfopen fopen
 #define _tremove remove
 #define _trename rename
@@ -54,6 +56,7 @@
 #include <stdlib.h>
 #define mTCHAR     char
 #define _mT(s)     s
+#define mString    std::string
 #define _mtcscat   strcat
 #define _mtcschr   strchr
 #define _mtcscmp   strcmp
@@ -75,6 +78,7 @@
 #else
 #define mTCHAR     TCHAR
 #define _mT(s)     __T(s)
+#define mString    t_string
 #define _mtcscat   _tcscat
 #define _mtcschr   _tcschr
 #define _mtcscmp   _tcscmp
@@ -95,22 +99,6 @@
 #define _mtrename  _trename
 #endif
 
-#if (defined _UNICODE || defined __UNICODE__ || defined UNICODE)
-#define t_string std::wstring
-#else
-  #define t_string std::string
-#endif
-
-#if (defined _UNICODE || defined __UNICODE__ || defined UNICODE) && !defined INI_ANSIONLY
-  #define mTCHAR TCHAR
-  #define mString std::wstring
-  #define _mT(x) __T(x)
-#else
-  /* force TCHAR to be "char", but only for minIni */
-  #define mTCHAR char
-  #define mString std::string
-  #define _mT(x)  x
-#endif
 
 #if !defined INI_BUFFERSIZE
   #define INI_BUFFERSIZE  512

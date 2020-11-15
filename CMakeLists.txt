@@ -23,9 +23,6 @@ set(CONFIG_FILE_PATH "SAASound.cfg" CACHE STRING "Path to config file (if USE_CO
 #include(CheckStructHasMember)
 #CHECK_STRUCT_HAS_MEMBER("struct dirent" d_type dirent.h HAVE_STRUCT_DIRENT_D_TYPE LANGUAGE CXX)
 
-file(GLOB HEADERS src/*.h LIST_DIRECTORIES false)
-file(GLOB API_HEADERS include/*.h LIST_DIRECTORIES false)
-
 if (MSVC)
   set(RESOURCES resources/SAASound.def)
 endif ()
@@ -76,7 +73,7 @@ if (APPLE AND BUILD_FRAMEWORK)
     OUTPUT_NAME SAASound
     FRAMEWORK TRUE
     FRAMEWORK_VERSION C
-    MACOSX_FRAMEWORK_IDENTIFIER org.rebuzz)
+    MACOSX_FRAMEWORK_IDENTIFIER com.beermex)
   set_source_files_properties(${API_HEADERS} PROPERTIES
     MACOSX_PACKAGE_LOCATION Headers)
   set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")

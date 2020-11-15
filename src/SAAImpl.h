@@ -13,6 +13,15 @@
 
 #include "SAASound.h"
 #include "SAADevice.h"
+#ifdef USE_CONFIG_FILE
+#include "SAAConfig.h"
+#endif
+
+#if defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
+#include <ios>
+#include <iostream>
+#include <fstream>
+#endif
 
 class CSAASoundInternal : public CSAASound
 {
@@ -23,8 +32,12 @@ private:
 	unsigned int m_nSampleRate;
 	unsigned int m_nOversample;
 	bool m_bHighpass;
-#ifdef DEBUGSAA
+#ifdef USE_CONFIG_FILE
+	SAAConfig m_Config;
+#endif
+#if defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
 	unsigned long m_nDebugSample;
+	std::ofstream m_dbgfile, m_pcmfile;
 #endif
 
 public:

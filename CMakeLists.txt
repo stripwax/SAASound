@@ -1,9 +1,13 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.13)
 project(SAASound)
 
 if (APPLE)
   option(BUILD_FRAMEWORK "Build a Mac OS X framework instead of a shared library" OFF)
   set(CMAKE_OSX_ARCHITECTURES "i386;x86_64")
+endif ()
+
+if (MSVC)
+  add_definitions(-DUNICODE -D_UNICODE)
 endif ()
 
 set(EXTERNAL_CLK_HZ "8000000" CACHE STRING "External clock in Hz")
@@ -19,7 +23,6 @@ set(CONFIG_FILE_PATH "SAASound.cfg" CACHE STRING "Path to config file (if USE_CO
 #include(CheckStructHasMember)
 #CHECK_STRUCT_HAS_MEMBER("struct dirent" d_type dirent.h HAVE_STRUCT_DIRENT_D_TYPE LANGUAGE CXX)
 
-file(GLOB SOURCES src/*.cpp LIST_DIRECTORIES false)
 file(GLOB HEADERS src/*.h LIST_DIRECTORIES false)
 file(GLOB API_HEADERS include/*.h LIST_DIRECTORIES false)
 
@@ -27,7 +30,37 @@ if (MSVC)
   set(RESOURCES resources/SAASound.def)
 endif ()
 
-add_library(SAASound SHARED ${SOURCES} ${HEADERS} ${API_HEADERS} ${RESOURCES})
+add_library(SAASound SHARED)
+set(API_HEADERS include/SAASound.h)
+target_sources(SAASound
+    PRIVATE
+        
+        src/defns.h
+        src/SAAAmp.cpp
+        src/SAAAmp.h
+        src/SAAConfig.cpp
+        src/SAAConfig.h
+        src/SAADevice.cpp
+        src/SAADevice.h
+        src/SAAEnv.cpp
+        src/SAAEnv.h
+        src/SAAFreq.cpp
+        src/SAAFreq.h
+        src/SAAImpl.cpp
+        src/SAAImpl.h
+        src/SAANoise.cpp
+        src/SAANoise.h
+        src/SAASndC.cpp
+        src/SAASound.cpp
+        src/types.h
+        src/SAASndC.h
+        src/minIni/minIni.h
+        src/minIni/minIni.c
+        src/minIni/minGlue.h
+        ${RESOURCES}
+    PUBLIC
+        ${API_HEADERS}
+)
 
 set_target_properties(SAASound PROPERTIES
   VERSION 3.5

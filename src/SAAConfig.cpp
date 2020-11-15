@@ -30,9 +30,9 @@ void SAAConfig::ReadConfig()
 	// Define a helper to let us read from UTF-8 and convert to system locale
 	// across platforms (and assume this will be a no-op on *nix)
 
-#ifdef WIN32
-	// Only support UNICODE WIN32
-	// convert config file contents from utf8 to wchar_t
+#if defined(WIN32) && defined(UNICODE)
+	// WIN32 support for UNICODE requires different types
+	// Convert config file contents from utf8 to wchar_t
 	// minIni has been compiled to use plain char for file read-write operations
 	// (which supports UTF8) and wchar_t for filenames (which supports unicode filenames
 	// on win32)
@@ -49,6 +49,8 @@ void SAAConfig::ReadConfig()
 	// For now I'm just going to assume you'using UTF8, and I will do no conversion.
 	// minIni has been compiled to use plain char for everything,
 	// which is really just a utf8 passthrough assumption.
+	// If you're compiling for WIN32 but with UNICODE not defined: you're on your own
+	// (it might work but I'm not testing or supporting you..)
 
 #define wrapped_gets(_mstring, _section, _element, _default) \
 	_mstring = m_minIni.gets(u8"" _section "", u8"" _element "", u8"" _default "");

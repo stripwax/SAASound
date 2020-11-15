@@ -11,15 +11,18 @@
 /* map required file I/O types and functions to the standard C library */
 #include <stdio.h>
 
+#define INI_ANSIONLY
+#define INI_READONLY
+
 #define INI_FILETYPE                    FILE*
-#define ini_openread(filename,file)     ((*(file) = fopen((filename),"rb")) != NULL)
-#define ini_openwrite(filename,file)    ((*(file) = fopen((filename),"wb")) != NULL)
-#define ini_openrewrite(filename,file)  ((*(file) = fopen((filename),"r+b")) != NULL)
+#define ini_openread(filename,file)     ((*(file) = _tfopen((filename), _T("rb"))) != NULL)
+#define ini_openwrite(filename,file)    ((*(file) = _tfopen((filename), _T("wb"))) != NULL)
+#define ini_openrewrite(filename,file)  ((*(file) = _tfopen((filename), _T("r+b"))) != NULL)
 #define ini_close(file)                 (fclose(*(file)) == 0)
 #define ini_read(buffer,size,file)      (fgets((buffer),(size),*(file)) != NULL)
 #define ini_write(buffer,file)          (fputs((buffer),*(file)) >= 0)
-#define ini_rename(source,dest)         (rename((source), (dest)) == 0)
-#define ini_remove(filename)            (remove(filename) == 0)
+#define ini_rename(source,dest)         (_trename((source), (dest)) == 0)
+#define ini_remove(filename)            (_tremove(filename) == 0)
 
 #define INI_FILEPOS                     long int
 #define ini_tell(file,pos)              (*(pos) = ftell(*(file)))
@@ -27,5 +30,5 @@
 
 /* for floating-point support, define additional types and functions */
 #define INI_REAL                        float
-#define ini_ftoa(string,value)          sprintf((string),"%f",(value))
+#define ini_ftoa(string,value)          sprintf((string), "%f",(value))
 #define ini_atof(string)                (INI_REAL)strtod((string),NULL)

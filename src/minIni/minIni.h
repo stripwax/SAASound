@@ -21,12 +21,22 @@
 
 #include "minGlue.h"
 
+#if (defined _UNICODE || defined __UNICODE__ || defined UNICODE)
+#include <tchar.h>
+#define t_string std::wstring
+#else
+  #define t_string std::string
+#endif
+
 #if (defined _UNICODE || defined __UNICODE__ || defined UNICODE) && !defined INI_ANSIONLY
-  #include <tchar.h>
   #define mTCHAR TCHAR
+  #define mString std::wstring
+  #define _mT(x) _T(x)
 #else
   /* force TCHAR to be "char", but only for minIni */
   #define mTCHAR char
+  #define mString std::string
+  #define _mT(x)  x
 #endif
 
 #if !defined INI_BUFFERSIZE
@@ -37,27 +47,27 @@
   extern "C" {
 #endif
 
-int   ini_getbool(const mTCHAR *Section, const mTCHAR *Key, int DefValue, const mTCHAR *Filename);
-long  ini_getl(const mTCHAR *Section, const mTCHAR *Key, long DefValue, const mTCHAR *Filename);
-int   ini_gets(const mTCHAR *Section, const mTCHAR *Key, const mTCHAR *DefValue, mTCHAR *Buffer, int BufferSize, const mTCHAR *Filename);
-int   ini_getsection(int idx, mTCHAR *Buffer, int BufferSize, const mTCHAR *Filename);
-int   ini_getkey(const mTCHAR *Section, int idx, mTCHAR *Buffer, int BufferSize, const mTCHAR *Filename);
+int   ini_getbool(const mTCHAR *Section, const mTCHAR *Key, int DefValue, const TCHAR *Filename);
+long  ini_getl(const mTCHAR *Section, const mTCHAR *Key, long DefValue, const TCHAR *Filename);
+int   ini_gets(const mTCHAR *Section, const mTCHAR *Key, const mTCHAR *DefValue, mTCHAR *Buffer, int BufferSize, const TCHAR *Filename);
+int   ini_getsection(int idx, mTCHAR *Buffer, int BufferSize, const TCHAR *Filename);
+int   ini_getkey(const mTCHAR *Section, int idx, mTCHAR *Buffer, int BufferSize, const TCHAR *Filename);
 
 #if defined INI_REAL
-INI_REAL ini_getf(const mTCHAR *Section, const mTCHAR *Key, INI_REAL DefValue, const mTCHAR *Filename);
+INI_REAL ini_getf(const mTCHAR *Section, const mTCHAR *Key, INI_REAL DefValue, const TCHAR *Filename);
 #endif
 
 #if !defined INI_READONLY
-int   ini_putl(const mTCHAR *Section, const mTCHAR *Key, long Value, const mTCHAR *Filename);
-int   ini_puts(const mTCHAR *Section, const mTCHAR *Key, const mTCHAR *Value, const mTCHAR *Filename);
+int   ini_putl(const mTCHAR *Section, const mTCHAR *Key, long Value, const TCHAR *Filename);
+int   ini_puts(const mTCHAR *Section, const mTCHAR *Key, const mTCHAR *Value, const TCHAR *Filename);
 #if defined INI_REAL
-int   ini_putf(const mTCHAR *Section, const mTCHAR *Key, INI_REAL Value, const mTCHAR *Filename);
+int   ini_putf(const mTCHAR *Section, const mTCHAR *Key, INI_REAL Value, const TCHAR *Filename);
 #endif
 #endif /* INI_READONLY */
 
 #if !defined INI_NOBROWSE
 typedef int (*INI_CALLBACK)(const mTCHAR *Section, const mTCHAR *Key, const mTCHAR *Value, void *UserData);
-int  ini_browse(INI_CALLBACK Callback, void *UserData, const mTCHAR *Filename);
+int  ini_browse(INI_CALLBACK Callback, void *UserData, const TCHAR *Filename);
 #endif /* INI_NOBROWSE */
 
 #if defined __cplusplus
@@ -76,69 +86,69 @@ int  ini_browse(INI_CALLBACK Callback, void *UserData, const mTCHAR *Filename);
   class minIni
   {
   public:
-    minIni(const std::string& filename) : iniFilename(filename)
+    minIni(const t_string& filename) : iniFilename(filename)
       { }
 
-    bool getbool(const std::string& Section, const std::string& Key, bool DefValue=false) const
+    bool getbool(const mString& Section, const mString& Key, bool DefValue=false) const
       { return ini_getbool(Section.c_str(), Key.c_str(), int(DefValue), iniFilename.c_str()) != 0; }
 
-    long getl(const std::string& Section, const std::string& Key, long DefValue=0) const
+    long getl(const mString& Section, const mString& Key, long DefValue=0) const
       { return ini_getl(Section.c_str(), Key.c_str(), DefValue, iniFilename.c_str()); }
 
-    int geti(const std::string& Section, const std::string& Key, int DefValue=0) const
+    int geti(const mString& Section, const mString& Key, int DefValue=0) const
       { return static_cast<int>(this->getl(Section, Key, long(DefValue))); }
 
-    std::string gets(const std::string& Section, const std::string& Key, const std::string& DefValue="") const
+    mString gets(const mString& Section, const mString& Key, const mString& DefValue=_mT("")) const
       {
-        char buffer[INI_BUFFERSIZE];
+        mTCHAR buffer[INI_BUFFERSIZE];
         ini_gets(Section.c_str(), Key.c_str(), DefValue.c_str(), buffer, INI_BUFFERSIZE, iniFilename.c_str());
         return buffer;
       }
 
-    std::string getsection(int idx) const
+    mString getsection(int idx) const
       {
-        char buffer[INI_BUFFERSIZE];
+        mTCHAR buffer[INI_BUFFERSIZE];
         ini_getsection(idx, buffer, INI_BUFFERSIZE, iniFilename.c_str());
         return buffer;
       }
 
-    std::string getkey(const std::string& Section, int idx) const
+    mString getkey(const mString& Section, int idx) const
       {
-        char buffer[INI_BUFFERSIZE];
+        mTCHAR buffer[INI_BUFFERSIZE];
         ini_getkey(Section.c_str(), idx, buffer, INI_BUFFERSIZE, iniFilename.c_str());
         return buffer;
       }
 
 #if defined INI_REAL
-    INI_REAL getf(const std::string& Section, const std::string& Key, INI_REAL DefValue=0) const
+    INI_REAL getf(const mString& Section, const mString& Key, INI_REAL DefValue=0) const
       { return ini_getf(Section.c_str(), Key.c_str(), DefValue, iniFilename.c_str()); }
 #endif
 
 #if ! defined INI_READONLY
-    bool put(const std::string& Section, const std::string& Key, long Value)
+    bool put(const mString& Section, const mString& Key, long Value)
       { return ini_putl(Section.c_str(), Key.c_str(), Value, iniFilename.c_str()) != 0; }
 
-    bool put(const std::string& Section, const std::string& Key, int Value)
+    bool put(const mString& Section, const mString& Key, int Value)
       { return ini_putl(Section.c_str(), Key.c_str(), (long)Value, iniFilename.c_str()) != 0; }
 
-    bool put(const std::string& Section, const std::string& Key, bool Value)
+    bool put(const mString& Section, const mString& Key, bool Value)
       { return ini_putl(Section.c_str(), Key.c_str(), (long)Value, iniFilename.c_str()) != 0; }
 
-    bool put(const std::string& Section, const std::string& Key, const std::string& Value)
+    bool put(const mString& Section, const mString& Key, const mString& Value)
       { return ini_puts(Section.c_str(), Key.c_str(), Value.c_str(), iniFilename.c_str()) != 0; }
 
-    bool put(const std::string& Section, const std::string& Key, const char* Value)
+    bool put(const mString& Section, const mString& Key, const mTCHAR* Value)
       { return ini_puts(Section.c_str(), Key.c_str(), Value, iniFilename.c_str()) != 0; }
 
 #if defined INI_REAL
-    bool put(const std::string& Section, const std::string& Key, INI_REAL Value)
+    bool put(const mString& Section, const mString& Key, INI_REAL Value)
       { return ini_putf(Section.c_str(), Key.c_str(), Value, iniFilename.c_str()) != 0; }
 #endif
 
-    bool del(const std::string& Section, const std::string& Key)
+    bool del(const mString& Section, const mString& Key)
       { return ini_puts(Section.c_str(), Key.c_str(), 0, iniFilename.c_str()) != 0; }
 
-    bool del(const std::string& Section)
+    bool del(const mString& Section)
       { return ini_puts(Section.c_str(), 0, 0, iniFilename.c_str()) != 0; }
 #endif
 
@@ -148,7 +158,7 @@ int  ini_browse(INI_CALLBACK Callback, void *UserData, const mTCHAR *Filename);
 #endif
 
   private:
-    std::string iniFilename;
+      t_string iniFilename;
   };
 
 #endif /* __WXWINDOWS__ */

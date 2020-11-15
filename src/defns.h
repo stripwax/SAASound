@@ -27,10 +27,17 @@
 #define DEFAULT_OVERSAMPLE 6
 
 // Whether to dump out a log of all register and value changes and raw output pcm
-#undef DEBUGSAA
 //#define DEBUGSAA
-//#define DEBUG_SAA_REGISTER_LOG "debugsaa.txt"
-//#define DEBUG_SAA_PCM_LOG "debugsaa.pcm" 
+#undef DEBUGSAA
+
+// the (default) names of the register output and pcm output log files.
+// If you're using a config file, you can change these (or, if you enable
+// debugging via the config file settings, but leave the filenames unspecified,
+// it will use these defaults)
+#define DEBUG_SAA_REGISTER_LOG "debugsaa.txt"
+#define DEBUG_SAA_PCM_LOG  "debugsaa.pcm"
+// Whether to include support for these debug logs via config file (only making
+// sense if USE_CONFIG_FILE is also defined)
 
 // Whether to support a startup configuration file that is parsed at load time
 // #undef USE_CONFIG_FILE

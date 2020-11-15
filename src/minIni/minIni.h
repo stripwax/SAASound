@@ -20,9 +20,9 @@
 #define MININI_H
 
 #include "minGlue.h"
+#include <tchar.h>
 
 #if (defined _UNICODE || defined __UNICODE__ || defined UNICODE)
-#include <tchar.h>
 #define t_string std::wstring
 #else
   #define t_string std::string

@@ -15,9 +15,9 @@
 #define INI_READONLY
 
 #define INI_FILETYPE                    FILE*
-#define ini_openread(filename,file)     ((*(file) = _tfopen((filename), _T("rb"))) != NULL)
-#define ini_openwrite(filename,file)    ((*(file) = _tfopen((filename), _T("wb"))) != NULL)
-#define ini_openrewrite(filename,file)  ((*(file) = _tfopen((filename), _T("r+b"))) != NULL)
+#define ini_openread(filename,file)     ((*(file) = _tfopen((filename), __T("rb"))) != NULL)
+#define ini_openwrite(filename,file)    ((*(file) = _tfopen((filename), __T("wb"))) != NULL)
+#define ini_openrewrite(filename,file)  ((*(file) = _tfopen((filename), __T("r+b"))) != NULL)
 #define ini_close(file)                 (fclose(*(file)) == 0)
 #define ini_read(buffer,size,file)      (fgets((buffer),(size),*(file)) != NULL)
 #define ini_write(buffer,file)          (fputs((buffer),*(file)) >= 0)

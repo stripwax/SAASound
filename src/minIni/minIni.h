@@ -20,7 +20,80 @@
 #define MININI_H
 
 #include "minGlue.h"
+
+
+#if (defined _UNICODE || defined __UNICODE__ || defined UNICODE) && !defined INI_ANSIONLY
+#if !defined UNICODE   /* for Windows */
+#define UNICODE
+#endif
+#if !defined _UNICODE  /* for C library */
+#define _UNICODE
+#endif
+#endif
+
+#if defined UNICODE
 #include <tchar.h>
+#else
+#define TCHAR char
+#define _tfopen fopen
+#define _tremove remove
+#define _trename rename
+#endif
+
+#if !defined __T
+#define __T(s)    s
+#endif
+
+#if !defined _T
+#define _T(s) __T(s)
+#endif
+
+#if defined INI_ANSIONLY
+#include <ctype.h>
+#include <string.h>
+#include <stdlib.h>
+#define mTCHAR     char
+#define _mT(s)     s
+#define _mtcscat   strcat
+#define _mtcschr   strchr
+#define _mtcscmp   strcmp
+#define _mtcscpy   strcpy
+#define _mtcsicmp  stricmp
+#define _mtcslen   strlen
+#define _mtcsncmp  strncmp
+#define _mtcsnicmp strnicmp
+#define _mtcsrchr  strrchr
+#define _mtcstol   strtol
+#define _mtcstod   strtod
+#define _mtotupper toupper
+#define _mstprintf sprintf
+#define _mtfgets   fgets
+#define _mtfputs   fputs
+#define _mtfopen   fopen
+#define _mtremove  remove
+#define _mtrename  rename
+#else
+#define mTCHAR     TCHAR
+#define _mT(s)     __T(s)
+#define _mtcscat   _tcscat
+#define _mtcschr   _tcschr
+#define _mtcscmp   _tcscmp
+#define _mtcscpy   _tcscpy
+#define _mtcsicmp  _tcsicmp
+#define _mtcslen   _tcslen
+#define _mtcsncmp  _tcsncmp
+#define _mtcsnicmp _tcsnicmp
+#define _mtcsrchr  _tcsrchr
+#define _mtcstol   _tcstol
+#define _mtcstod   _tcstod
+#define _mtotupper _totupper
+#define _mstprintf _stprintf
+#define _mtfgets   _tfgets
+#define _mtfputs   _tfputs
+#define _mtfopen   _tfopen
+#define _mtremove  _tremove
+#define _mtrename  _trename
+#endif
 
 #if (defined _UNICODE || defined __UNICODE__ || defined UNICODE)
 #define t_string std::wstring
@@ -31,7 +104,7 @@
 #if (defined _UNICODE || defined __UNICODE__ || defined UNICODE) && !defined INI_ANSIONLY
   #define mTCHAR TCHAR
   #define mString std::wstring
-  #define _mT(x) _T(x)
+  #define _mT(x) __T(x)
 #else
   /* force TCHAR to be "char", but only for minIni */
   #define mTCHAR char

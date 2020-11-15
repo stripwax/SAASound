@@ -12,9 +12,9 @@
 #include <stdio.h>
 
 #define INI_FILETYPE                    FILE*
-#define ini_openread(filename,file)     ((*(file) = _tfopen((filename), _T("rb"))) != NULL)
-#define ini_openwrite(filename,file)    ((*(file) = _tfopen((filename), _T("wb"))) != NULL)
-#define ini_openrewrite(filename,file)  ((*(file) = _tfopen((filename), _T("r+b"))) != NULL)
+#define ini_openread(filename,file)     ((*(file) = _tfopen((filename), __T("rb"))) != NULL)
+#define ini_openwrite(filename,file)    ((*(file) = _tfopen((filename), __T("wb"))) != NULL)
+#define ini_openrewrite(filename,file)  ((*(file) = _tfopen((filename), __T("r+b"))) != NULL)
 #define ini_close(file)                 (fclose(*(file)) == 0)
 #define ini_read(buffer,size,file)      (_fgetts((buffer),(size),*(file)) != NULL)
 #define ini_write(buffer,file)          (_fputts((buffer),*(file)) >= 0)
@@ -27,5 +27,5 @@
 
 /* for floating-point support, define additional types and functions */
 #define INI_REAL                        float
-#define ini_ftoa(string,value)          _stprintf((string), _T("%f"),(value))
+#define ini_ftoa(string,value)          _stprintf((string), __T("%f"),(value))
 #define ini_atof(string)                (INI_REAL)_tcstod((string),NULL)

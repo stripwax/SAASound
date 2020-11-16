@@ -51,7 +51,7 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       shell: bash
       # Execute the build.  You can specify a specific target with "--target <NAME>"
-      run: cmake --install . --config $BUILD_TYPE --prefix ${{runner.workspace}}/install
+      run: cmake --install . --config $BUILD_TYPE --prefix ${{runner.workspace}}/install/$BUILD_TYPE
     
     #- name: Diags
     #  working-directory: ${{runner.workspace}}/install
@@ -64,7 +64,7 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "bleeding-edge-${{matrix.os}}"
         prerelease: true
-        title: "Development Build"
+        title: "Development snapshot build for ${{matrix.os}}"
         files: |
           ${{runner.workspace}}/install/$BUILD_TYPE/bin/*.*
           ${{runner.workspace}}/install/$BUILD_TYPE/include/*.*

@@ -55,4 +55,4 @@ jobs:
         prerelease: true
         title: "Development Build"
         files: |
-          ${{runner.workspace}}/build/bin/*.*
+          ${{runner.workspace}}/install/$BUILD_TYPE/bin/*.*

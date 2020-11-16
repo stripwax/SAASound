@@ -53,17 +53,20 @@ jobs:
       # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --install . --config $BUILD_TYPE --prefix ${{runner.workspace}}/install
     
-    - name: Diags
-      working-directory: ${{runner.workspace}}/install
-      shell: bash
-      run: ls -laR .
+    #- name: Diags
+    #  working-directory: ${{runner.workspace}}/install
+    #  shell: bash
+    #  run: ls -laR .
       
     - name: BleedingEdge
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "bleeding-edge"
+        automatic_release_tag: "bleeding-edge-${{matrix.os}}"
         prerelease: true
         title: "Development Build"
         files: |
           ${{runner.workspace}}/install/$BUILD_TYPE/bin/*.*
+          ${{runner.workspace}}/install/$BUILD_TYPE/include/*.*
+          ${{runner.workspace}}/install/$BUILD_TYPE/lib/*.*
+          

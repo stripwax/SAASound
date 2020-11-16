@@ -31,12 +31,9 @@ add_library(SAASound SHARED)
 set(API_HEADERS include/SAASound.h)
 target_sources(SAASound
     PRIVATE
-        
         src/defns.h
         src/SAAAmp.cpp
         src/SAAAmp.h
-        src/SAAConfig.cpp
-        src/SAAConfig.h
         src/SAADevice.cpp
         src/SAADevice.h
         src/SAAEnv.cpp
@@ -51,13 +48,21 @@ target_sources(SAASound
         src/SAASound.cpp
         src/types.h
         src/SAASndC.h
-        src/minIni/minIni.h
-        src/minIni/minIni.c
-        src/minIni/minGlue.h
         ${RESOURCES}
     PUBLIC
         ${API_HEADERS}
 )
+
+if (USE_CONFIG_FILE)
+target_sources(SAASound
+    PRIVATE
+        src/SAAConfig.cpp
+        src/SAAConfig.h
+        src/minIni/minIni.h
+        src/minIni/minIni.c
+        src/minIni/minGlue.h
+)
+endif ()
 
 set_target_properties(SAASound PROPERTIES
   VERSION 3.5

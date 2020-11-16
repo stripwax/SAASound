@@ -78,7 +78,7 @@ jobs:
         files: |
           test.txt
           ${{runner.workspace}}/install/test2.txt
-          ${{runner.workspace}}/install/$BUILD_TYPE/bin/*.*
-          ${{runner.workspace}}/install/$BUILD_TYPE/include/*.*
-          ${{runner.workspace}}/install/$BUILD_TYPE/lib/*.*
+          ${{runner.workspace}}/install/$BUILD_TYPE/bin/*
+          ${{runner.workspace}}/install/$BUILD_TYPE/include/*
+          ${{runner.workspace}}/install/$BUILD_TYPE/lib/*
           

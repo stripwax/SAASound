@@ -53,10 +53,20 @@ jobs:
       # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --install . --config $BUILD_TYPE --prefix ${{runner.workspace}}/install/$BUILD_TYPE
     
-    #- name: Diags
-    #  working-directory: ${{runner.workspace}}/install
-    #  shell: bash
-    #  run: ls -laR .
+    - name: fake1
+      working-directory: .
+      shell: bash
+      run: echo "foo" > test.txt
+      
+    - name: fake2
+      working-directory: ${{runner.workspace}}/install
+      shell: bash
+      run: echo "foo2" > test2.txt
+      
+    - name: Diags
+      working-directory: ${{runner.workspace}}/install
+      shell: bash
+      run: ls -laR .
       
     - name: BleedingEdge
       uses: "marvinpinto/action-automatic-releases@latest"
@@ -66,6 +76,8 @@ jobs:
         prerelease: true
         title: "Development snapshot build for ${{matrix.os}}"
         files: |
+          test.txt
+          ${{runner.workspace}}/install/test2.txt
           ${{runner.workspace}}/install/$BUILD_TYPE/bin/*.*
           ${{runner.workspace}}/install/$BUILD_TYPE/include/*.*
           ${{runner.workspace}}/install/$BUILD_TYPE/lib/*.*

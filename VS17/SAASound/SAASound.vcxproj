@@ -45,7 +45,18 @@
   <ItemGroup>
     <ClInclude Include="..\..\include\SAASound.h" />
     <ClInclude Include="..\..\src\defns.h" />
+    <ClInclude Include="..\..\src\minIni\minGlue-ccs.h" />
+    <ClInclude Include="..\..\src\minIni\minGlue-efsl.h" />
+    <ClInclude Include="..\..\src\minIni\minGlue-FatFs.h" />
+    <ClInclude Include="..\..\src\minIni\minGlue-ffs.h" />
+    <ClInclude Include="..\..\src\minIni\minGlue-Linux.h" />
+    <ClInclude Include="..\..\src\minIni\minGlue-mdd.h" />
+    <ClInclude Include="..\..\src\minIni\minGlue-stdio.h" />
+    <ClInclude Include="..\..\src\minIni\minGlue.h" />
+    <ClInclude Include="..\..\src\minIni\minGlue_stdio_tchar.h" />
+    <ClInclude Include="..\..\src\minIni\minIni.h" />
     <ClInclude Include="..\..\src\SAAAmp.h" />
+    <ClInclude Include="..\..\src\SAAConfig.h" />
     <ClInclude Include="..\..\src\SAADevice.h" />
     <ClInclude Include="..\..\src\SAAEnv.h" />
     <ClInclude Include="..\..\src\SAAFreq.h" />
@@ -56,7 +67,9 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\minIni\minIni.c" />
     <ClCompile Include="..\..\src\SAAAmp.cpp" />
+    <ClCompile Include="..\..\src\SAAConfig.cpp" />
     <ClCompile Include="..\..\src\SAADevice.cpp" />
     <ClCompile Include="..\..\src\SAAEnv.cpp" />
     <ClCompile Include="..\..\src\SAAFreq.cpp" />
@@ -241,21 +254,23 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;WIN32_LEAN_AND_MEAN;VC_EXTRALEAN;SAASOUND_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
       <StringPooling>false</StringPooling>
-      <SmallerTypeCheck>true</SmallerTypeCheck>
-      <ControlFlowGuard>false</ControlFlowGuard>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <EnableParallelCodeGeneration>false</EnableParallelCodeGeneration>
-      <FloatingPointExceptions>true</FloatingPointExceptions>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
-      <FloatingPointModel>Strict</FloatingPointModel>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <AssemblerOutput>NoListing</AssemblerOutput>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <ExpandAttributedSource>true</ExpandAttributedSource>
+      <ExpandAttributedSource>false</ExpandAttributedSource>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <FloatingPointModel>Strict</FloatingPointModel>
+      <FloatingPointExceptions>true</FloatingPointExceptions>
+      <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -264,7 +279,7 @@
       <AdditionalDependencies />
       <OptimizeReferences>false</OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
-      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AssemblyDebug>true</AssemblyDebug>
       <GenerateMapFile>true</GenerateMapFile>
       <MapExports>true</MapExports>
@@ -277,22 +292,24 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;SAASOUND_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
       <StringPooling>false</StringPooling>
-      <SmallerTypeCheck>true</SmallerTypeCheck>
-      <ControlFlowGuard>false</ControlFlowGuard>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <EnableParallelCodeGeneration>false</EnableParallelCodeGeneration>
-      <FloatingPointExceptions>true</FloatingPointExceptions>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
       <OmitFramePointers>false</OmitFramePointers>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
-      <FloatingPointModel>Strict</FloatingPointModel>
-      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <AssemblerOutput>NoListing</AssemblerOutput>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExpandAttributedSource>true</ExpandAttributedSource>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <FloatingPointModel>Strict</FloatingPointModel>
+      <FloatingPointExceptions>true</FloatingPointExceptions>
+      <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -301,7 +318,7 @@
       <ModuleDefinitionFile>$(SolutionDir)..\resources\SAASound.def</ModuleDefinitionFile>
       <OptimizeReferences>false</OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
-      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AssemblyDebug>true</AssemblyDebug>
       <GenerateMapFile>true</GenerateMapFile>
       <MapExports>true</MapExports>

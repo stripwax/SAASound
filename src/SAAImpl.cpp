@@ -8,30 +8,12 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifdef WIN32
-#include <assert.h>
-#else
-#define assert(exp)	((void)0)
-#endif
-
 #include "SAASound.h"
 
 #include "types.h"
 #include "SAAImpl.h"
 #include "defns.h"
 
-
-//////////////////////////////////////////////////////////////////////
-// Globals
-//////////////////////////////////////////////////////////////////////
-
-// TODO: Support DEBUGSAA via runtime flag / config file
-#ifdef DEBUGSAA
-#include <ios>
-#include <iostream>
-#include <fstream>
-std::ofstream dbgfile, pcmfile;
-#endif
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -45,13 +27,24 @@ m_nSampleRate(SAMPLE_RATE_HZ),
 m_nOversample(DEFAULT_OVERSAMPLE),
 m_uParam(0),
 m_uParamRate(0),
+#if defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
+m_nDebugSample(0),
+#endif
 m_chip()
 {
-	#ifdef DEBUGSAA
-	dbgfile.open(DEBUG_SAA_REGISTER_LOG, std::ios_base::out);
-	pcmfile.open(DEBUG_SAA_PCM_LOG, std::ios_base::out|std::ios_base::binary);
-	m_nDebugSample = 0;
-	#endif
+#ifdef USE_CONFIG_FILE
+	m_Config.ReadConfig();
+#endif
+
+#if defined(DEBUGSAA)
+	m_dbgfile.open(_T(DEBUG_SAA_REGISTER_LOG), std::ios_base::out);
+	m_pcmfile.open(_T(DEBUG_SAA_PCM_LOG), std::ios_base::out | std::ios_base::binary);
+#elif defined(USE_CONFIG_FILE)
+	if (m_Config.m_bGenerateRegisterLogs)
+		m_dbgfile.open(m_Config.m_strRegisterLogPath, std::ios_base::out);
+	if (m_Config.m_bGeneratePcmLogs)
+		m_pcmfile.open(m_Config.m_strPcmOutputPath, std::ios_base::out | std::ios_base::binary);
+#endif
 	// set parameters
 	// TODO support defaults and overrides from config file
 	// m_chip.SetSoundParameters(SAAP_FILTER | SAAP_11025 | SAAP_8BIT | SAAP_MONO);
@@ -64,10 +57,7 @@ m_chip()
 
 CSAASoundInternal::~CSAASoundInternal()
 {
-#ifdef DEBUGSAA
-	dbgfile.close();
-	pcmfile.close();
-#endif
+	//
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -100,8 +90,15 @@ void CSAASoundInternal::WriteData(BYTE nData)
 {
 	// originated from an OUT 255,d call
 	m_chip._WriteData(nData);
-#ifdef DEBUGSAA
-	dbgfile << m_nDebugSample << " " << (int)m_chip._ReadAddress() << ":" << (int)nData << std::endl;
+#if defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
+#ifdef USE_CONFIG_FILE
+	if (m_Config.m_bGenerateRegisterLogs)
+	{
+#endif
+		m_dbgfile << m_nDebugSample << " " << (int)m_chip._ReadAddress() << ":" << (int)nData << std::endl;
+#ifdef USE_CONFIG_FILE
+	}
+#endif
 #endif
 }
 
@@ -109,17 +106,24 @@ void CSAASoundInternal::WriteAddress(BYTE nReg)
 {
 	// originated from an OUT 511,r call
 	m_chip._WriteAddress(nReg);
-#ifdef DEBUGSAA
-	dbgfile << m_nDebugSample << " " << (int)nReg << ":";
-	if (nReg==24)
+#if defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
+#ifdef USE_CONFIG_FILE
+	if (m_Config.m_bGenerateRegisterLogs)
 	{
-		dbgfile << "<!ENVO!>";
+#endif
+		m_dbgfile << m_nDebugSample << " " << (int)nReg << ":";
+		if (nReg==24)
+		{
+			m_dbgfile << "<!ENVO!>";
+		}
+		else if (nReg==25)
+		{
+			m_dbgfile << "<!ENV1!>";
+		}
+		m_dbgfile << std::endl;
+#ifdef USE_CONFIG_FILE
 	}
-	else if (nReg==25)
-	{
-		dbgfile << "<!ENV1!>";
-	}
-	dbgfile << std::endl;
+#endif
 #endif
 }
 
@@ -247,7 +251,7 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 	static double filterout_z1_left = 0, filterout_z1_right = 0;
 	signed short left, right; // output only - 16 bit result
 
-#ifdef DEBUGSAA
+#if defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
 	BYTE* pBufferStart = pBuffer;
 	unsigned long nTotalSamples = nSamples;
 #endif
@@ -292,9 +296,17 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 		*pBuffer++ = (right >> 8) & 0x00ff;
 	}
 
-#ifdef DEBUGSAA
-	pcmfile.write((const char *)pBufferStart, nTotalSamples * (unsigned long)GetCurrentBytesPerSample());
-	m_nDebugSample += nTotalSamples;
+#if defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
+#ifdef USE_CONFIG_FILE
+	if (m_Config.m_bGeneratePcmLogs)
+	{
+#endif
+		m_pcmfile.write((const char *)pBufferStart, nTotalSamples * (unsigned long)GetCurrentBytesPerSample());
+		m_nDebugSample += nTotalSamples;
+#ifdef USE_CONFIG_FILE
+	}
+#endif
+
 #endif
 }
 

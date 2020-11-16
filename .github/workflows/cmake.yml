@@ -54,7 +54,7 @@ jobs:
       run: cmake --install . --config $BUILD_TYPE --prefix ${{runner.workspace}}/install
     
     - name: Diags
-      working-directory: ${{runner.workspace}}/build
+      working-directory: ${{runner.workspace}}/install
       shell: bash
       run: ls -laR .
       

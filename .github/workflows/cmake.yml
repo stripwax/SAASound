@@ -51,23 +51,13 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       shell: bash
       # Execute the build.  You can specify a specific target with "--target <NAME>"
+      # I tried here to set the install prefix to include $BUILD_TYPE and actually, while
+      # that worked for the cmake step, it seems incompatible with
+      # the marvinpinto/action-automatice-releases step (I guess it couldn't expand the
+      # $BUILD_ENV correctly so couldn't find the files).  The upload seems to work if I
+      # don't use any env var here, so ..   the prefix is fixed
       run: cmake --install . --config $BUILD_TYPE --prefix ${{runner.workspace}}/install
-    
-    - name: fake1
-      working-directory: .
-      shell: bash
-      run: echo "foo" > test.txt
-      
-    - name: fake2
-      working-directory: ${{runner.workspace}}/install
-      shell: bash
-      run: echo "foo2" > test2.txt
-      
-    - name: Diags
-      working-directory: ${{runner.workspace}}/install
-      shell: bash
-      run: ls -laR .
-      
+          
     - name: BleedingEdge
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
@@ -76,8 +66,6 @@ jobs:
         prerelease: true
         title: "Development snapshot build for ${{matrix.os}}"
         files: |
-          test.txt
-          ${{runner.workspace}}/install/test2.txt
           ${{runner.workspace}}/install/bin/*
           ${{runner.workspace}}/install/include/*
           ${{runner.workspace}}/install/lib/*

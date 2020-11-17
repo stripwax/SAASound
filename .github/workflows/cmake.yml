@@ -55,18 +55,29 @@ jobs:
       # that worked for the cmake step, it seems incompatible with
       # the marvinpinto/action-automatice-releases step (I guess it couldn't expand the
       # $BUILD_ENV correctly so couldn't find the files).  The upload seems to work if I
-      # don't use any env var here, so ..   the prefix is fixed
+      # don't use any env var here, so ..   the prefix is fixed .  Furthermore,
+      # the action-automatic-releases doesn't like mixing / and \ and unfortunately
+      # the runner.workspace has \ on windows (but I use a / as path separator) so 
       run: cmake --install . --config $BUILD_TYPE --prefix ${{runner.workspace}}/install
           
+    #- name: BleedingEdge
+    #  uses: "marvinpinto/action-automatic-releases@latest"
+    #  with:
+    #    repo_token: "${{ secrets.GITHUB_TOKEN }}"
+    #    automatic_release_tag: "bleeding-edge-${{matrix.os}}"
+    #    prerelease: true
+    #    title: "Development snapshot build for ${{matrix.os}}"
+    #    files: |
+    #      ${{runner.workspace}}/install/bin/*
+    #      ${{runner.workspace}}/install/include/*
+    #      ${{runner.workspace}}/install/lib/*
+    
     - name: BleedingEdge
-      uses: "marvinpinto/action-automatic-releases@latest"
+      uses: "svenstaro/upload-release-action@v2"
       with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "bleeding-edge-${{matrix.os}}"
-        prerelease: true
-        title: "Development snapshot build for ${{matrix.os}}"
-        files: |
-          ${{runner.workspace}}/install/bin/*
-          ${{runner.workspace}}/install/include/*
-          ${{runner.workspace}}/install/lib/*
-          
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ${{runner.workspace}}/install/**/*
+        tag: "bleeding-edge-${{matrix.os}}"
+        overwrite: true
+        file_glob: true
+    

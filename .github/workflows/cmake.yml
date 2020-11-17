@@ -51,7 +51,7 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       shell: bash
       # Execute the build.  You can specify a specific target with "--target <NAME>"
-      run: cmake --install . --config $BUILD_TYPE --prefix ${{runner.workspace}}/install/$BUILD_TYPE
+      run: cmake --install . --config $BUILD_TYPE --prefix ${{runner.workspace}}/install
     
     - name: fake1
       working-directory: .
@@ -78,7 +78,7 @@ jobs:
         files: |
           test.txt
           ${{runner.workspace}}/install/test2.txt
-          ${{runner.workspace}}/install/$BUILD_TYPE/bin/*
-          ${{runner.workspace}}/install/$BUILD_TYPE/include/*
-          ${{runner.workspace}}/install/$BUILD_TYPE/lib/*
+          ${{runner.workspace}}/install/bin/*
+          ${{runner.workspace}}/install/include/*
+          ${{runner.workspace}}/install/lib/*
           

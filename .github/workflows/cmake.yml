@@ -60,24 +60,24 @@ jobs:
       # the runner.workspace has \ on windows (but I use a / as path separator) so 
       run: cmake --install . --config $BUILD_TYPE --prefix ${{runner.workspace}}/install
           
-    #- name: BleedingEdge
-    #  uses: "marvinpinto/action-automatic-releases@latest"
-    #  with:
-    #    repo_token: "${{ secrets.GITHUB_TOKEN }}"
-    #    automatic_release_tag: "bleeding-edge-${{matrix.os}}"
-    #    prerelease: true
-    #    title: "Development snapshot build for ${{matrix.os}}"
-    #    files: |
-    #      ${{runner.workspace}}/install/bin/*
-    #      ${{runner.workspace}}/install/include/*
-    #      ${{runner.workspace}}/install/lib/*
-    
     - name: BleedingEdge
-      uses: "svenstaro/upload-release-action@v2"
+      uses: "marvinpinto/action-automatic-releases@latest"
       with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: ${{runner.workspace}}/*
-        tag: "bleeding-edge-${{matrix.os}}"
-        overwrite: true
-        file_glob: true
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "bleeding-edge-${{matrix.os}}"
+        prerelease: true
+        title: "Development snapshot build for ${{matrix.os}}"
+        files: |
+          ${{runner.workspace}}/install/bin/*
+          ${{runner.workspace}}/install/include/*
+          ${{runner.workspace}}/install/lib/*
+    
+    #- name: BleedingEdge
+    #  uses: "svenstaro/upload-release-action@v2"
+    #  with:
+    #    repo_token: ${{ secrets.GITHUB_TOKEN }}
+    #    file: ${{runner.workspace}}/*
+    #    tag: "bleeding-edge-${{matrix.os}}"
+    #    overwrite: true
+    #    file_glob: true
     

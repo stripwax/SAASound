@@ -76,7 +76,7 @@ jobs:
       uses: "svenstaro/upload-release-action@v2"
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: ${{runner.workspace}}/install/*/*
+        file: ${{runner.workspace}}/*
         tag: "bleeding-edge-${{matrix.os}}"
         overwrite: true
         file_glob: true

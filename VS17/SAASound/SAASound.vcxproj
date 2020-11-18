@@ -83,6 +83,7 @@
     <None Include="..\..\README" />
     <None Include="..\..\resources\SAASound.def" />
     <None Include="..\..\src\SAAFreq.dat" />
+    <None Include="SAASound.cfg" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SAASound.rc" />

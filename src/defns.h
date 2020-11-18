@@ -48,6 +48,11 @@
 #define CONFIG_FILE_PATH "SAASound.cfg"
 #endif // USE_CONFIG_FILE
 
+#define DEFAULT_UNBOOSTED_MULTIPLIER 11.35
+
+#define DEFAULT_BOOST 1
+
+
 #endif // HAVE_CONFIG_H
 
 #endif //  DEFNS_H_INCLUDED

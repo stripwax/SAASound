@@ -244,6 +244,10 @@ unsigned long CSAASoundInternal::GetCurrentSampleRate(void)
 	}
 }
 
+#if defined(USE_CONFIG_FILE) || (defined(DEFAULT_BOOST) && DEFAULT_BOOST>1)
+#define DO_BOOST
+#endif
+
 void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 {
 	unsigned int temp_left, temp_right;
@@ -254,6 +258,14 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 #if defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
 	BYTE* pBufferStart = pBuffer;
 	unsigned long nTotalSamples = nSamples;
+#endif
+
+#if defined(DO_BOOST)
+#if defined(USE_CONFIG_FILE)
+	double nBoost = m_Config.m_nBoost;
+#else
+	double nBoost = DEFAULT_BOOST;
+#endif
 #endif
 
 	// for now, this is the only case that has full support and tested
@@ -269,8 +281,8 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 		f_right /= (double)(1 << m_nOversample);
 
 		// scale output into good range
-		f_left *= 10;
-		f_right *= 10;
+		f_left *= DEFAULT_UNBOOSTED_MULTIPLIER;
+		f_right *= DEFAULT_UNBOOSTED_MULTIPLIER;
 
 		if (m_bHighpass)
 		{
@@ -287,8 +299,14 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 			f_right -= filterout_z1_right;
 		}
 
-		left = (signed short)f_left;
-		right = (signed short)f_right;
+		// multiply by boost, if defined
+#if defined(DO_BOOST)
+		f_left *= nBoost;
+		f_right *= nBoost;
+#endif
+		// convert to 16-bit signed range with hard clipping
+		left = (signed short)(f_left > 32767 ? 32767 : f_left < -32768 ? -32768 : f_left);
+		right = (signed short)(f_right > 32767 ? 32767 : f_right < -32768 ? -32768 : f_right);
 
 		*pBuffer++ = left & 0x00ff;
 		*pBuffer++ = (left >> 8) & 0x00ff;

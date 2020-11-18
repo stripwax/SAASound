@@ -25,6 +25,9 @@ public:
 	bool m_bGeneratePcmLogs;
 	t_string m_strRegisterLogPath;
 	t_string m_strPcmOutputPath;
+	unsigned int m_nOversample;
+	bool m_bHighpass;
+	double m_nBoost;
 
 	SAAConfig();
 	void ReadConfig();

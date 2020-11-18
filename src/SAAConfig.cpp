@@ -18,6 +18,9 @@ SAAConfig::SAAConfig()
 m_bHasReadConfig(false),
 m_bGenerateRegisterLogs(false),
 m_bGeneratePcmLogs(false),
+m_nBoost(DEFAULT_BOOST),
+m_bHighpass(true),
+m_nOversample(DEFAULT_OVERSAMPLE),
 m_minIni(_T(CONFIG_FILE_PATH))
 {
 }
@@ -67,6 +70,19 @@ void SAAConfig::ReadConfig()
 	if (m_bGeneratePcmLogs)
 	{
 		wrapped_gets(m_strPcmOutputPath, "Debug", "PCMOutputPath", DEBUG_SAA_PCM_LOG);
+	}
+
+	m_bHighpass = m_minIni.getbool(u8"Quality", u8"Highpass", true);
+
+	m_nOversample = m_minIni.geti(u8"Quality", u8"Oversample", DEFAULT_OVERSAMPLE);
+
+	m_nBoost = m_minIni.getf(u8"Quality", u8"Boost", DEFAULT_BOOST);
+	if (m_nBoost < 1)
+	{
+		// interpret setting Boost=0 as disabling boost i.e. volume multipler = 100% (not 0%)
+		// Since "Boost=1" also means volume multipler = 100%, we can just ignore values of
+		// Boost between 0 and 1 as meaning 'no boost'
+		m_nBoost = 1;
 	}
 }
 

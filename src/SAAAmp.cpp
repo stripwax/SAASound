@@ -166,6 +166,13 @@ inline int CSAAAmp::EffectiveAmplitude(int amp, int env) const
 
 void CSAAAmp::TickAndOutputStereo(unsigned int & left, unsigned int & right)
 {
+	// This returns a value between 0 and 480 inclusive.
+	// This represents the full dynamic range of one output mixer (tone, or noise+tone, at full volume,
+	// without envelopes enabled).  Note that, with envelopes enabled, the actual dynamic range
+	// is reduced on-chip to just over 88% of this (424), so the "loudest" output requires disabling envs.
+	// NB for 6 channels at full volume, with simple additive mixing, you would see a combined
+	// output of 2880, and a multiplier of 11 (=31680) fits comfortably within 16-bit signed output range.
+
 	if (m_bSync)
 	{
 		// TODO check this

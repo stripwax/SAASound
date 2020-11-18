@@ -75,6 +75,13 @@ void SAAConfig::ReadConfig()
 	m_bHighpass = m_minIni.getbool(u8"Quality", u8"Highpass", true);
 
 	m_nOversample = m_minIni.geti(u8"Quality", u8"Oversample", DEFAULT_OVERSAMPLE);
+	if (m_nOversample < 1)
+		// oversample of 0 or negative doesn't make sense
+		m_nOversample = 1;
+	if (m_nOversample > 15)
+		// oversample of 16 (=65536x oversample) or more is ridiculous
+		// apart from just CPU cycles, our (32-bit)int-based accumulation would overflow
+		m_nOversample = 15;
 
 	m_nBoost = m_minIni.getf(u8"Quality", u8"Boost", DEFAULT_BOOST);
 	if (m_nBoost < 1)

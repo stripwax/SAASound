@@ -62,7 +62,7 @@ jobs:
     
     - name: Recopy
       shell: bash
-      run: mkdir for_release && cp ${{runner.workspace}}/install/bin/* for_release && cp ${{runner.workspace}}/install/lib/* for_release
+      run: mkdir for_release && cp ${{runner.workspace}}/install/**/* for_release
           
     - name: BleedingEdge
       uses: "marvinpinto/action-automatic-releases@latest"

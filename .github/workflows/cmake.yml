@@ -46,3 +46,51 @@ jobs:
       # Execute tests defined by the CMake configuration.  
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -C $BUILD_TYPE
+
+    - name: Install
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      # Execute the build.  You can specify a specific target with "--target <NAME>"
+      # I tried here to set the install prefix to include $BUILD_TYPE and actually, while
+      # that worked for the cmake step, it seems incompatible with
+      # the marvinpinto/action-automatice-releases step (I guess it couldn't expand the
+      # $BUILD_ENV correctly so couldn't find the files).  The upload seems to work if I
+      # don't use any env var here, so ..   the prefix is fixed .  Furthermore,
+      # the action-automatic-releases doesn't like mixing / and \ and unfortunately
+      # the runner.workspace has \ on windows (but I use a / as path separator) so 
+      run: cmake --install . --config $BUILD_TYPE --prefix "${{runner.workspace}}/install"
+    
+    - name: Recopy (nix)
+      shell: bash
+      run: ls "${{runner.workspace}}/install" && mkdir for_release && cp ${{runner.workspace}}/install/**/* for_release && ls for_release
+      if: (!contains(matrix.os, 'windows'))
+    
+    - name: Recopy (windows)
+      shell: bash
+      # Help. Glob doesn't work with git bash cp on windows with paths with mixed back and forward slash.
+      run: ls "${{runner.workspace}}/install" && mkdir for_release && cp "${{runner.workspace}}/install/bin/SAASound.dll" for_release && ls for_release
+      if: contains(matrix.os, 'windows')
+
+    - name: Copy config
+      shell: bash
+      run: cp "./resources/SAASound.cfg" for_release
+      
+    - name: BleedingEdge
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "bleeding-edge-${{matrix.os}}"
+        prerelease: true
+        title: "Development snapshot build for ${{matrix.os}}"
+        files: |
+          for_release/*
+    
+    #- name: BleedingEdge
+    #  uses: "svenstaro/upload-release-action@v2"
+    #  with:
+    #    repo_token: ${{ secrets.GITHUB_TOKEN }}
+    #    file: ${{runner.workspace}}/*
+    #    tag: "bleeding-edge-${{matrix.os}}"
+    #    overwrite: true
+    #    file_glob: true
+    

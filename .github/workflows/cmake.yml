@@ -62,12 +62,12 @@ jobs:
     
     - name: Recopy (nix)
       shell: bash
-      run: ls "${{runner.workspace}}/install" && mkdir for_release && cp ${{runner.workspace}}/install/**/* for_release
+      run: ls "${{runner.workspace}}/install" && mkdir for_release && cp ${{runner.workspace}}/install/**/* for_release && ls for_release
       if: (!contains(matrix.os, 'windows'))
     
     - name: Recopy (windows)
       shell: bash
-      run: ls "${{runner.workspace}}/install" && mkdir for_release && cp "${{runner.workspace}}/install/bin/SAASound.dll" for_release
+      run: ls "${{runner.workspace}}/install" && mkdir for_release && cp "${{runner.workspace}}/install/bin/SAASound.dll" for_release && ls for_release
       if: contains(matrix.os, 'windows')
           
     - name: BleedingEdge
@@ -78,7 +78,7 @@ jobs:
         prerelease: true
         title: "Development snapshot build for ${{matrix.os}}"
         files: |
-          "for_release/*"
+          for_release/*
     
     #- name: BleedingEdge
     #  uses: "svenstaro/upload-release-action@v2"

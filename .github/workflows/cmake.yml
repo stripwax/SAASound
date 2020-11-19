@@ -62,7 +62,7 @@ jobs:
     
     - name: Recopy (nix)
       shell: bash
-      run: ls "${{runner.workspace}}/install" && mkdir for_release && cp ${{runner.workspace}}/install/**/* for_release && ls for_release
+      run: ls "${{runner.workspace}}/install" && mkdir for_release && cp -r ${{runner.workspace}}/install/**/* for_release && ls for_release
       if: (!contains(matrix.os, 'windows'))
     
     - name: Recopy (windows)

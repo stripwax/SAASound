@@ -67,7 +67,8 @@ jobs:
     
     - name: Recopy (windows)
       shell: bash
-      run: ls "${{runner.workspace}}/install" && mkdir for_release && cp "${{runner.workspace}}/install/bin/*" for_release && ls for_release
+      # Help. Glob doesn't work with git bash cp on windows with paths with mixed back and forward slash.
+      run: ls "${{runner.workspace}}/install" && mkdir for_release && cp "${{runner.workspace}}/install/bin/SAASound.dll" for_release && ls for_release
       if: contains(matrix.os, 'windows')
 
     - name: Copy config

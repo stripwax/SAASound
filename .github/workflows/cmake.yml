@@ -67,7 +67,7 @@ jobs:
     
     - name: Recopy (windows)
       shell: bash
-      run: mkdir for_release && cp ${{runner.workspace}}/install/bin/* for_release
+      run: mkdir for_release && cp "${{runner.workspace}}/install/bin/*" for_release
       if: contains(matrix.os, 'windows')
           
     - name: BleedingEdge
@@ -78,7 +78,7 @@ jobs:
         prerelease: true
         title: "Development snapshot build for ${{matrix.os}}"
         files: |
-          for_release/*
+          "for_release/*"
     
     #- name: BleedingEdge
     #  uses: "svenstaro/upload-release-action@v2"

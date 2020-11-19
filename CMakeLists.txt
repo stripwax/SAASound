@@ -7,7 +7,7 @@ endif ()
 project(SAASound)
 
 if (APPLE)
-  option(BUILD_FRAMEWORK "Build a Mac OS X framework instead of a shared library" OFF)
+  option(BUILD_FRAMEWORK "Build a Mac OS X framework instead of a shared library" ON)
 endif ()
 
 if (MSVC)

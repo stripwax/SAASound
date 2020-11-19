@@ -23,6 +23,7 @@ private:
 public:
 	bool m_bGenerateRegisterLogs;
 	bool m_bGeneratePcmLogs;
+	bool m_bGeneratePcmSeparateChannels;
 	t_string m_strRegisterLogPath;
 	t_string m_strPcmOutputPath;
 	unsigned int m_nOversample;
@@ -31,6 +32,8 @@ public:
 
 	SAAConfig();
 	void ReadConfig();
+
+	t_string getChannelPcmOutputPath(int);
 };
 
 #endif  // SAA_CONFIG_H_INCLUDED

@@ -14,7 +14,6 @@
 #include "SAAImpl.h"
 #include "defns.h"
 
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -44,6 +43,16 @@ m_chip()
 		m_dbgfile.open(m_Config.m_strRegisterLogPath, std::ios_base::out);
 	if (m_Config.m_bGeneratePcmLogs)
 		m_pcmfile.open(m_Config.m_strPcmOutputPath, std::ios_base::out | std::ios_base::binary);
+
+	if (m_Config.m_bGeneratePcmLogs && m_Config.m_bGeneratePcmSeparateChannels)
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			m_channel_pcmfile[i].open(m_Config.getChannelPcmOutputPath(i), std::ios_base::out | std::ios_base::binary);
+		}
+	}
+
+
 #endif
 	// set parameters
 	// TODO support defaults and overrides from config file
@@ -248,12 +257,54 @@ unsigned long CSAASoundInternal::GetCurrentSampleRate(void)
 #define DO_BOOST
 #endif
 
+void scale_for_output(unsigned int left_input, unsigned int right_input,
+	double oversample_scalar, bool highpass, double boost,
+	double& filterout_z1_left, double& filterout_z1_right,
+	BYTE* &pBuffer)
+{
+	double float_left = (double)left_input;
+	double float_right = (double)right_input;
+	float_left /= oversample_scalar;
+	float_right /= oversample_scalar;
+
+	// scale output into good range
+	float_left *= DEFAULT_UNBOOSTED_MULTIPLIER;
+	float_right *= DEFAULT_UNBOOSTED_MULTIPLIER;
+
+	if (highpass)
+	{
+		/* cutoff = 5 Hz (say)
+			const double b1 = exp(-2.0 * M_PI * (Fc/Fs))
+			const double a0 = 1.0 - b1;
+		*/
+		const double b1 = 0.99928787;
+		const double a0 = 1.0 - b1;
+
+		filterout_z1_left = float_left * a0 + filterout_z1_left * b1;
+		filterout_z1_right = float_right * a0 + filterout_z1_right * b1;
+		float_left -= filterout_z1_left;
+		float_right -= filterout_z1_right;
+	}
+
+	// multiply by boost, if defined
+#if defined(DO_BOOST)
+	float_left *= boost;
+	float_right *= boost;
+#endif
+	// convert to 16-bit signed range with hard clipping
+	signed short left_output = (signed short)(float_left > 32767 ? 32767 : float_left < -32768 ? -32768 : float_left);
+	signed short right_output = (signed short)(float_right > 32767 ? 32767 : float_right < -32768 ? -32768 : float_right);
+
+	*pBuffer++ = left_output & 0x00ff;
+	*pBuffer++ = (left_output >> 8) & 0x00ff;
+	*pBuffer++ = right_output & 0x00ff;
+	*pBuffer++ = (right_output >> 8) & 0x00ff;
+}
+
 void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 {
-	unsigned int temp_left, temp_right;
-	double f_left, f_right;
-	static double filterout_z1_left = 0, filterout_z1_right = 0;
-	signed short left, right; // output only - 16 bit result
+	unsigned int left_mixed, right_mixed;
+	static double filterout_z1_left_mixed = 0, filterout_z1_right_mixed = 0;
 
 #if defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
 	BYTE* pBufferStart = pBuffer;
@@ -268,51 +319,71 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 #endif
 #endif
 
-	// for now, this is the only case that has full support and tested
-	// accumulate and mix at the same time
-	// Of course, this means we can't separately filter and generate
-	// per-channel outputs (see notes at end of file)
-	while (nSamples--)
+	double oversample = double(1 << m_nOversample);
+
+#if defined(USE_CONFIG_FILE)
+	static double filterout_z1_left_0 = 0, filterout_z1_right_0 = 0;
+	static double filterout_z1_left_1 = 0, filterout_z1_right_1 = 0;
+	static double filterout_z1_left_2 = 0, filterout_z1_right_2 = 0;
+	static double filterout_z1_left_3 = 0, filterout_z1_right_3 = 0;
+	static double filterout_z1_left_4 = 0, filterout_z1_right_4 = 0;
+	static double filterout_z1_left_5 = 0, filterout_z1_right_5 = 0;
+
+	if (m_Config.m_bGeneratePcmLogs && m_Config.m_bGeneratePcmSeparateChannels)
 	{
-		m_chip._TickAndOutputStereo(temp_left, temp_right);
-		f_left = (double)temp_left;
-		f_right = (double)temp_right;
-		f_left /= (double)(1 << m_nOversample);
-		f_right /= (double)(1 << m_nOversample);
+		unsigned int left0, right0, left1, right1, left2, right2, left3, right3, left4, right4, left5, right5;
+		BYTE* pChannelBufferPtr[6] = { m_pChannelBuffer[0], m_pChannelBuffer[1], m_pChannelBuffer[2], m_pChannelBuffer[3], m_pChannelBuffer[4], m_pChannelBuffer[5] };
 
-		// scale output into good range
-		f_left *= DEFAULT_UNBOOSTED_MULTIPLIER;
-		f_right *= DEFAULT_UNBOOSTED_MULTIPLIER;
-
-		if (m_bHighpass)
+		while (nSamples--)
 		{
-			/* cutoff = 5 Hz (say) 
-				const double b1 = exp(-2.0 * M_PI * (Fc/Fs))
-				const double a0 = 1.0 - b1;
-			*/
-			const double b1 = 0.99928787;
-			const double a0 = 1.0 - b1;
+			m_chip._TickAndOutputSeparate(left_mixed, right_mixed,
+				left0, right0,
+				left1, right1,
+				left2, right2,
+				left3, right3,
+				left4, right4,
+				left5, right5);
+			scale_for_output(left_mixed, right_mixed, oversample, m_bHighpass, nBoost, filterout_z1_left_mixed, filterout_z1_right_mixed, pBuffer);
 
-			filterout_z1_left = f_left * a0 + filterout_z1_left * b1;
-			filterout_z1_right = f_right * a0 + filterout_z1_right * b1;
-			f_left -= filterout_z1_left;
-			f_right -= filterout_z1_right;
+			// and the separate channels
+			scale_for_output(left0, right0, oversample, m_bHighpass, nBoost, filterout_z1_left_0, filterout_z1_right_0, pChannelBufferPtr[0]);
+			scale_for_output(left1, right1, oversample, m_bHighpass, nBoost, filterout_z1_left_1, filterout_z1_right_1, pChannelBufferPtr[1]);
+			scale_for_output(left2, right2, oversample, m_bHighpass, nBoost, filterout_z1_left_2, filterout_z1_right_2, pChannelBufferPtr[2]);
+			scale_for_output(left3, right3, oversample, m_bHighpass, nBoost, filterout_z1_left_3, filterout_z1_right_3, pChannelBufferPtr[3]);
+			scale_for_output(left4, right4, oversample, m_bHighpass, nBoost, filterout_z1_left_4, filterout_z1_right_4, pChannelBufferPtr[4]);
+			scale_for_output(left5, right5, oversample, m_bHighpass, nBoost, filterout_z1_left_5, filterout_z1_right_5, pChannelBufferPtr[5]);
+
+			// flush channel output PCM buffers when full
+			if (pChannelBufferPtr[0] >= m_pChannelBuffer[0] + CHANNEL_BUFFER_SIZE)
+			{
+				for (int i = 0; i < 6; i++)
+				{
+					m_channel_pcmfile[i].write((const char*)m_pChannelBuffer[i], CHANNEL_BUFFER_SIZE);
+					pChannelBufferPtr[i] = m_pChannelBuffer[i];
+				}
+			}
+		}
+		// flush remaining channel PCM output data
+		if (pChannelBufferPtr[0] >= m_pChannelBuffer[0])
+		{
+			for (int i = 0; i < 6; i++)
+			{
+				m_channel_pcmfile[i].write((const char*)m_pChannelBuffer[i], pChannelBufferPtr[i]-m_pChannelBuffer[i]);
+			}
+		}
+	}
+	else
+	{
+#endif
+		while (nSamples--)
+		{
+			m_chip._TickAndOutputStereo(left_mixed, right_mixed);
+			scale_for_output(left_mixed, right_mixed, oversample, m_bHighpass, nBoost, filterout_z1_left_mixed, filterout_z1_right_mixed, pBuffer);
 		}
 
-		// multiply by boost, if defined
-#if defined(DO_BOOST)
-		f_left *= nBoost;
-		f_right *= nBoost;
-#endif
-		// convert to 16-bit signed range with hard clipping
-		left = (signed short)(f_left > 32767 ? 32767 : f_left < -32768 ? -32768 : f_left);
-		right = (signed short)(f_right > 32767 ? 32767 : f_right < -32768 ? -32768 : f_right);
-
-		*pBuffer++ = left & 0x00ff;
-		*pBuffer++ = (left >> 8) & 0x00ff;
-		*pBuffer++ = right & 0x00ff;
-		*pBuffer++ = (right >> 8) & 0x00ff;
+#if defined(USE_CONFIG_FILE)
 	}
+#endif
 
 #if defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
 #ifdef USE_CONFIG_FILE
@@ -412,41 +483,3 @@ f_right = oversample_lp_filterout_z1_right_stages[nStages - 1];
 
 */
 
-/* notes about multiple channel output (not implemented)
-* 
-* I'm thinking I should just implement a Render stage to handle final mixing
-* but I want to handle the following two cases:
-* 
-* 1.  If only mixed final stereo result is required, only need to perform filtering
-*     on the mixed output
-* 2.  If separate channel outputs are required, each needs to have filtering applied
-*     (but then, mixing is trivial)
-* 
-* I want to optimise for 1, since that's what most people will actually be doing (i.e.
-* listening to the output, rather than generating separate channels as separate outputs
-* and doing their own analysis/mixing)
-* 
-* If I needed to do filtering for multiple outputs, I might do it like this:
-
-
-				// if separate channel outputs:
-				double f_left[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-				double f_right[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-				for (int i = 0; i < 1<<m_nOversample; i++)
-				{
-					Noise[0]->Tick();
-					Noise[1]->Tick();
-					for (int c = 0; c < 6; c++)
-					{
-						Amp[c]->TickAndOutputStereo(temp_left, temp_right);
-						f_left[c] += (double)temp_left;
-						f_right[c] += (double)temp_right;
-					}
-				}
-				// ...
-				// now downsample each of f_left[i], f_right[i]
-
-*/
-
-
-///////////////////////////////////////////////////////

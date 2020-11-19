@@ -18,6 +18,7 @@ SAAConfig::SAAConfig()
 m_bHasReadConfig(false),
 m_bGenerateRegisterLogs(false),
 m_bGeneratePcmLogs(false),
+m_bGeneratePcmSeparateChannels(false),
 m_nBoost(DEFAULT_BOOST),
 m_bHighpass(true),
 m_nOversample(DEFAULT_OVERSAMPLE),
@@ -70,6 +71,7 @@ void SAAConfig::ReadConfig()
 	if (m_bGeneratePcmLogs)
 	{
 		wrapped_gets(m_strPcmOutputPath, "Debug", "PCMOutputPath", DEBUG_SAA_PCM_LOG);
+		m_bGeneratePcmSeparateChannels = m_minIni.getbool(u8"Debug", u8"PCMSeparateChannels", false);
 	}
 
 	m_bHighpass = m_minIni.getbool(u8"Quality", u8"Highpass", true);
@@ -91,6 +93,21 @@ void SAAConfig::ReadConfig()
 		// Boost between 0 and 1 as meaning 'no boost'
 		m_nBoost = 1;
 	}
+}
+
+t_string SAAConfig::getChannelPcmOutputPath(int i)
+{
+	// returns a name for the i'th PCM output file when generating
+	// single files per channel.  This is really just a helper to localise
+	// the string manipulation involved in this.
+	// TODO - maybe make the naming convention more flexible?
+	t_string filename = m_strPcmOutputPath;
+#if defined UNICODE
+	filename += std::to_wstring(i);
+#else
+	filename += std::to_string(i);
+#endif
+	return filename;
 }
 
 #endif // USE_CONFIG_FILE

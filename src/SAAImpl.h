@@ -21,6 +21,10 @@
 #include <ios>
 #include <iostream>
 #include <fstream>
+
+#if defined(USE_CONFIG_FILE)
+const int CHANNEL_BUFFER_SIZE=1024;
+#endif
 #endif
 
 class CSAASoundInternal : public CSAASound
@@ -38,6 +42,10 @@ private:
 #if defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
 	unsigned long m_nDebugSample;
 	std::ofstream m_dbgfile, m_pcmfile;
+#if defined(USE_CONFIG_FILE)
+	std::ofstream m_channel_pcmfile[6];
+	BYTE m_pChannelBuffer[6][CHANNEL_BUFFER_SIZE];
+#endif
 #endif
 
 public:

@@ -58,16 +58,16 @@ jobs:
       # don't use any env var here, so ..   the prefix is fixed .  Furthermore,
       # the action-automatic-releases doesn't like mixing / and \ and unfortunately
       # the runner.workspace has \ on windows (but I use a / as path separator) so 
-      run: cmake --install . --config $BUILD_TYPE --prefix ${{runner.workspace}}/install
+      run: cmake --install . --config $BUILD_TYPE --prefix "${{runner.workspace}}/install"
     
     - name: Recopy (nix)
       shell: bash
-      run: mkdir for_release && cp ${{runner.workspace}}/install/**/* for_release
+      run: ls "${{runner.workspace}}/install" && mkdir for_release && cp ${{runner.workspace}}/install/**/* for_release
       if: (!contains(matrix.os, 'windows'))
     
     - name: Recopy (windows)
       shell: bash
-      run: mkdir for_release && cp "${{runner.workspace}}/install/bin/*" for_release
+      run: ls "${{runner.workspace}}/install" && mkdir for_release && cp "${{runner.workspace}}/install/bin/SAASound.dll" for_release
       if: contains(matrix.os, 'windows')
           
     - name: BleedingEdge

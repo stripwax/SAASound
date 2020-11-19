@@ -60,9 +60,15 @@ jobs:
       # the runner.workspace has \ on windows (but I use a / as path separator) so 
       run: cmake --install . --config $BUILD_TYPE --prefix ${{runner.workspace}}/install
     
-    - name: Recopy
+    - name: Recopy (nix)
       shell: bash
       run: mkdir for_release && cp ${{runner.workspace}}/install/**/* for_release
+      if: (!contains(matrix.os, 'windows'))
+    
+    - name: Recopy (windows)
+      shell: bash
+      run: mkdir for_release && cp ${{runner.workspace}}/install/bin/* for_release
+      if: contains(matrix.os, 'windows')
           
     - name: BleedingEdge
       uses: "marvinpinto/action-automatic-releases@latest"

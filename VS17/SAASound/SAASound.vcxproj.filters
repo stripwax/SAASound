@@ -129,7 +129,7 @@
     <None Include="..\..\resources\SAASound.def">
       <Filter>Resources</Filter>
     </None>
-    <None Include="SAASound.cfg">
+    <None Include="..\..\resources\SAASound.cfg">
       <Filter>Resources</Filter>
     </None>
   </ItemGroup>

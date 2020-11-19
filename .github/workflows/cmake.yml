@@ -59,6 +59,10 @@ jobs:
       # the action-automatic-releases doesn't like mixing / and \ and unfortunately
       # the runner.workspace has \ on windows (but I use a / as path separator) so 
       run: cmake --install . --config $BUILD_TYPE --prefix ${{runner.workspace}}/install
+    
+    - name: Recopy
+      shell: bash
+      run: mkdir for_release && cp ${{runner.workspace}}/install/bin/* for_release && cp ${{runner.workspace}}/install/lib/* for_release
           
     - name: BleedingEdge
       uses: "marvinpinto/action-automatic-releases@latest"
@@ -68,9 +72,7 @@ jobs:
         prerelease: true
         title: "Development snapshot build for ${{matrix.os}}"
         files: |
-          ${{runner.workspace}}/install/bin/*
-          ${{runner.workspace}}/install/include/*
-          ${{runner.workspace}}/install/lib/*
+          for_release/*
     
     #- name: BleedingEdge
     #  uses: "svenstaro/upload-release-action@v2"

@@ -1,14 +1,12 @@
 cmake_minimum_required(VERSION 3.12)
 
 if (APPLE)
-  set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "OSX Architectures")
+  set(CMAKE_OSX_ARCHITECTURES "i386;x86_64" CACHE STRING "OSX Architectures")
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
+  option(BUILD_FRAMEWORK "Build a Mac OS X framework instead of a shared library" ON)
 endif ()
 
 project(SAASound)
-
-if (APPLE)
-  option(BUILD_FRAMEWORK "Build a Mac OS X framework instead of a shared library" ON)
-endif ()
 
 if (MSVC)
   add_definitions(-DUNICODE -D_UNICODE)
@@ -87,7 +85,6 @@ if (APPLE AND BUILD_FRAMEWORK)
     MACOSX_FRAMEWORK_IDENTIFIER com.beermex)
   set_source_files_properties(${API_HEADERS} PROPERTIES
     MACOSX_PACKAGE_LOCATION Headers)
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
 endif ()
 
 configure_file(src/config.h.in ${CMAKE_BINARY_DIR}/config.h)

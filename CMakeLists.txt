@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 if (APPLE)
-  set(CMAKE_OSX_ARCHITECTURES "i386;x86_64" CACHE STRING "OSX Architectures")
+  set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "OSX Architectures")
   set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
   option(BUILD_FRAMEWORK "Build a Mac OS X framework instead of a shared library" ON)
 endif ()

@@ -32,7 +32,6 @@ if (MSVC)
 endif ()
 
 add_library(SAASound SHARED)
-set(API_HEADERS include/SAASound.h)
 target_sources(SAASound
     PRIVATE
         src/defns.h
@@ -52,9 +51,8 @@ target_sources(SAASound
         src/SAASound.cpp
         src/types.h
         src/SAASndC.h
+        include/SAASound.h
         ${RESOURCES}
-    PUBLIC
-        ${API_HEADERS}
 )
 
 if (USE_CONFIG_FILE)
@@ -75,6 +73,7 @@ set_target_properties(SAASound PROPERTIES
 
 target_include_directories(SAASound PRIVATE
   ${CMAKE_BINARY_DIR}
+  PUBLIC
   include)
 
 if (APPLE AND BUILD_FRAMEWORK)

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.10)
 
 if (APPLE)
   set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "OSX Architectures")
@@ -53,7 +53,6 @@ target_sources(SAASound
         src/types.h
         src/SAASndC.h
         ${RESOURCES}
-    PUBLIC
         ${API_HEADERS}
 )
 
@@ -75,6 +74,7 @@ set_target_properties(SAASound PROPERTIES
 
 target_include_directories(SAASound PRIVATE
   ${CMAKE_BINARY_DIR}
+  PUBLIC
   include)
 
 if (APPLE AND BUILD_FRAMEWORK)
@@ -87,7 +87,7 @@ if (APPLE AND BUILD_FRAMEWORK)
     MACOSX_PACKAGE_LOCATION Headers)
 endif ()
 
-configure_file(src/config.h.in ${CMAKE_BINARY_DIR}/config.h)
+configure_file(src/config.h.in ${CMAKE_BINARY_DIR}/saasound_cmake_config.h)
 target_compile_definitions(SAASound PRIVATE HAVE_CONFIG_H=1)
 
 install(TARGETS SAASound

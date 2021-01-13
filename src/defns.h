@@ -9,7 +9,7 @@
 
 #ifdef HAVE_CONFIG_H
 // using CMAKE
-#include "config.h"
+#include "saasound_cmake_config.h"
 #else
 
 // initial default SAA1099 crystal clock rate in HZ (can be changed subsequently by calling SetClockRate)

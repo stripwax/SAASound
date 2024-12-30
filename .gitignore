@@ -13,11 +13,3 @@ src/.libs
 src/*.o
 src/*.lo
 src/*.la
-CMakeFiles/
-CMakeCache.txt
-install_manifest.txt
-cmake_install.cmake
-libSAASound.pc
-saasound_cmake_config.h
-libSAASound.so*
-libSAASound.dll*

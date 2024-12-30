@@ -6,10 +6,7 @@ if (APPLE)
   option(BUILD_FRAMEWORK "Build a Mac OS X framework instead of a shared library" ON)
 endif ()
 
-project(SAASound VERSION 3.5)
-set(PROJECT_DESCRIPTION "SAASound is a portable Phillips SAA 1099 sound chip emulator, written in C++." )
-
-include(GNUInstallDirs)
+project(SAASound)
 
 if (MSVC)
   add_definitions(-DUNICODE -D_UNICODE)
@@ -71,13 +68,11 @@ target_sources(SAASound
 endif ()
 
 set_target_properties(SAASound PROPERTIES
-  VERSION ${PROJECT_VERSION}
+  VERSION 3.5
   SOVERSION 3
   CXX_STANDARD 11)
 
 target_include_directories(SAASound PRIVATE
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   ${CMAKE_BINARY_DIR}
   PUBLIC
   include)
@@ -95,20 +90,13 @@ endif ()
 configure_file(src/config.h.in ${CMAKE_BINARY_DIR}/saasound_cmake_config.h)
 target_compile_definitions(SAASound PRIVATE HAVE_CONFIG_H=1)
 
-set(ENV{PKG_CONFIG_PATH} "${PROJECT_BINARY_DIR}:$ENV{PKG_CONFIG_PATH}")
-configure_file(lib${PROJECT_NAME}.pc.in ${PROJECT_BINARY_DIR}/lib${PROJECT_NAME}.pc @ONLY)
-
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-  FRAMEWORK DESTINATION "/Library/Frameworks"
-  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(TARGETS SAASound
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  FRAMEWORK DESTINATION lib
+  PUBLIC_HEADER DESTINATION include)
 
 if (NOT APPLE OR NOT BUILD_FRAMEWORK)
-  install(FILES ${API_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+  install(FILES ${API_HEADERS} DESTINATION include)
 endif ()
-
-# install pkgconfig and cmake files
-install(FILES ${PROJECT_BINARY_DIR}/lib${PROJECT_NAME}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig/)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Find${PROJECT_NAME}.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/)

@@ -34,7 +34,7 @@ void SAAConfig::ReadConfig()
 	// Define a helper to let us read from UTF-8 and convert to system locale
 	// across platforms (and assume this will be a no-op on *nix)
 
-#if defined(WIN32) && defined(UNICODE)
+#if defined(_WIN32) && defined(UNICODE)
 	// WIN32 support for UNICODE requires different types
 	// Convert config file contents from utf8 to wchar_t
 	// minIni has been compiled to use plain char for file read-write operations

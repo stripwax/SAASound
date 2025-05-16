@@ -1,3 +1,20 @@
+# some interesting facts:
+# setting the sync bit (28,2) does not synchronise the below patterns to the
+# frequency generators.  so what you see below could be 'shifted' left or right in time
+# w.r.t the main oscillator period edge .   a good way to see this is to set an osc to the
+# highest frequency (freq=255, octave=7) and maximum volume (vol=255) and no envelopes,
+# and watch the output for the pulses;  it should look like the last row
+# #  '1111000011111111111111111111111111111111111111111111111111111111',
+# where there's a small transition ('peak') to zero in the 'on' period of the osc.
+# then set 28,2 then 28,1
+# and see that the 0 'peak' is now in a different place relative to the osc edge.
+#
+# However, the sync between the 8mhz pattern generator and the osc doesn't change
+# if you just change the volume.  So once you've established where you want to set
+# the 'origin' of the below patterns, you can reliably change the volume register
+# and/or env register to capture each different pattern
+
+
 amps = [
     '0000000000000000000000000000000000000000000000000000000000000000',
     '0000000011110000000000000000000000000000000000000000000000000000',
@@ -49,7 +66,10 @@ print(vas)
 
 vs = []
 
+# only need to output 8 different amp levels for the combined table
+# since, when env is enabled, only the 3 MSB of amplitude are used (LSB taken as zero)
 for ai,a in enumerate(amps):
+    if ai % 2: continue
     vas = []
     for ei,e in enumerate(envs):
         v = 0
@@ -59,7 +79,7 @@ for ai,a in enumerate(amps):
             if al=='1' and el=='1':
                 v += 1
         vas.append(v)
-    print('{'+','.join([str(x) for x in vas])+'}')
+    print('{'+','.join([str(x) for x in vas])+'} // amp '+str(ai))
     vs.append(vas)
 
 #print(vs)

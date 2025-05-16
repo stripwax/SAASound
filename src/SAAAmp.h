@@ -12,11 +12,11 @@
 class CSAAAmp  
 {
 private:
-	int leftlevel;
-	int leftlevela0x0e;
-	int rightlevel;
-	int rightlevela0x0e;
-	int m_nOutputIntermediate;
+	unsigned int leftlevel;
+	unsigned int leftlevel_div2;
+	unsigned int rightlevel;
+	unsigned int rightlevel_div2;
+	unsigned int m_nOutputIntermediate;
 	unsigned int m_nMixMode;
 	CSAAFreq * const m_pcConnectedToneGenerator; // not const because amp calls ->Tick()
 	const CSAANoise * const m_pcConnectedNoiseGenerator;
@@ -25,7 +25,7 @@ private:
 	mutable bool m_bMute;
 	mutable bool m_bSync;
 	mutable BYTE last_level_byte;
-	int EffectiveAmplitude(int amp, int env) const;
+	unsigned int EffectiveAmplitude(unsigned int amp_div2, unsigned int env) const;
 
 public:
 	CSAAAmp(CSAAFreq * const ToneGenerator, const CSAANoise * const NoiseGenerator, const CSAAEnv * const EnvGenerator);

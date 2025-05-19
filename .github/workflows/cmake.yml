@@ -18,10 +18,14 @@ jobs:
           config:
             - runs_on: windows-latest
               arch: Win32
+              output_name: Windows-32
             - runs_on: windows-latest
               arch: x64
+              output_name: Windows-64
             - runs_on: macos-latest
+              output_name: macos
             - runs_on: ubuntu-latest
+              output_name: ubuntu
 
     steps:
     - name: Checkout
@@ -83,13 +87,13 @@ jobs:
     - name: Recopy (nix)
       shell: bash
       run: ls "${{runner.workspace}}/install" && mkdir for_release && cp -r ${{runner.workspace}}/install/**/* for_release && ls for_release
-      if: (!contains(matrix.os, 'windows'))
+      if: (!contains(matrix.config.runs_on, 'windows'))
     
     - name: Recopy (windows)
       shell: bash
       # Help. Glob doesn't work with git bash cp on windows with paths with mixed back and forward slash.
       run: ls "${{runner.workspace}}/install" && mkdir for_release && cp "${{runner.workspace}}/install/bin/SAASound.dll" for_release && ls for_release
-      if: contains(matrix.os, 'windows')
+      if: contains(matrix.config.runs_on, 'windows')
 
     - name: Copy config
       shell: bash
@@ -99,9 +103,9 @@ jobs:
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "bleeding-edge-${{matrix.os}}"
+        automatic_release_tag: "bleeding-edge-${{matrix.config.output_name}}"
         prerelease: true
-        title: "Development snapshot build for ${{matrix.os}}"
+        title: "Development snapshot build for ${{matrix.config.output_name}}"
         files: |
           for_release/*
     

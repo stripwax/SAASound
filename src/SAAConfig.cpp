@@ -15,14 +15,13 @@
 
 SAAConfig::SAAConfig()
 :
-m_bHasReadConfig(false),
+m_minIni(_T(CONFIG_FILE_PATH)),
 m_bGenerateRegisterLogs(false),
 m_bGeneratePcmLogs(false),
 m_bGeneratePcmSeparateChannels(false),
-m_nBoost(DEFAULT_BOOST),
-m_bHighpass(true),
 m_nOversample(DEFAULT_OVERSAMPLE),
-m_minIni(_T(CONFIG_FILE_PATH))
+m_bHighpass(true),
+m_nBoost(DEFAULT_BOOST)
 {
 }
 

@@ -18,12 +18,9 @@ private:
 	BYTE m_nPhase;
 	BYTE m_nPhasePosition;
 	bool m_bEnvelopeEnded;
-	char m_nPhaseAdd[2];
-	char m_nCurrentPhaseAdd;
 	bool m_bLooping;
 	char m_nNumberOfPhases;
 	char m_nResolution;
-	char m_nInitialLevel;
 	bool m_bNewData;
 	BYTE m_nNextData;
 	bool m_bClockExternally;

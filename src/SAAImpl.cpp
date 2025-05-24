@@ -20,19 +20,20 @@
 
 CSAASoundInternal::CSAASoundInternal()
 	:
-m_nClockRate(EXTERNAL_CLK_HZ),
-m_bHighpass(false),
-m_nSampleRate(SAMPLE_RATE_HZ),
-m_nOversample(DEFAULT_OVERSAMPLE),
+m_chip(),
 m_uParam(0),
 m_uParamRate(0),
+m_nClockRate(EXTERNAL_CLK_HZ),
+m_nSampleRate(SAMPLE_RATE_HZ),
+m_nOversample(DEFAULT_OVERSAMPLE),
+m_bHighpass(false),
 #if defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
-m_nDebugSample(0),
+m_nDebugSample(0)
 #endif
-m_chip()
 {
 #ifdef USE_CONFIG_FILE
 	m_Config.ReadConfig();
+	m_bHighpass = m_Config.m_bHighpass;
 #endif
 
 #if defined(DEBUGSAA)
@@ -55,11 +56,6 @@ m_chip()
 
 #endif
 	// set parameters
-	// TODO support defaults and overrides from config file
-	// m_chip.SetSoundParameters(SAAP_FILTER | SAAP_11025 | SAAP_8BIT | SAAP_MONO);
-	// reset the virtual SAA
-	// m_chip.Clear();
-
 	m_chip._SetClockRate(m_nClockRate);
 	m_chip._SetOversample(m_nOversample);
 }
@@ -189,7 +185,12 @@ void CSAASoundInternal::SetSoundParameters(SAAPARAM uParam)
 	// set filter properties from uParam
 	m_uParam = (m_uParam & ~SAAP_MASK_FILTER) | (uParam & SAAP_MASK_FILTER);
 	 
-	m_bHighpass=true;
+#ifdef USE_CONFIG_FILE
+	m_bHighpass = m_Config.m_bHighpass;
+#else
+	m_bHighpass = true;  // previous defaults without config file
+#endif
+	;
 }
 
 void CSAASoundInternal::SetSampleRate(unsigned int nSampleRate)
@@ -208,6 +209,11 @@ void CSAASoundInternal::SetOversample(unsigned int nOversample)
 		m_nOversample = nOversample;
 		m_chip._SetOversample(m_nOversample);
 	}
+}
+
+void CSAASoundInternal::SetHighpass(bool bHighpass)
+{
+	m_bHighpass = bHighpass;
 }
 
 SAAPARAM CSAASoundInternal::GetCurrentSoundParameters(void)

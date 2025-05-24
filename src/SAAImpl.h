@@ -55,6 +55,7 @@ public:
 	void SetClockRate(unsigned int nClockRate);
 	void SetSampleRate(unsigned int nClockRate);
 	void SetOversample(unsigned int nOversample);
+	void SetHighpass(bool bHighpass);
 	void SetSoundParameters(SAAPARAM uParam);
 	void WriteAddress(BYTE nReg);
 	void WriteData(BYTE nData);

@@ -18,7 +18,6 @@ class SAAConfig
 {
 private:
 	minIni m_minIni;
-	bool m_bHasReadConfig;
 
 public:
 	bool m_bGenerateRegisterLogs;

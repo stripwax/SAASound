@@ -21,7 +21,6 @@ private:
 	int m_nCurrentSaaReg;
 	bool m_bOutputEnabled;
 	bool m_bSync;
-	bool m_bHighpass;
 	int m_nOversample;
 
 	CSAANoise m_Noise0, m_Noise1;

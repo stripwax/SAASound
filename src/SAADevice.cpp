@@ -26,7 +26,6 @@ CSAADevice::CSAADevice()
 	m_nCurrentSaaReg(0),
 	m_bOutputEnabled(false),
 	m_bSync(false),
-	m_bHighpass(true),
 	m_nOversample(0),
 	m_Noise0(0xffffffff),
 	m_Noise1(0xffffffff),

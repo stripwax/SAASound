@@ -27,7 +27,7 @@ set(CONFIG_FILE_PATH "SAASound.cfg" CACHE STRING "Path to config file (if USE_CO
 #include(CheckStructHasMember)
 #CHECK_STRUCT_HAS_MEMBER("struct dirent" d_type dirent.h HAVE_STRUCT_DIRENT_D_TYPE LANGUAGE CXX)
 
-if (MSVC)
+if (WIN32)
   set(RESOURCES resources/SAASound.def)
 endif ()
 
@@ -71,6 +71,12 @@ set_target_properties(SAASound PROPERTIES
   VERSION 3.5
   SOVERSION 3
   CXX_STANDARD 11)
+
+if (WIN32)
+  target_compile_definitions(SAASound PRIVATE
+    _CRT_SECURE_NO_WARNINGS=1
+    _CRT_NONSTDC_NO_WARNINGS=1)
+endif()
 
 target_include_directories(SAASound PRIVATE
   ${CMAKE_BINARY_DIR}

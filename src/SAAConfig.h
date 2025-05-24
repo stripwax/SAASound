@@ -28,6 +28,7 @@ public:
 	unsigned int m_nOversample;
 	bool m_bHighpass;
 	double m_nBoost;
+	unsigned int m_output_bitmask;
 
 	SAAConfig();
 	void ReadConfig();

@@ -46,6 +46,7 @@ private:
 	std::ofstream m_channel_pcmfile[6];
 	BYTE m_pChannelBuffer[6][CHANNEL_BUFFER_SIZE];
 #endif
+	BYTE m_output_bitmask;
 #endif
 
 public:
@@ -70,7 +71,8 @@ public:
 	static unsigned short GetBytesPerSample(SAAPARAM uParam);
 
 	void GenerateMany(BYTE * pBuffer, unsigned long nSamples);
-
+	void GenerateManySeparate(BYTE** pBuffers, unsigned long nSamples);
+	void SetOutputMixerBitmask(BYTE bitmask);
 };
 
 #endif // SAAIMPL_H_INCLUDED

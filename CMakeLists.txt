@@ -8,7 +8,7 @@ endif ()
 
 project(SAASound)
 
-if (MSVC)
+if (WIN32)
   add_definitions(-DUNICODE -D_UNICODE)
 endif ()
 

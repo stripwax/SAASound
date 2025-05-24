@@ -84,6 +84,7 @@ public:
 	virtual void SetClockRate(unsigned int nClockRate) = 0;
 	virtual void SetSampleRate(unsigned int nSampleRate) = 0;
 	virtual void SetOversample(unsigned int nOversample) = 0;
+	virtual void SetHighpass(bool bHighpass) = 0;
 };
 
 typedef class CSAASound * LPCSAASOUND;
@@ -120,6 +121,7 @@ void SAAAPI SAASNDGenerateMany(SAASND object, BYTE * pBuffer, unsigned long nSam
 void SAAAPI SAASNDSetClockRate(SAASND object, unsigned int nClockRate);
 void SAAAPI SAASNDSetSampleRate(SAASND object, unsigned int nSampleRate);
 void SAAAPI SAASNDSetOversample(SAASND object, unsigned int nOversample);
+void SAAAPI SAASNDSetHighpass(SAASND object, bool bHighpass);
 
 
 #ifdef __cplusplus

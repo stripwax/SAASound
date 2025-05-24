@@ -29,24 +29,26 @@ EXPORTS
 ;	SAASNDClickClick						@19
 	SAASNDSetClockRate						@20
 	SAASNDSetSampleRate						@21
+	SAASNDSetOversample						@22
+	SAASNDSetHighpass						@23
 
 	CreateCSAASound							@25
 	DestroyCSAASound						@26
 	
-	SetSoundParameters						@30
-	WriteAddress							@31
-	WriteData								@32
-	WriteAddressData						@33
-	Clear									@34
+;	SetSoundParameters						@30
+;	WriteAddress							@31
+;	WriteData								@32
+;	WriteAddressData						@33
+;	Clear									@34
 ;	ReadAddress								@35
-	GetCurrentSoundParameters				@36
-	GetCurrentSampleRate					@37
-	GetSampleRate							@38	
-	GetCurrentBytesPerSample				@39
-	GetBytesPerSample						@40
+;	GetCurrentSoundParameters				@36
+;	GetCurrentSampleRate					@37
+;	GetSampleRate							@38	
+;	GetCurrentBytesPerSample				@39
+;	GetBytesPerSample						@40
 ;	Generate								@41
-	GenerateMany							@42
+;	GenerateMany							@42
 ;	SendCommand								@43
 ;	ClickClick								@44
-	SetClockRate							@45
-	SetSampleRate							@46
+;	SetClockRate							@45
+;	SetSampleRate							@46

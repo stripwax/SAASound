@@ -93,3 +93,8 @@ void SAAAPI SAASNDSetOversample(SAASND object, unsigned int nOversample)
 {
 	return ((LPCSAASOUND)(object))->SetOversample(nOversample);
 }
+
+void SAAAPI SAASNDSetHighpass(SAASND object, bool bHighpass)
+{
+	return ((LPCSAASOUND)(object))->SetHighpass(bHighpass);
+}

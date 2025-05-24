@@ -80,7 +80,6 @@ void EXTAPI SAASNDWriteAddress(SAASND object, BYTE nReg);
 void EXTAPI SAASNDWriteData(SAASND object, BYTE nData);
 void EXTAPI SAASNDWriteAddressData(SAASND object, BYTE nReg, BYTE nData);
 void EXTAPI SAASNDClear(SAASND object);
-BYTE EXTAPI SAASNDReadAddress(SAASND object);
 
 SAAPARAM EXTAPI SAASNDGetCurrentSoundParameters(SAASND object);
 unsigned short EXTAPI SAASNDGetCurrentBytesPerSample(SAASND object);

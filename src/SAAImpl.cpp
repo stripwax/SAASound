@@ -28,8 +28,9 @@ m_nSampleRate(SAMPLE_RATE_HZ),
 m_nOversample(DEFAULT_OVERSAMPLE),
 m_bHighpass(false),
 #if defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
-m_nDebugSample(0)
+m_nDebugSample(0),
 #endif
+m_output_bitmask(0x3f)
 {
 #ifdef USE_CONFIG_FILE
 	m_Config.ReadConfig();
@@ -52,6 +53,8 @@ m_nDebugSample(0)
 			m_channel_pcmfile[i].open(m_Config.getChannelPcmOutputPath(i), std::ios_base::out | std::ios_base::binary);
 		}
 	}
+	
+	m_output_bitmask = m_Config.m_output_bitmask;
 
 
 #endif
@@ -313,7 +316,7 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 	static double filterout_z1_left_mixed = 0, filterout_z1_right_mixed = 0;
 
 #if defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
-	BYTE* pBufferStart = pBuffer;
+	const BYTE* const pBufferStart = pBuffer;
 	unsigned long nTotalSamples = nSamples;
 #endif
 
@@ -348,7 +351,8 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 				left2, right2,
 				left3, right3,
 				left4, right4,
-				left5, right5);
+				left5, right5,
+				m_output_bitmask);
 			scale_for_output(left_mixed, right_mixed, oversample, m_bHighpass, nBoost, filterout_z1_left_mixed, filterout_z1_right_mixed, pBuffer);
 
 			// and the separate channels
@@ -383,7 +387,7 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 #endif
 		while (nSamples--)
 		{
-			m_chip._TickAndOutputStereo(left_mixed, right_mixed);
+			m_chip._TickAndOutputStereo(left_mixed, right_mixed, m_output_bitmask);
 			scale_for_output(left_mixed, right_mixed, oversample, m_bHighpass, nBoost, filterout_z1_left_mixed, filterout_z1_right_mixed, pBuffer);
 		}
 
@@ -404,6 +408,93 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 
 #endif
 }
+
+void CSAASoundInternal::GenerateManySeparate(BYTE** pBuffers, unsigned long nSamples)
+{
+	unsigned int left_mixed, right_mixed;
+	static double filterout_z1_left_mixed = 0, filterout_z1_right_mixed = 0;
+	unsigned long nTotalSamples = nSamples;
+
+#if defined(DO_BOOST)
+#if defined(USE_CONFIG_FILE)
+	double nBoost = m_Config.m_nBoost;
+#else
+	double nBoost = DEFAULT_BOOST;
+#endif
+#endif
+
+#if defined(USE_CONFIG_FILE)
+	// used only for outputting MIXED pcm if you set config to generate pcm logs but not generate separate pcm channels..
+	// when outputting .pcm files, use arbitrarily one of the (6) pcm channel buffers.  We're not using them for anything else here
+	// because the "separate" channels output already uses the supplied pBuffers for that
+	BYTE* pMixedBufferPtr = m_pChannelBuffer[0];
+	const BYTE* const pMixedBufferStart = pMixedBufferPtr;
+#endif
+
+	double oversample = double(1 << m_nOversample);
+
+	static double filterout_z1_left_0 = 0, filterout_z1_right_0 = 0;
+	static double filterout_z1_left_1 = 0, filterout_z1_right_1 = 0;
+	static double filterout_z1_left_2 = 0, filterout_z1_right_2 = 0;
+	static double filterout_z1_left_3 = 0, filterout_z1_right_3 = 0;
+	static double filterout_z1_left_4 = 0, filterout_z1_right_4 = 0;
+	static double filterout_z1_left_5 = 0, filterout_z1_right_5 = 0;
+
+	unsigned int left0, right0, left1, right1, left2, right2, left3, right3, left4, right4, left5, right5;
+	BYTE* pChannelBufferPtr[6] = { pBuffers[0], pBuffers[1], pBuffers[2], pBuffers[3], pBuffers[4], pBuffers[5] };
+
+	while (nSamples--)
+	{
+		m_chip._TickAndOutputSeparate(left_mixed, right_mixed,
+			left0, right0,
+			left1, right1,
+			left2, right2,
+			left3, right3,
+			left4, right4,
+			left5, right5,
+			m_output_bitmask);
+
+#ifdef USE_CONFIG_FILE
+		if (m_Config.m_bGeneratePcmLogs)
+		{
+			// write pcm for mixed output.
+			m_nDebugSample++;
+			scale_for_output(left_mixed, right_mixed, oversample, m_bHighpass, nBoost, filterout_z1_left_mixed, filterout_z1_right_mixed, pMixedBufferPtr);
+
+			// flush channel output PCM buffer when full
+			if (pMixedBufferPtr >= m_pChannelBuffer[0] + CHANNEL_BUFFER_SIZE)
+			{
+				m_pcmfile.write((const char*)pMixedBufferStart, CHANNEL_BUFFER_SIZE);
+				pMixedBufferPtr = m_pChannelBuffer[0];
+
+			}
+		}
+#endif
+
+		scale_for_output(left0, right0, oversample, m_bHighpass, nBoost, filterout_z1_left_0, filterout_z1_right_0, pChannelBufferPtr[0]);
+		scale_for_output(left1, right1, oversample, m_bHighpass, nBoost, filterout_z1_left_1, filterout_z1_right_1, pChannelBufferPtr[1]);
+		scale_for_output(left2, right2, oversample, m_bHighpass, nBoost, filterout_z1_left_2, filterout_z1_right_2, pChannelBufferPtr[2]);
+		scale_for_output(left3, right3, oversample, m_bHighpass, nBoost, filterout_z1_left_3, filterout_z1_right_3, pChannelBufferPtr[3]);
+		scale_for_output(left4, right4, oversample, m_bHighpass, nBoost, filterout_z1_left_4, filterout_z1_right_4, pChannelBufferPtr[4]);
+		scale_for_output(left5, right5, oversample, m_bHighpass, nBoost, filterout_z1_left_5, filterout_z1_right_5, pChannelBufferPtr[5]);
+	}
+
+#if defined(USE_CONFIG_FILE)
+	if (m_Config.m_bGeneratePcmLogs && m_Config.m_bGeneratePcmSeparateChannels)
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			m_pcmfile.write((const char*)pBuffers[i], nTotalSamples * (unsigned long)GetCurrentBytesPerSample());
+		}
+	}
+#endif
+}
+
+void CSAASoundInternal::SetOutputMixerBitmask(BYTE bitmask)
+{
+	m_output_bitmask = bitmask;
+}
+
 
 ///////////////////////////////////////////////////////
 

@@ -398,14 +398,16 @@ void CSAASoundInternal::GenerateMany(BYTE* pBuffer, unsigned long nSamples)
 #if defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
 #ifdef USE_CONFIG_FILE
 	if (m_Config.m_bGeneratePcmLogs)
+#endif
 	{
-#endif
 		m_pcmfile.write((const char *)pBufferStart, nTotalSamples * (unsigned long)GetCurrentBytesPerSample());
-		m_nDebugSample += nTotalSamples;
-#ifdef USE_CONFIG_FILE
 	}
+#ifdef USE_CONFIG_FILE
+	if (m_Config.m_bGenerateRegisterLogs)
 #endif
-
+	{
+		m_nDebugSample += nTotalSamples;
+	}
 #endif
 }
 
@@ -458,7 +460,6 @@ void CSAASoundInternal::GenerateManySeparate(BYTE** pBuffers, unsigned long nSam
 		if (m_Config.m_bGeneratePcmLogs)
 		{
 			// write pcm for mixed output.
-			m_nDebugSample++;
 			scale_for_output(left_mixed, right_mixed, oversample, m_bHighpass, nBoost, filterout_z1_left_mixed, filterout_z1_right_mixed, pMixedBufferPtr);
 
 			// flush channel output PCM buffer when full
@@ -468,6 +469,15 @@ void CSAASoundInternal::GenerateManySeparate(BYTE** pBuffers, unsigned long nSam
 				pMixedBufferPtr = m_pChannelBuffer[0];
 
 			}
+		}
+#endif
+
+#if defined(DEBUGSAA) || defined(USE_CONFIG_FILE)
+#ifdef USE_CONFIG_FILE
+		if (m_Config.m_bGenerateRegisterLogs)
+#endif
+		{
+			m_nDebugSample++;
 		}
 #endif
 

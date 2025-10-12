@@ -85,6 +85,8 @@ public:
 	virtual void SetSampleRate(unsigned int nSampleRate) = 0;
 	virtual void SetOversample(unsigned int nOversample) = 0;
 	virtual void SetHighpass(bool bHighpass) = 0;
+	virtual void GenerateManySeparate(BYTE** pBuffers, unsigned long nSamples) = 0;
+	virtual void SetOutputMixerBitmask(BYTE bitmask) = 0;
 };
 
 typedef class CSAASound * LPCSAASOUND;
@@ -122,6 +124,8 @@ void SAAAPI SAASNDSetClockRate(SAASND object, unsigned int nClockRate);
 void SAAAPI SAASNDSetSampleRate(SAASND object, unsigned int nSampleRate);
 void SAAAPI SAASNDSetOversample(SAASND object, unsigned int nOversample);
 void SAAAPI SAASNDSetHighpass(SAASND object, bool bHighpass);
+void SAAAPI SAASNDGenerateManySeparate(SAASND object, BYTE** pBuffers, unsigned long nSamples);
+void SAAAPI SAASNDSetOutputMixerBitmask(SAASND object, BYTE bitmask);
 
 
 #ifdef __cplusplus

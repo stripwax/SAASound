@@ -3,10 +3,10 @@
 ; This is the current .DEF file for the SAASound.dll
 ; These export ordinals WILL NOT change in future releases
 ;
-; Version 3.2.1 (14th August 2018)
-; (c) 1998-2018 dave @ spc       <dave@beermex.com>
+; Version 3.5.0 (24 May 2025)
+; (c) 1998-2025 dave @ spc       <dave@beermex.com>
 
-VERSION 3.2
+VERSION 3.5
 
 EXPORTS
 	newSAASND								@1
@@ -31,6 +31,7 @@ EXPORTS
 	SAASNDSetSampleRate						@21
 	SAASNDSetOversample						@22
 	SAASNDSetHighpass						@23
+	SAASNDGenerateManySeparate				@24
 
 	CreateCSAASound							@25
 	DestroyCSAASound						@26
@@ -52,3 +53,6 @@ EXPORTS
 ;	ClickClick								@44
 ;	SetClockRate							@45
 ;	SetSampleRate							@46
+
+	SAASNDSetOutputMixerBitmask				@50
+

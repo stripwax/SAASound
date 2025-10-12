@@ -73,6 +73,8 @@ void SAAConfig::ReadConfig()
 		m_bGeneratePcmSeparateChannels = m_minIni.getbool(u8"Debug", u8"PCMSeparateChannels", false);
 	}
 
+	m_output_bitmask = m_minIni.geti(u8"Debug", u8"FinalOutputMixerBitmask", 0b111111) & 0x3f;
+
 	m_bHighpass = m_minIni.getbool(u8"Quality", u8"Highpass", true);
 
 	m_nOversample = m_minIni.geti(u8"Quality", u8"Oversample", DEFAULT_OVERSAMPLE);

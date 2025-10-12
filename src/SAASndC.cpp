@@ -98,3 +98,13 @@ void SAAAPI SAASNDSetHighpass(SAASND object, bool bHighpass)
 {
 	return ((LPCSAASOUND)(object))->SetHighpass(bHighpass);
 }
+
+void SAAAPI SAASNDGenerateManySeparate(SAASND object, BYTE** pBuffers, unsigned long nSamples)
+{
+	return ((LPCSAASOUND)(object))->GenerateManySeparate(pBuffers, nSamples);
+}
+
+void SAAAPI SAASNDSetOutputMixerBitmask(SAASND object, BYTE bitmask)
+{
+	return ((LPCSAASOUND)(object))->SetOutputMixerBitmask(bitmask);
+}

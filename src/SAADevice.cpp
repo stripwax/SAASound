@@ -307,7 +307,7 @@ BYTE CSAADevice::_ReadData(void)
 }
 #endif
 
-void CSAADevice::_TickAndOutputStereo(unsigned int& left_mixed, unsigned int& right_mixed)
+void CSAADevice::_TickAndOutputStereo(unsigned int& left_mixed, unsigned int& right_mixed, BYTE bitmask)
 {
 	unsigned int temp_left, temp_right;
 	unsigned int accum_left = 0, accum_right = 0;
@@ -316,23 +316,41 @@ void CSAADevice::_TickAndOutputStereo(unsigned int& left_mixed, unsigned int& ri
 		m_Noise0.Tick();
 		m_Noise1.Tick();
 		m_Amp0.TickAndOutputStereo(temp_left, temp_right);
-		accum_left += temp_left;
-		accum_right += temp_right;
+		if (bitmask & 0x01)
+		{
+			accum_left += temp_left;
+			accum_right += temp_right;
+		}
 		m_Amp1.TickAndOutputStereo(temp_left, temp_right);
-		accum_left += temp_left;
-		accum_right += temp_right;
+		if (bitmask & 0x02)
+		{
+			accum_left += temp_left;
+			accum_right += temp_right;
+		}
 		m_Amp2.TickAndOutputStereo(temp_left, temp_right);
-		accum_left += temp_left;
-		accum_right += temp_right;
+		if (bitmask & 0x04)
+		{
+			accum_left += temp_left;
+			accum_right += temp_right;
+		}
 		m_Amp3.TickAndOutputStereo(temp_left, temp_right);
-		accum_left += temp_left;
-		accum_right += temp_right;
+		if (bitmask & 0x08)
+		{
+			accum_left += temp_left;
+			accum_right += temp_right;
+		}
 		m_Amp4.TickAndOutputStereo(temp_left, temp_right);
-		accum_left += temp_left;
-		accum_right += temp_right;
+		if (bitmask & 0x10)
+		{
+			accum_left += temp_left;
+			accum_right += temp_right;
+		}
 		m_Amp5.TickAndOutputStereo(temp_left, temp_right);
-		accum_left += temp_left;
-		accum_right += temp_right;
+		if (bitmask & 0x20)
+		{
+			accum_left += temp_left;
+			accum_right += temp_right;
+		}
 	}
 	left_mixed = accum_left;
 	right_mixed = accum_right;
@@ -344,7 +362,8 @@ void CSAADevice::_TickAndOutputSeparate(unsigned int& left_mixed, unsigned int& 
 	unsigned int& left2, unsigned int& right2,
 	unsigned int& left3, unsigned int& right3,
 	unsigned int& left4, unsigned int& right4,
-	unsigned int& left5, unsigned int& right5
+	unsigned int& left5, unsigned int& right5,
+	BYTE bitmask
 )
 {
 	unsigned int temp_left, temp_right;
@@ -358,33 +377,51 @@ void CSAADevice::_TickAndOutputSeparate(unsigned int& left_mixed, unsigned int& 
 		m_Amp0.TickAndOutputStereo(temp_left, temp_right);
 		left0 += temp_left;
 		right0 += temp_right;
-		accum_left += temp_left;
-		accum_right += temp_right;
+		if (bitmask & 0x01)
+		{
+			accum_left += temp_left;
+			accum_right += temp_right;
+		}
 		m_Amp1.TickAndOutputStereo(temp_left, temp_right);
 		left1 += temp_left;
 		right1 += temp_right;
-		accum_left += temp_left;
-		accum_right += temp_right;
+		if (bitmask & 0x02)
+		{
+			accum_left += temp_left;
+			accum_right += temp_right;
+		}
 		m_Amp2.TickAndOutputStereo(temp_left, temp_right);
 		left2 += temp_left;
 		right2 += temp_right;
-		accum_left += temp_left;
-		accum_right += temp_right;
+		if (bitmask & 0x04)
+		{
+			accum_left += temp_left;
+			accum_right += temp_right;
+		}
 		m_Amp3.TickAndOutputStereo(temp_left, temp_right);
 		left3 += temp_left;
 		right3 += temp_right;
-		accum_left += temp_left;
-		accum_right += temp_right;
+		if (bitmask & 0x08)
+		{
+			accum_left += temp_left;
+			accum_right += temp_right;
+		}
 		m_Amp4.TickAndOutputStereo(temp_left, temp_right);
 		left4 += temp_left;
 		right4 += temp_right;
-		accum_left += temp_left;
-		accum_right += temp_right;
+		if (bitmask & 0x10)
+		{
+			accum_left += temp_left;
+			accum_right += temp_right;
+		}
 		m_Amp5.TickAndOutputStereo(temp_left, temp_right);
 		left5 += temp_left;
 		right5 += temp_right;
-		accum_left += temp_left;
-		accum_right += temp_right;
+		if (bitmask & 0x20)
+		{
+			accum_left += temp_left;
+			accum_right += temp_right;
+		}
 	}
 	left_mixed = accum_left;
 	right_mixed = accum_right;

@@ -1,5 +1,6 @@
 .vs
 out/
+build/
 CMakeSettings.json
 Makefile
 config.h

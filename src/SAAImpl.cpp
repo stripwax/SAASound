@@ -103,7 +103,7 @@ void CSAASoundInternal::WriteData(BYTE nData)
 	if (m_Config.m_bGenerateRegisterLogs)
 	{
 #endif
-		m_dbgfile << m_nDebugSample << " " << (int)m_chip._ReadAddress() << ":" << (int)nData << std::endl;
+		m_dbgfile << m_nDebugSample << " " << (int)m_chip._ReadAddress() << " " << (int)nData << std::endl;
 #ifdef USE_CONFIG_FILE
 	}
 #endif
@@ -119,7 +119,7 @@ void CSAASoundInternal::WriteAddress(BYTE nReg)
 	if (m_Config.m_bGenerateRegisterLogs)
 	{
 #endif
-		m_dbgfile << m_nDebugSample << " " << (int)nReg << ":";
+		m_dbgfile << m_nDebugSample << " " << (int)nReg << " ";
 		if (nReg==24)
 		{
 			m_dbgfile << "<!ENVO!>";
